@@ -1,91 +1,27 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#20251f">
-<title>米米环游世界 · mi</title>
-<style>
-:root{--i:#20251f;--p:#e8e2cd;--s:#f5f0df;--g:#6b7757;--b:#718789;--y:#d3ad58;--r:#b9764e}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#c9c0a3;color:var(--i);font-family:ui-monospace,SFMono-Regular,Menlo,"PingFang SC",monospace}
-button{font:inherit;color:inherit}.wrap{min-height:100svh;display:grid;place-items:center;padding:18px}
-.game{width:min(430px,100%);min-height:min(820px,calc(100svh - 36px));border:3px solid var(--i);background:var(--p);box-shadow:0 10px 0 #20251f22;position:relative;overflow:hidden}
-.top{height:60px;display:grid;grid-template-columns:52px 1fr 48px;align-items:center;border-bottom:3px solid var(--i);background:var(--s)}
-.logo,.dots{height:100%;border:0;background:none}.logo span{display:grid;place-items:center;width:32px;height:32px;margin:auto;border:2px solid var(--i);border-radius:50%;background:var(--y);font-weight:900}.mini{padding:0 10px}.mini small,.mini strong{display:block}.mini small{font-size:9px;opacity:.55;letter-spacing:.1em}.mini strong{font-size:11px;margin-top:3px}
-.hud{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #20251f33}.hud div{padding:7px 10px;border-right:1px solid #20251f22}.hud div:last-child{border:0}.hud span,.hud strong{display:block;font-size:9px}.hud span{opacity:.55}.hud strong{margin-top:2px}
-main{padding:18px;min-height:690px}.ey{font-size:9px;letter-spacing:.16em;opacity:.55;margin:0 0 8px}.title{font-size:30px;line-height:1.02;letter-spacing:-.06em;margin:0}.copy{font-size:11px;line-height:1.75;opacity:.75}
-.btn,.choice,.pack,.friend{width:100%;border:2px solid var(--i);background:var(--s);box-shadow:0 4px 0 var(--i);padding:13px;cursor:pointer;text-align:left}.btn:active,.choice:active,.pack:active,.friend:active{transform:translateY(3px);box-shadow:0 1px 0 var(--i)}.primary{background:var(--y)}
-.start{min-height:740px;display:flex;flex-direction:column}.bigmi{margin-top:68px;width:86px;height:86px;display:grid;place-items:center;border:4px solid var(--i);border-radius:50%;background:var(--y);box-shadow:6px 6px 0 var(--i);font-size:38px;font-weight:900}.start h1{font-size:38px;letter-spacing:-.08em;margin:26px 0 0}.start .sub{font-size:10px;letter-spacing:.12em;opacity:.6}.mapstrip{height:120px;margin-top:34px;border:2px solid var(--i);background:radial-gradient(circle at 25% 35%,#718789aa 0 18px,transparent 19px),radial-gradient(circle at 52% 52%,#6b7757bb 0 28px,transparent 29px),radial-gradient(circle at 78% 34%,#b9764e88 0 20px,transparent 21px),var(--s);position:relative}.mapstrip:after{content:"✦";position:absolute;left:55%;top:42%;font-size:22px}.actions{margin-top:auto;display:grid;gap:10px}
-.hero{margin-top:15px;padding:14px;border:2px solid var(--i);background:var(--g);color:var(--s);box-shadow:5px 5px 0 var(--i)}.hero b{font-size:26px}.route{margin-top:14px;border:2px solid var(--i);background:var(--s);padding:14px}.node{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed #20251f33}.node:last-child{border:0}.dot{width:14px;height:14px;border:2px solid var(--i);transform:rotate(45deg);background:var(--p)}.done .dot{background:var(--g)}.now .dot{background:var(--y)}.lock{opacity:.35}.node strong{font-size:10px}.node small{display:block;font-size:9px;opacity:.55;margin-top:2px}
-.grid{display:grid;gap:10px;margin-top:16px}.pack b{display:flex;justify-content:space-between;font-size:12px}.pack small{display:block;font-size:9px;line-height:1.6;margin-top:7px;opacity:.65}
-.scene{border:2px solid var(--i);background:var(--s);box-shadow:5px 5px 0 var(--i);overflow:hidden;margin-top:15px}.visual{height:180px;border-bottom:2px solid var(--i);position:relative;overflow:hidden}.visual:before,.visual:after{content:"";position:absolute}.city{background:linear-gradient(#718789 0 63%,#8b8067 63%)}.city:before{left:18px;right:18px;bottom:0;height:60px;background:repeating-linear-gradient(90deg,var(--i) 0 24px,transparent 24px 35px);opacity:.7}.city:after{width:52px;height:52px;border-radius:50%;background:var(--y);right:30px;top:22px}.coast{background:linear-gradient(#718789 0 58%,#d8d3bd 58% 64%,#bd9765 64%)}.coast:before{left:0;right:0;top:48%;height:7px;background:repeating-linear-gradient(90deg,#fff8 0 22px,transparent 22px 38px)}.transit{background:linear-gradient(155deg,#9a9075 0 56%,var(--r) 57%)}.transit:before{width:150px;height:54px;left:50%;bottom:34px;transform:translateX(-50%);border:4px solid var(--i);background:var(--p);box-shadow:inset 0 -13px 0 var(--g)}.room{background:#8c7d6a}.room:before{width:72%;height:70px;left:14%;bottom:30px;border:4px solid var(--i);background:var(--p);box-shadow:inset 0 -18px 0 var(--g)}.open{background:linear-gradient(#809095 0 50%,#bda06a 51%)}.open:before{left:-10%;right:-10%;bottom:30px;border-top:5px solid var(--i);transform:rotate(-4deg)}.tag{position:absolute;left:10px;top:10px;border:2px solid var(--i);background:var(--p);padding:5px 7px;font-size:9px;font-weight:700}.body{padding:14px}.body h2{font-size:20px;margin:0}.body p{font-size:11px;line-height:1.75}
-.result,.social,.diary,.post{margin-top:16px;border:2px solid var(--i);background:var(--s);box-shadow:5px 5px 0 var(--i);padding:15px}.stamp{display:inline-block;border:2px solid var(--i);background:var(--y);padding:5px 7px;font-size:9px;font-weight:800;transform:rotate(-2deg)}.result h2{font-size:19px}.result p,.social p,.diary p,.post p{font-size:11px;line-height:1.8}.deltas{display:flex;gap:6px;flex-wrap:wrap}.deltas span{border:1px solid #20251f33;padding:4px 6px;font-size:9px}
-.social .quote{font:17px/1.6 "PingFang SC",sans-serif;margin-top:0}.friend{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;padding:9px;margin-top:8px}.av{width:32px;height:32px;display:grid;place-items:center;border:2px solid var(--i);font-size:10px}.friend b{font-size:10px}.friend small{display:block;font-size:9px;opacity:.55}.reply{margin-top:10px;border:1px dashed var(--i);padding:10px;font-size:10px}
-.diary{min-height:250px;background:repeating-linear-gradient(0deg,var(--s) 0 26px,#20251f18 27px 28px)}.diary h2{font-size:18px}.post h2{margin:0;font-size:18px}.rows{margin-top:12px}.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #20251f33;font-size:10px}
-.menu{position:absolute;inset:0;background:#20251f77;display:grid;align-items:end;z-index:20}.sheet{background:var(--p);border-top:3px solid var(--i);padding:18px}.sheet .btn{margin-top:8px;text-align:center}.toast{position:absolute;left:18px;right:18px;bottom:18px;padding:10px;background:var(--i);color:var(--s);font-size:10px;text-align:center;opacity:0;pointer-events:none}.toast.show{opacity:1}
-[hidden]{display:none!important}@media(max-width:520px){.wrap{padding:0}.game{width:100%;min-height:100svh;border:0;box-shadow:none}main{min-height:calc(100svh - 97px)}.start{min-height:calc(100svh - 36px)}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9e7d8">
+  <meta name="description" content="米米环游世界。一次真实旅行，一条可以反复走的路线。像素旅行叙事小游戏。">
+  <meta name="app-version" content="0.2.0">
+  <title>米米环游世界 · FIELD RECORDS</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=0.2.0">
 </head>
 <body>
-<div class="wrap"><div class="game">
-<header id="top" class="top" hidden><button id="home" class="logo"><span>mi</span></button><div class="mini"><small>AFRICA · ROUTE 01</small><strong id="daymini">DAY 01 / 42</strong></div><button id="more" class="dots">•••</button></header>
-<section id="hud" class="hud" hidden><div><span>旅费</span><strong id="budget">100%</strong></div><div><span>体力</span><strong id="energy">70%</strong></div><div><span>行李</span><strong id="bag">-- / 20kg</strong></div></section>
-<main id="screen"></main>
-<div id="toast" class="toast"></div>
-<div id="menu" class="menu" hidden><div class="sheet"><p class="ey">TRAVEL MENU</p><button id="tomap" class="btn">返回路线地图</button><button id="restart" class="btn">重新开始</button><button id="close" class="btn">继续旅行</button></div></div>
-</div></div>
-<script>
-(function(){
-var KEY="mi-v01";
-var DAYS=[
-{p:"ARRIVAL",l:"抵达",v:"city",t:"落地后的第一顿饭",c:"手机还有 17% 的电。住处离这里不远，但街角传来很好闻的味道。",s:"food",o:[
-["按收藏夹去找那家店","路线没有走错。坐下后才发现自己已经饿得说不出话。",-7,-5,0,"BOOKMARK","plan"],
-["跟着香味拐进去","店名没记住。你只记得门口那盏灯和一种完全没想到会在第一晚吃到的味道。",-5,-7,0,"SIDE STREET","drift"],
-["先回住处放行李，再出来","洗了把脸之后，城市没那么陌生了。再下楼时，街上已经安静了一些。",-3,3,0,"CHECK-IN","comfort"]]},
-{p:"COAST",l:"海岸",v:"coast",t:"风比预报里大得多",c:"原定只停二十分钟。现在海面一直变颜色，回程车还有一小时。",s:"view",o:[
-["坐下来，等到该走的时候","你几乎什么都没做。后来翻照片时，这一小时却显得比很多景点都长。",0,3,0,"STAY","comfort"],
-["沿着海岸一直走","风把头发吹得一团乱。你没走到尽头，但看见了地图上没有标出来的石滩。",0,-9,0,"WIND","drift"],
-["去附近买件能挡风的外套","它不在原本的行李计划里。之后的照片里，这件外套开始反复出现。",-8,1,.6,"EXTRA LAYER","comfort"]]},
-{p:"TRANSFER",l:"转场",v:"transit",t:"三种方式，都能到",c:"最便宜的车要坐很久；早班快线会让今天变长；舒服的方式会明显吃掉预算。",s:null,o:[
-["便宜的长途车 · 把时间交出去","窗外重复了很久。你睡了两次，醒来两次，最后开始记路边出现过多少种颜色。",-4,-12,0,"LONG WAY","drift"],
-["早班快线 · 把一天留给目的地","天还没亮就出发。抵达时还有半天，行程表像是多长出了一格。",-8,-7,0,"EARLY","plan"],
-["舒服一点 · 今天少折腾","你在路上睡得很好。醒来时已经快到了，代价只是预算表明显往下跳了一格。",-14,4,0,"EASY RIDE","comfort"]]},
-{p:"NIGHT",l:"住宿",v:"room",t:"只剩两种房间",c:"前台说原本订的房型出了点问题。门外有人在讨论明天去哪。",s:"odd",o:[
-["多人间 · 顺便听听大家在聊什么","你没有立刻睡。桌上还出现了一只不知道谁带来的小纪念物。",-3,-4,0,"BUNK","curiosity"],
-["小房间 · 把门关上","安静来得很快。行李摊开之后，房间突然有了一点属于自己的样子。",-10,7,0,"QUIET","comfort"],
-["先坐在公共区一会儿","手机里多了几个地点。它们都不在原来的路线里。",-5,-2,0,"LOBBY","drift"]]},
-{p:"OPEN DAY",l:"空白",v:"open",t:"明天没有计划",c:"这是行程表里故意留下的一天。现在它真的到了。没有一个想法看起来更正确。",s:null,o:[
-["按原路线继续","你把车票重新确认了一遍。路线重新变清楚，下一格就在前面。",-6,-4,0,"ON ROUTE","plan"],
-["去刚听说的小地方","那条支线看起来并不远。真正走进去时，却像另外一段旅行的入口。",-8,-8,0,"DETOUR","curiosity"],
-["留下来多一天","你把闹钟关掉。第一次没有因为空白的一天而急着把它填满。",-5,8,0,"ONE MORE DAY","comfort"]]}
-];
-var FRIENDS=[
-["food","01","朋友 01","喜欢吃东西"],["view","02","朋友 02","喜欢看风景"],["odd","03","朋友 03","喜欢奇怪小东西"]
-];
-function fresh(){return{started:false,packed:false,done:false,d:0,m:100,e:70,b:null,lim:20,t:{plan:0,drift:0,comfort:0,curiosity:0,share:0},con:{food:0,view:0,odd:0},st:[],j:[],pending:null}}
-var s=load()||fresh(),screen=q("screen");
-function q(id){return document.getElementById(id)}function save(){localStorage.setItem(KEY,JSON.stringify(s))}
-function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
-function chrome(on){q("top").hidden=!on;q("hud").hidden=!on;if(on)hud()}
-function hud(){q("budget").textContent=Math.max(0,Math.round(s.m))+"%";q("energy").textContent=Math.max(0,Math.round(s.e))+"%";q("bag").textContent=(s.b==null?"--":s.b.toFixed(1))+" / 20kg";q("daymini").textContent="DAY "+String(Math.min(s.d+1,42)).padStart(2,"0")+" / 42"}
-function toast(x){q("toast").textContent=x;q("toast").classList.add("show");setTimeout(function(){q("toast").classList.remove("show")},1000)}
-function title(){chrome(false);var cont=s.started?'<button id="cont" class="btn">继续旅行</button>':"";screen.innerHTML='<div class="start"><p class="ey">FIVSEVN / TRAVEL ARCHIVE 01</p><div class="bigmi">mi</div><h1>米米环游世界</h1><div class="sub">MI’S LITTLE WORLD TRIP</div><div class="mapstrip"></div><div class="actions"><button id="new" class="btn primary">'+(s.started?"重新开始":"开始旅行")+'</button>'+cont+'<p class="copy">第一版 · AFRICA ROUTE / 42 DAYS<br>当前开放：核心循环试玩 DAY 01–05</p></div></div>';
-q("new").onclick=function(){if(s.started&&!confirm("从头开始？当前试玩记录会被覆盖。"))return;s=fresh();s.started=true;save();route()};if(q("cont"))q("cont").onclick=function(){s.done?end():route()}
-}
-function route(){chrome(true);var nodes=DAYS.map(function(x,i){var c=i<s.d||s.done?"done":i==s.d?"now":"lock";return'<div class="node '+c+'"><i class="dot"></i><div><strong>DAY '+String(i+1).padStart(2,"0")+' · '+x.l+'</strong><small>'+(i<s.d||s.done?"已记录":i==s.d?"现在":"未抵达")+'</small></div></div>'}).join("");screen.innerHTML='<p class="ey">WORLD MAP / ROUTE 01</p><h1 class="title">Africa<br>42 Days</h1><p class="copy">每一次现实旅行，会在这里变成一条可以反复走的叙事环线。路线相同，留下来的东西不一定相同。</p><div class="hero"><span class="ey">CURRENT ROUTE</span><br><b>AFRICA</b> · 42 DAYS</div><div class="route">'+nodes+'</div><button id="go" class="btn primary" style="margin-top:14px">'+(s.done?"查看这一段旅程":!s.packed?"整理行李，准备出发 →":"继续 DAY "+String(s.d+1).padStart(2,"0")+" →")+'</button>';q("go").onclick=function(){s.done?end():s.packed?day():pack()}
-}
-function pack(){chrome(true);screen.innerHTML='<p class="ey">BEFORE DAY 01</p><h1 class="title">先决定<br>带多少东西。</h1><p class="copy">航空行李上限暂按 20kg。它会影响后面的体力、预算和买东西的余地。</p><div class="grid"><button class="pack" data-p="0"><b>轻装 <span>11.8kg</span></b><small>速干衣 · 薄外套 · 相机 · 充电器<br>空间很多，路上买到的东西可以直接塞进去。</small></button><button class="pack" data-p="1"><b>标准 <span>16.4kg</span></b><small>换洗衣物 · 外套 · 相机 · 备用鞋 · 小药包<br>大部分预想得到的情况，都准备了一点。</small></button><button class="pack" data-p="2"><b>塞满 <span>21.2kg</span></b><small>更多衣服 · 厚外套 · 相机 · 备用鞋 · 杂物<br>超过 20kg，出发时会产生一点额外费用。</small></button></div><p class="copy">后续会改成真正的行李箱界面：逐件放入、称重、换装、途中购入或丢弃。</p>';[].forEach.call(document.querySelectorAll("[data-p]"),function(b){b.onclick=function(){var n=+b.dataset.p,ws=[11.8,16.4,21.2],es=[6,0,-4],ms=[0,0,-4];s.packed=true;s.b=ws[n];s.e+=es[n];s.m+=ms[n];if(n==0)s.t.drift++;if(n==2)s.t.comfort++;save();toast(ws[n].toFixed(1)+"kg");setTimeout(day,180)}})}
-function day(){if(s.d>=DAYS.length){finish();return}chrome(true);var x=DAYS[s.d];screen.innerHTML='<p class="ey">DAY '+String(s.d+1).padStart(2,"0")+' / '+x.p+'</p><div class="scene"><div class="visual '+x.v+'"><span class="tag">'+x.l+'</span></div><div class="body"><h2>'+x.t+'</h2><p>'+x.c+'</p></div></div><div class="grid">'+x.o.map(function(o,i){return'<button class="choice" data-o="'+i+'">'+o[0]+' →</button>'}).join("")+'</div>';[].forEach.call(document.querySelectorAll("[data-o]"),function(b){b.onclick=function(){choose(+b.dataset.o)}})}
-function choose(i){var x=DAYS[s.d],o=x.o[i];s.m+=o[2];s.e=Math.max(0,Math.min(100,s.e+o[3]));s.b=(s.b||0)+o[4];s.t[o[6]]=(s.t[o[6]]||0)+2;if(s.st.indexOf(o[5])<0)s.st.push(o[5]);s.pending={day:s.d+1,text:o[0],res:o[1],dm:o[2],de:o[3],db:o[4],stamp:o[5],share:x.s};save();result()}
-function result(){chrome(true);var r=s.pending,ds=[];if(r.dm)ds.push("旅费 "+(r.dm>0?"+":"")+r.dm+"%");if(r.de)ds.push("体力 "+(r.de>0?"+":"")+r.de+"%");if(r.db)ds.push("行李 +"+r.db+"kg");screen.innerHTML='<p class="ey">DAY '+String(r.day).padStart(2,"0")+' / RESULT</p><div class="result"><span class="stamp">'+r.stamp+'</span><h2>'+r.text+'</h2><p>'+r.res+'</p><div class="deltas">'+ds.map(function(d){return"<span>"+d+"</span>"}).join("")+'</div></div><button id="next" class="btn primary" style="margin-top:14px">'+(r.share?"把手机拿出来 →":"记下今天 →")+'</button>';q("next").onclick=function(){r.share?social():dayend()}
-}
-function social(sel){chrome(true);var type=s.pending.share;var reply=sel?'<div class="reply">“'+(sel==type?"这个发得正好。":"居然会想到发这个给我。")+'”</div>':"";screen.innerHTML='<p class="ey">A SMALL MESSAGE</p><div class="social"><p class="quote">「不知道为什么，突然想发给TA。」</p><p>不发也没关系。旅行有时只是突然和某个人连在一起。</p>'+FRIENDS.map(function(f){return'<button class="friend" data-f="'+f[0]+'" '+(sel?"disabled":"")+'><span class="av">'+f[1]+'</span><span><b>'+f[2]+'</b><small>'+f[3]+'</small></span><span>→</span></button>'}).join("")+reply+'</div>'+(sel?'<button id="sn" class="btn primary" style="margin-top:14px">收起手机 →</button>':'<button id="skip" class="btn" style="margin-top:14px">这次不发</button>');if(sel){q("sn").onclick=dayend}else{[].forEach.call(document.querySelectorAll("[data-f]"),function(b){b.onclick=function(){var id=b.dataset.f;s.con[id]+=(id==type?2:1);s.t.share++;save();social(id)}});q("skip").onclick=dayend}}
-function dayend(){var r=s.pending;s.j.push({day:r.day,res:r.res,stamp:r.stamp});s.pending=null;s.d++;save();chrome(true);screen.innerHTML='<p class="ey">TRAVEL NOTE / DAY '+String(r.day).padStart(2,"0")+'</p><h1 class="title">今天先到这里。</h1><div class="diary"><h2>米的旅行记录</h2><p>'+r.res+'</p><div class="deltas">'+s.st.slice(-4).map(function(x){return'<span class="stamp">'+x+'</span>'}).join("")+'</div></div><button id="dn" class="btn primary" style="margin-top:16px">'+(s.d>=DAYS.length?"看看这一段变成了什么 →":"回到路线地图 →")+'</button>';q("dn").onclick=function(){s.d>=DAYS.length?finish():route()}}
-function finish(){s.done=true;save();end()}
-function end(){chrome(true);var arr=[["drift","地图外侧","你开始相信，绕路本身也可以是一种抵达。"],["plan","沿线前进","你没有排斥偶然，但总会把下一格重新找回来。"],["comfort","给自己留余地","你越来越愿意把体力、安静和睡眠也算进旅行里。"],["curiosity","小事收集者","真正留下来的，往往不是最大、最著名的那个东西。"],["share","远方的收件人","一些瞬间，会因为想起某个人而变得更具体。"]];arr.sort(function(a,b){return(s.t[b[0]]||0)-(s.t[a[0]]||0)});var a=arr[0];screen.innerHTML='<p class="ey">ROUTE FRAGMENT COMPLETE</p><h1 class="title">这不是结局。<br>只是路线开始长出形状。</h1><div class="post"><h2>'+a[1]+'</h2><p>'+a[2]+'</p><div class="rows"><div class="row"><span>行李</span><b>'+((s.b||0).toFixed(1))+'kg</b></div><div class="row"><span>剩余旅费</span><b>'+Math.max(0,Math.round(s.m))+'%</b></div><div class="row"><span>旅行印章</span><b>'+s.st.length+'</b></div><div class="row"><span>发出的消息</span><b>'+s.t.share+'</b></div></div></div><p class="copy">完整版会把同一条 42 天路线扩展成多周目结构，并在整段旅程结束后生成 9–13 种没有好坏之分的结局。</p><div class="grid"><button id="again" class="btn primary">用另一种方式再走一次</button><button id="emap" class="btn">回到路线地图</button></div>';q("again").onclick=function(){s=fresh();s.started=true;save();pack()};q("emap").onclick=route}
-q("home").onclick=function(){if(s.started)route()};q("more").onclick=function(){q("menu").hidden=false};q("close").onclick=function(){q("menu").hidden=true};q("tomap").onclick=function(){q("menu").hidden=true;route()};q("restart").onclick=function(){if(confirm("重新开始会清除当前试玩记录。确定吗？")){s=fresh();save();q("menu").hidden=true;title()}};q("menu").onclick=function(e){if(e.target==q("menu"))q("menu").hidden=true};
-title();
-})();
-</script>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#map" aria-label="米米环游世界，返回地图"><span class="brand-mark">mi<span>✦</span></span><span class="brand-type">米米环游世界<small>A PERSONAL TRAVEL ARCHIVE</small></span></a>
+      <nav aria-label="旅行工具"><button data-action="map" id="nav-map">地图<span>ATLAS</span></button><button data-action="journal" id="nav-journal">手记<span>NOTES</span></button><button data-action="phone" id="nav-phone">手机<span>PHONE</span></button><button data-action="menu" aria-label="打开旅行菜单" class="menu-icon">•••</button></nav>
+    </header>
+    <main id="app" tabindex="-1" aria-live="polite"><div class="loading">正在展开地图……</div></main>
+    <footer class="footer"><span>FIVSEVN / MI</span><span id="save-status">旅行会自动保存</span><span>EARTH · 001 <i>✦</i></span></footer>
+  </div>
+  <dialog id="modal" aria-labelledby="modal-title"></dialog>
+  <div id="toast" role="status"></div>
+  <noscript>请启用 JavaScript，米才能打开她的行李箱。</noscript>
+  <script type="module" src="js/app.js?v=0.2.0"></script>
 </body>
 </html>
