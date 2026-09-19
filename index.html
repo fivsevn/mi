@@ -4,24 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#e9e7d8">
-  <meta name="description" content="米米环游世界。一次真实旅行，一条可以反复走的路线。像素旅行叙事小游戏。">
-  <meta name="app-version" content="0.2.0">
-  <title>米米环游世界 · FIELD RECORDS</title>
+  <meta name="description" content="米的地图 · MI’S MAP">
+  <title>米的地图 · MI’S MAP</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="stylesheet" href="css/style.css?v=0.2.0">
+  <link rel="stylesheet" href="css/style.css?v=desk-1">
+  <link rel="stylesheet" href="css/desk.css?v=desk-1">
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#map" aria-label="米米环游世界，返回地图"><span class="brand-mark">mi<span>✦</span></span><span class="brand-type">米米环游世界<small>A PERSONAL TRAVEL ARCHIVE</small></span></a>
-      <nav aria-label="旅行工具"><button data-action="map" id="nav-map">地图<span>ATLAS</span></button><button data-action="journal" id="nav-journal">手记<span>NOTES</span></button><button data-action="phone" id="nav-phone">手机<span>PHONE</span></button><button data-action="menu" aria-label="打开旅行菜单" class="menu-icon">•••</button></nav>
-    </header>
+    <header class="topbar"><a class="brand" href="#map" aria-label="米的地图，回到桌上"><span class="brand-type">米的地图<small>MI’S MAP</small></span></a></header>
     <main id="app" tabindex="-1" aria-live="polite"><div class="loading">正在展开地图……</div></main>
-    <footer class="footer"><span>FIVSEVN / MI</span><span id="save-status">旅行会自动保存</span><span>EARTH · 001 <i>✦</i></span></footer>
+    <footer class="footer"><span id="save-status" role="status"></span></footer>
   </div>
   <dialog id="modal" aria-labelledby="modal-title"></dialog>
   <div id="toast" role="status"></div>
   <noscript>请启用 JavaScript，米才能打开她的行李箱。</noscript>
-  <script type="module" src="js/app.js?v=0.2.0"></script>
+  <script type="module" src="js/app.js?v=desk-1"></script>
 </body>
 </html>

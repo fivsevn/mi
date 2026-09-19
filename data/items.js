@@ -12,7 +12,7 @@ export const ITEMS = [
   {id:'repellent',name:'驱蚊液',weight:0.2,group:'日用',note:'小小一瓶安全感。'},
   {id:'swimsuit',name:'泳衣',weight:0.2,group:'日用',note:'先带上，游不游再说。'},
   {id:'wash',name:'洗漱包',weight:1.1,group:'日用',note:'每天都用，但拍照时不出现。'},
-  {id:'laundry',name:'换洗衣物',weight:3.4,group:'日用',note:'42天当然不是42套。'},
+  {id:'laundry',name:'换洗衣物',weight:3.4,group:'日用',note:'洗过，晾干，还能接着穿。'},
   {id:'camera',name:'相机',weight:0.9,group:'随身物',note:'手机也能拍。这台比较重。'},
   {id:'lens',name:'长焦镜头',weight:1.8,group:'随身物',note:'把远处拉近一点。'},
   {id:'guide',name:'纸质指南',weight:0.7,group:'随身物',note:'没有电的时候也在。'},

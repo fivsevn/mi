@@ -37,8 +37,8 @@ export function drawMap(canvas){
  c.strokeStyle='#f1e6b3';c.lineWidth=2;c.setLineDash([4,3]);c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.setLineDash([]);
  pts.forEach(([x,y],i)=>{rect(c,P.ink,x-3,y-3,7,7);rect(c,i<2?'#f5e19a':'#e7e8d7',x-1,y-1,3,3);});
  rect(c,'#bac2b0',650,17,13,13);rect(c,'#d7ddca',650,17,9,10);
- c.font='10px monospace';c.fillStyle='#81917e';c.fillText('LUNAR ORBIT · ?',548,23);c.fillText('90° N',12,44);c.fillText('0°',18,197);c.fillText('90° S',12,344);c.fillText('180° W',48,369);c.fillText('0°',354,369);c.fillText('180° E',623,369);
- c.fillStyle='#687e6b';c.font='11px monospace';c.fillText('PACIFIC OCEAN',61,239);c.fillText('ATLANTIC',272,213);c.fillText('INDIAN OCEAN',470,278);
+ c.font='12px Pixel, monospace';c.fillStyle='#81917e';c.fillText('LUNAR ORBIT · ?',548,23);c.fillText('90° N',12,44);c.fillText('0°',18,197);c.fillText('90° S',12,344);c.fillText('180° W',48,369);c.fillText('0°',354,369);c.fillText('180° E',623,369);
+ c.fillStyle='#687e6b';c.font='12px Pixel, monospace';c.fillText('PACIFIC OCEAN',61,239);c.fillText('ATLANTIC',272,213);c.fillText('INDIAN OCEAN',470,278);
 }
 export function scene(canvas,type='savanna',outfit={}){
  const c=context(canvas,384,216),random=rng(42);rect(c,P.sky,0,0,384,216);

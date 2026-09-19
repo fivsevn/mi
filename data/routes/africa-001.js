@@ -1,7 +1,7 @@
 const choice=(id,label,result,effect={},extra={})=>({id,label,result,effect,...extra});
 export const africa={
  id:'africa-001',number:'001',name:'AFRICA',label:'非洲环线',region:'africa',days:42,budget:42000,
- coordinates:'01° S — 34° S',coverText:'从草地到海边。\n出去的时候，箱子还很空。',edition:'本版可玩：Safari ＋ 塞舌尔 ＋ 归来',playTime:'约 15 分钟',recordStops:['safari','seychelles'],
+ coordinates:'01° S — 34° S',coverText:'从草地到海边。\n出去的时候，箱子还很空。',recordStops:['safari','seychelles'],
  intro:'同一条路线，可以留下不同的东西。',
  stops:[
   {id:'safari',name:'肯尼亚 / 坦桑尼亚',en:'SAFARI',days:'01—12',theme:'看，也被看着',available:true,coord:[35,-3]},
@@ -16,9 +16,9 @@ export const africa={
  {id:'flight-out',kind:'booking',scene:'airport',day:1,place:'出发机场',eyebrow:'DEPARTURE / FLIGHT',title:'两张票，都能到。',text:'凌晨的机场很亮。米还没有。\n护照已经拿在手里了。',choices:[
   choice('red-eye','转机夜航','米在登机口醒了三次。最后一次，确实该登机了。',{fatigue:2,spontaneous:1},{cost:4200,detail:'转机 8 小时 · 托运 20 kg',stamp:'BOARDING PASS'}),
   choice('daytime','日间航班','贵出来的那一部分，米决定先叫它睡眠。',{fatigue:-1,prepared:1,flags:{comfort:true}},{cost:6900,detail:'少一次转机 · 托运 20 kg',stamp:'BOARDING PASS'})]},
- {id:'hotel-safari',kind:'booking',scene:'room',day:1,place:'Safari 营地',eyebrow:'CHECK-IN / 3 NIGHTS',title:'今晚睡在哪里？',text:r=>r.hidden.fatigue>0?'床还没看到，米已经想好了怎么躺。':'米还不困。先看看房间。',choices:[
-  choice('camp','基础帐篷','夜里能听见许多声音。米没分清几个，就睡着了。',{fatigue:1,people:1},{cost:1200,detail:'三晚 · 公用洗浴 · 离集合点较远'}),
-  choice('lodge','营地小屋','门关上，世界安静了一点。今天买到的安静很合适。',{fatigue:-2,flags:{comfort:true}},{cost:3600,detail:'三晚 · 独立洗浴 · 近集合点'})]},
+ {id:'hotel-safari',kind:'booking',scene:'room',day:1,place:'Safari 营地',eyebrow:'营地的灯亮了',title:'今晚睡在哪里？',text:r=>r.hidden.fatigue>0?'床还没看到，米已经想好了怎么躺。':'米还不困。先看看房间。',choices:[
+  choice('camp','基础帐篷','夜里能听见许多声音。米没分清几个，就睡着了。',{fatigue:1,people:1},{cost:1200,detail:'公用洗浴 · 离集合点较远'}),
+  choice('lodge','营地小屋','门关上，世界安静了一点。今天买到的安静很合适。',{fatigue:-2,flags:{comfort:true}},{cost:3600,detail:'独立洗浴 · 近集合点'})]},
  {id:'safari-morning',scene:'savanna',day:2,place:'肯尼亚 / 坦桑尼亚',eyebrow:'01 / SAFARI',title:'谁在看谁？',text:r=>`车停了。长颈鹿也停了。\n它看着这一车拿着手机的人。${r.outfit.hat?'米扶了一下帽子。':'米眯起了眼睛。'}`,choices:[
   choice('photo','先拍一张',r=>r.bag.includes('camera')?'相机举起来，长颈鹿正好转身。照片里，是一个很完整的后脑勺。':'手机举起来，长颈鹿正好转身。至少拍到了它的后脑勺。',{photograph:2,observe:1}),
   choice('look','先看一会儿','米把手放下来。长颈鹿嚼着东西。双方暂时都没话说。',{remember:2,observe:2,flags:{looked:true}}),
@@ -39,9 +39,9 @@ export const africa={
  {id:'flight-island',kind:'booking',scene:'airport',day:13,place:'飞往塞舌尔',eyebrow:'TRANSFER / FLIGHT',title:'下一段，换一种蓝。',text:'草地从窗外退了下去。\n到海边之前，先过一次秤。',choices:[
   choice('connection','便宜一点，多等一会儿','转机时买了一杯咖啡。票省下来的钱，先少了一点。',{fatigue:2,spontaneous:1},{cost:2400,detail:'长转机 · 20 kg · 超重费另计',limit:20}),
   choice('short','少转一班，早一点到','今天不想折腾。这个理由已经够长了。',{fatigue:-1,flags:{comfort:true}},{cost:3900,detail:'较短转机 · 23 kg · 超重费另计',limit:23})]},
- {id:'hotel-island',kind:'booking',scene:'island',day:13,place:'塞舌尔 · 马埃岛',eyebrow:'CHECK-IN / 4 NIGHTS',title:'海在照片的哪一边？',text:'两个住处都写着“靠近海边”。\n一个是窗外。一个要走一段坡。',choices:[
-  choice('guesthouse','山坡上的小住处','老板说，没有电梯。米看了看箱子，箱子没有看米。',{fatigue:1,people:1},{cost:1600,detail:'四晚 · 厨房 · 步行上坡'}),
-  choice('seaside','海边的房间','米坐在阳台上。今天的路，到这里就够了。',{fatigue:-2,flags:{comfort:true}},{cost:5200,detail:'四晚 · 早餐 · 下楼到海边'})]},
+ {id:'hotel-island',kind:'booking',scene:'island',day:13,place:'塞舌尔 · 马埃岛',eyebrow:'门钥匙有点咸',title:'海在照片的哪一边？',text:'两个住处都写着“靠近海边”。\n一个是窗外。一个要走一段坡。',choices:[
+  choice('guesthouse','山坡上的小住处','老板说，没有电梯。米看了看箱子，箱子没有看米。',{fatigue:1,people:1},{cost:1600,detail:'厨房 · 步行上坡'}),
+  choice('seaside','海边的房间','米坐在阳台上。今天的路，到这里就够了。',{fatigue:-2,flags:{comfort:true}},{cost:5200,detail:'早餐 · 下楼到海边'})]},
  {id:'beach',scene:'island',day:14,place:'塞舌尔 · 海边',eyebrow:'02 / SEYCHELLES',title:'“天堂”今天有点热。',text:r=>`宣传照里没有拍出这段上坡。\n${r.bag.includes('sunscreen')?'米拧开防晒霜，挤得有点多。':'到小店买防晒霜的时候，米记住了价格。'}\n海确实是那个颜色。`,onEnter:{flags:{sunscreenUsed:true}},choices:[
   choice('sit','先找个阴凉地方坐下','什么也没安排。坐满一小时，还是觉得没有白来。',{remember:2,accept:1},{cost:r=>r.bag.includes('sunscreen')?0:160,addIfMissing:'sunscreen'}),
   choice('swim','去水里试一下',r=>r.bag.includes('swimsuit')?'泳衣终于离开了压缩袋。海水没有滤镜，也有点咸。':'没带泳衣。米卷起裤腿站到水里，裤腿还是湿了。',{participate:2,remember:1},{cost:r=>r.bag.includes('sunscreen')?0:160,addIfMissing:'sunscreen'}),
@@ -57,7 +57,7 @@ export const africa={
  {id:'last-shop',scene:'island',day:17,place:'离开塞舌尔前',eyebrow:'ONE LAST THING',title:'行李箱还有意见吗？',text:'米看到一块印花布。\n可以当桌布，或者别的什么。先拿在手里想一会儿。',choices:[
   choice('cloth','带回去再决定','以后每次看见它，大概都要先想起这张收据。',{keep:2},{cost:210,add:'cloth',detail:'+ 1.2 kg'}),
   choice('nothing','今天不买了','放回去。米的手空了出来。',{discard:1,accept:1})]},
- {id:'interlude',scene:'route',day:18,place:'路线中间的几页',eyebrow:'ROUTE 001 / TO BE CONTINUED',title:'还有一些页，暂时留白。',text:'维多利亚瀑布、乔贝、纳米比亚、开普敦、毛里求斯。\n它们都在真实路线里。这一版先夹上书签。\n下一页，我们直接回家。',choices:[choice('home','把书签留在这里，回家','这次先带着已经发生的部分回来。',{},{add:'receipts'})]},
+ {id:'interlude',scene:'route',day:18,place:'窗边',eyebrow:'折起来的一角',title:'有些地方，下次再去。',text:'地图被海风吹得卷了边。\n我把还没走到的地方圈起来，没有写日期。\n手机亮了。有人问，什么时候回家。',choices:[choice('home','把地图折好','票根夹进了日记。剩下的空白，也一起带回去。',{},{add:'receipts'})]},
  {id:'flight-home',kind:'booking',scene:'airport',day:42,place:'回程机场',eyebrow:'RETURN / FLIGHT',title:'这一次，目的地叫家。',text:'护照还在。充电线也在。\n米把手机时区调了回去。',choices:[
   choice('home-transfer','再转一次机','已经知道在哪里接热水了。也算一种熟练。',{fatigue:1},{cost:3800,detail:'转机回家 · 托运 20 kg'}),
   choice('home-short','买一段短一点的回程','我决定再买六小时睡眠。回家以后，账单明天看。',{fatigue:-1,flags:{comfort:true}},{cost:6200,detail:'较短转机 · 托运 20 kg'})]}

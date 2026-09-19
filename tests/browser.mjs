@@ -16,10 +16,11 @@ const fit=async()=>assert.ok(await page.evaluate(()=>document.documentElement.sc
 await mkdir('test-results',{recursive:true});
 await page.goto(origin);await page.waitForSelector('#world-map');await fit();
 assert.equal(await page.locator('.region').count(),7);
-await click('region','[data-region="asia"]');assert.match(await page.locator('.route-card').innerText(),/NO FIELD RECORD/);
-await click('region','[data-region="africa"]');await page.screenshot({path:'test-results/mobile-map.png',fullPage:true});
+assert.equal(await page.locator('.route-card, .route-preview, nav').count(),0);
+assert.doesNotMatch(await page.locator('body').innerText(),/42天|42 DAYS|FIELD RECORD|本版|约15|一次一条/);
+await page.screenshot({path:'test-results/mobile-map.png',fullPage:true});
 for(const kind of ['heavy','light','sea']){
- await click('start');await click('reason','[data-id="2"]');assert.match(await page.locator('.pack-heading').innerText(),/18.6/);
+ await click('journey');await click('reason','[data-id="2"]');assert.match(await page.locator('.pack-heading').innerText(),/18.6/);
  await click('preset');
  if(kind==='heavy'){
   for(const id of ['coat','spare'])await click('item',`[data-id="${id}"]`);
@@ -34,7 +35,7 @@ for(const kind of ['heavy','light','sea']){
  while((await state()).run.stage!=='return-pack'){
   assert.ok(++safety<100);let before=await state();const r=before.run;
   // Refresh at each saved phase, then resume through the public map control.
-  await page.reload();await click('continue');const after=await state();assert.deepEqual(after,before);
+  await page.reload();await page.waitForSelector('.travel, .packing, .phone-scene');const after=await state();assert.deepEqual(after,before);
   await fit();assert.doesNotMatch(await page.locator('#app').innerText(),/疲劳值|体力\s*\d|好感度|人格数值/);
   if(r.stage==='event'){
    const n=africa.nodes[r.node];let choice=0;if(kind==='sea'&&(n.id==='beach'||n.id==='island-wind'))choice=2;
@@ -43,8 +44,8 @@ for(const kind of ['heavy','light','sea']){
    if(n.id==='beach'&&kind==='heavy')await page.screenshot({path:'test-results/mobile-beach.png',fullPage:true});
    await click('choose',`[data-index="${choice}"]`);
   }else if(r.stage==='result')await click('next');
-  else if(r.stage==='social'){assert.match(await page.locator('.social-quote').innerText(),/^不知道为什么，突然想发给TA。$/);await click(kind==='light'?'social-skip':'send',kind==='light'?'':'[data-contact="qi"]');}
-  else if(r.stage==='chat'){if(kind==='heavy')await page.screenshot({path:'test-results/mobile-chat.png',fullPage:true});await click('social-done');}
+  else if(r.stage==='social'){await click('unlock');assert.match(await page.locator('.social-quote').innerText(),/^不知道为什么，突然想发给TA。$/);await click(kind==='light'?'social-skip':'send',kind==='light'?'':'[data-contact="qi"]');}
+  else if(r.stage==='chat'){await click('unlock');if(kind==='heavy')await page.screenshot({path:'test-results/mobile-chat.png',fullPage:true});await click('social-done');}
  }
  if(kind==='heavy'){
   assert.match(await page.locator('[data-action="return-finish"]').innerText(),/超重费/);
@@ -57,19 +58,25 @@ for(const kind of ['heavy','light','sea']){
  }
  await page.screenshot({path:`test-results/${kind}-return-pack.png`,fullPage:true});
  await click('return-finish');await click('finish',`[data-ending="${kind}"]`);assert.equal((await state()).records.at(-1).endingId,kind);
- await page.screenshot({path:`test-results/${kind}-ending.png`,fullPage:true});await page.reload();await click('records');await click('record');await click('map');
+ await page.screenshot({path:`test-results/${kind}-ending.png`,fullPage:true});await click('map');await click('journal');await click('records');await click('record');await page.reload();assert.ok(await page.locator('.return-paper').count());await click('map');
 }
 const p=await state();assert.equal(p.records.length,3);assert.equal(p.messages.length,6);assert.equal(p.contacts.qi,6);
-await click('phone');await click('contact','[data-contact="qi"]');assert.equal(await page.locator('.chat-thread').count(),6);await click('map');
-await click('start');await click('reason');await click('menu');await click('restart');await click('confirm-start');assert.equal((await state()).records.length,3);assert.equal((await state()).messages.length,6);await click('map');
+await click('phone');assert.ok(await page.locator('.lock-screen').count());await click('unlock');await click('contact','[data-contact="qi"]');assert.equal(await page.locator('.bubble').count(),1+p.messages.filter(m=>m.contact==='qi').flatMap(m=>m.lines).length);await click('map');
+await click('journey');await click('reason');await click('map');await click('journal');await click('restart');await click('confirm-start');assert.equal((await state()).records.length,3);assert.equal((await state()).messages.length,6);await click('map');
 await page.setViewportSize({width:1440,height:1060});await fit();await page.screenshot({path:'test-results/desktop-map.png',fullPage:true});
 for(const width of [320,360,768,1024]){await page.setViewportSize({width,height:900});await fit();}
-// Existing early-game save is left untouched and the earlier prototype still runs.
+// The published prototype URL returns to the same desk; old save is untouched.
 await page.evaluate(()=>localStorage.setItem('mi-v01',JSON.stringify({started:false})));
-await page.goto(origin+'/legacy/');assert.equal(await page.locator('h1').innerText(),'米米环游世界');await page.goto(origin);assert.ok(await page.locator('a[href="legacy/"]').count());
+await page.goto(origin+'/legacy/');await page.waitForSelector('#world-map');
 assert.equal(await page.evaluate(()=>localStorage.getItem('mi-v01')),JSON.stringify({started:false}));
+// Phone, back/forward, journal and refresh preserve the view and saved messages.
+await click('phone');await click('unlock');await click('contact','[data-contact="he"]');await click('hello');
+assert.match(await page.locator('.chat-thread').innerText(),/下次拍给我看/);
+await page.reload();await click('unlock');assert.match(await page.locator('.chat-thread').innerText(),/下次拍给我看/);
+await click('contacts');await page.goBack();assert.ok(await page.locator('[data-action="contacts"]').count());await click('map');
+await click('journal');await page.reload();assert.ok(await page.locator('.open-notebook').count());await click('map');
 // Denied storage must not stop an in-memory game.
 const blocked=await browser.newContext({viewport:{width:390,height:844}});await blocked.addInitScript(()=>{Storage.prototype.setItem=()=>{throw new DOMException('denied','SecurityError')};Storage.prototype.getItem=()=>{throw new DOMException('denied','SecurityError')};});
-const blockedPage=await blocked.newPage();blockedPage.on('pageerror',e=>errors.push(e.message));await blockedPage.goto(origin);await blockedPage.locator('[data-action="start"]').click();await blockedPage.locator('[data-action="reason"]').first().click();await blockedPage.locator('[data-action="depart"]').click();assert.match(await blockedPage.locator('#save-status').innerText(),/无法存档/);assert.ok(await blockedPage.locator('[data-action="choose"]').count());
-assert.deepEqual(errors,[]);console.log('PASS: three complete UI playthroughs, reload every phase, 3 records, chat history, overweight/wardrobe/return handling, 320–1440px, legacy and denied-storage fallback.');
+const blockedPage=await blocked.newPage();blockedPage.on('pageerror',e=>errors.push(e.message));await blockedPage.goto(origin);await blockedPage.locator('[data-action="journey"]').click();await blockedPage.locator('[data-action="reason"]').first().click();await blockedPage.locator('[data-action="depart"]').click();assert.match(await blockedPage.locator('#save-status').innerText(),/无法存档/);assert.ok(await blockedPage.locator('[data-action="choose"]').count());
+assert.deepEqual(errors,[]);console.log('PASS: three complete UI playthroughs, reload every phase, 3 records, chat history, overweight/wardrobe/return handling, 320–1440px, phone lock/unlock, saved chat, back/forward, journal, legacy redirect and denied-storage fallback.');
 await browser.close();
