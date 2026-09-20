@@ -1,5 +1,5 @@
-import { LAND, AFRICA } from '../assets/world-grid.js';
-import { itemById } from '../data/items.js';
+import { LAND, AFRICA } from '../assets/world-grid.js?v=journey-3';
+import { itemById } from '../data/items.js?v=journey-3';
 const P={ink:'#263c37',leaf:'#527252',grass:'#9ba266',sand:'#d8b777',cream:'#f0e8cb',sun:'#f1d779',sky:'#a6c7bc',blue:'#508c91',dark:'#315e60'};
 function context(canvas,w,h){canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;return c;}
 function rect(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}

@@ -1,10 +1,10 @@
-import { placeFor, places } from '../data/routes/africa-stories.js';
-import { ROUTES, routeById } from '../data/routes/index.js';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js';
-import { ENDINGS,returnQuestions } from '../data/endings.js';
-import * as E from './engine.js';
-import { drawMap,scene,avatar } from './art.js';
+import { placeFor, places } from '../data/routes/africa-stories.js?v=journey-3';
+import { ROUTES, routeById } from '../data/routes/index.js?v=journey-3';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=journey-3';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=journey-3';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=journey-3';
+import * as E from './engine.js?v=journey-3';
+import { drawMap,scene,avatar } from './art.js?v=journey-3';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN');

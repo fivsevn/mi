@@ -1,7 +1,7 @@
-import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js';
-import { routeById } from '../data/routes/index.js';
-import { selectEnding, returnQuestions } from '../data/endings.js';
-import { conversation } from '../data/contacts.js';
+import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=journey-3';
+import { routeById } from '../data/routes/index.js?v=journey-3';
+import { selectEnding, returnQuestions } from '../data/endings.js?v=journey-3';
+import { conversation } from '../data/contacts.js?v=journey-3';
 export const SAVE_KEY='mi-v02';
 export function freshProfile(){return {version:2,records:[],contacts:{},messages:[],run:null};}
 export function createRun(routeId='africa-001',seed=Math.random()){
