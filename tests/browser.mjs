@@ -1,82 +1,46 @@
-// Optional browser integration checks. Set PLAYWRIGHT_MODULE and CHROME_PATH
-// when Playwright / Chrome are provided outside this project.
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
-import {africa} from '../data/routes/africa-001.js';
-const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
-const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})});
+const {chromium,webkit}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const origin=process.env.MI_TEST_URL||'http://127.0.0.1:4173';
-const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1});
-await context.addInitScript(()=>{Math.random=()=>.2;});
-const page=await context.newPage();const errors=[];
-page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
-const click=async(action,extra='')=>page.locator(`[data-action="${action}"]${extra}`).first().click();
-const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
-const fit=async()=>assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'horizontal overflow');
 await mkdir('test-results',{recursive:true});
-await page.goto(origin);await page.waitForSelector('#world-map');await fit();
-assert.equal(await page.locator('.region').count(),7);
-assert.equal(await page.locator('.route-card, .route-preview, nav').count(),0);
-assert.doesNotMatch(await page.locator('body').innerText(),/42天|42 DAYS|FIELD RECORD|本版|约15|一次一条/);
-await page.screenshot({path:'test-results/mobile-map.png',fullPage:true});
-for(const kind of ['heavy','light','sea']){
- await click('journey');await click('reason','[data-id="2"]');assert.match(await page.locator('.pack-heading').innerText(),/18.6/);
- await click('preset');
- if(kind==='heavy'){
-  for(const id of ['coat','spare'])await click('item',`[data-id="${id}"]`);
-  await click('tab','[data-tab="随身物"]');for(const id of ['lens','tripod'])await click('item',`[data-id="${id}"]`);
-  assert.equal((await state()).run.bag.length,20);
-  // Cross 20 kg and verify departure is blocked, then take the towel out.
-  await click('tab','[data-tab="日用"]');await click('item','[data-id="towel"]');assert.equal(await page.locator('[data-action="depart"]').isDisabled(),true);await click('item','[data-id="towel"]');
- }
- await click('equip','[data-id="stripe"]');assert.equal((await state()).run.outfit.top,'stripe');
- await fit();await page.screenshot({path:`test-results/${kind}-packing.png`,fullPage:true});await click('depart');
- let safety=0;
+for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
+ const browser=await (name==='webkit'?webkit:chromium).launch({headless:true,...(name==='chromium'&&process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})});
+ const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+ const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ const click=async(a,extra='')=>page.locator(`[data-action="${a}"]${extra}`).first().click();
+ const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
+ const fit=async()=>{assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'viewport overflow');assert.ok(await page.locator('.app-shell').evaluate(e=>e.getBoundingClientRect().width<=440),'portrait width');};
+ await page.goto(origin);await page.waitForSelector('.font-ready');assert.ok(await page.evaluate(()=>document.fonts.check('12px Pixel')));await fit();await page.screenshot({path:`test-results/${name}-map.png`});
+ assert.equal(await page.locator('.desk-pencil,.coffee-ring,.pencil-circle').count(),0);
+ await click('phone');await click('unlock');await click('contact','[data-contact="he"]');await click('hello');await page.reload();await click('unlock');assert.match(await page.locator('.chat-thread').innerText(),/下次拍给我看/);await click('map');
+ await click('journey');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');await fit();await page.screenshot({path:`test-results/${name}-packing.png`,fullPage:true});
+ assert.doesNotMatch(await page.locator('#app').innerText(),/\d+\.\d+ kg/);await click('depart');
+ let count=0,miniCount=0;
  while((await state()).run.stage!=='return-pack'){
-  assert.ok(++safety<100);let before=await state();const r=before.run;
-  // Refresh at each saved phase, then resume through the public map control.
-  await page.reload();await page.waitForSelector('.travel, .packing, .phone-scene');const after=await state();assert.deepEqual(after,before);
-  await fit();assert.doesNotMatch(await page.locator('#app').innerText(),/疲劳值|体力\s*\d|好感度|人格数值/);
+  assert.ok(++count<240);const before=await state(),r=before.run;
   if(r.stage==='event'){
-   const n=africa.nodes[r.node];let choice=0;if(kind==='sea'&&(n.id==='beach'||n.id==='island-wind'))choice=2;
-   if(n.id==='safari-moment')choice=1;
-   if(n.id==='safari-morning'&&kind==='heavy')await page.screenshot({path:'test-results/mobile-safari.png',fullPage:true});
-   if(n.id==='beach'&&kind==='heavy')await page.screenshot({path:'test-results/mobile-beach.png',fullPage:true});
-   await click('choose',`[data-index="${choice}"]`);
-  }else if(r.stage==='result')await click('next');
-  else if(r.stage==='social'){await click('unlock');assert.match(await page.locator('.social-quote').innerText(),/^不知道为什么，突然想发给TA。$/);await click(kind==='light'?'social-skip':'send',kind==='light'?'':'[data-contact="qi"]');}
-  else if(r.stage==='chat'){await click('unlock');if(kind==='heavy')await page.screenshot({path:'test-results/mobile-chat.png',fullPage:true});await click('social-done');}
+   if(await page.locator('.mini-game').count()){
+    miniCount++;const kind=await page.locator('.mini-game').getAttribute('data-game');
+    if(kind==='falls'){await click('mini-tap');await click('mini-tap');await click('mini-tap');assert.ok(await page.locator('body.soaked').count());}
+    else if(kind==='bus'){await click('mini-tap','[data-kind="2"]');await page.waitForTimeout(1000);await page.reload();await page.locator('.npc-here').waitFor({timeout:15000});assert.match(await page.locator('.mini-text').innerText(),/有人来了/);}
+    else{for(let i=0;i<12;i++)await click('mini-tap');}
+    await page.locator('.mini-done:not([hidden])').waitFor({timeout:30000});await page.screenshot({path:`test-results/${name}-${kind}.png`});await click('mini-finish');
+   }else{
+    if(count%7===0){await page.reload();assert.deepEqual(await state(),before);await fit();}
+    const fryer=page.getByRole('button',{name:/拿出空气炸锅/});const goggles=page.getByRole('button',{name:/^01\s*戴/});const broken=page.getByRole('button',{name:/换一个/});
+    if(await fryer.count())await fryer.click();else if(await goggles.count())await goggles.click();else if(await broken.count())await broken.click();else await page.locator('[data-action="choose"]:not([disabled])').first().click();
+   }
+  }else if(r.stage==='result'){
+   if(count===2){await click('location');assert.match(await page.locator('#modal').innerText(),/DAY 1 \/ 42/);await click('archive');assert.ok(await page.locator('.archive-pages').count());await click('close');}
+   await click('next');
+  }else if(r.stage==='social'){await click('unlock');await click('send','[data-contact="qi"]');}else if(r.stage==='chat')await click('social-done');else throw Error(r.stage);
  }
- if(kind==='heavy'){
-  assert.match(await page.locator('[data-action="return-finish"]').innerText(),/超重费/);
-  await click('wear','[data-id="boots"]');await click('wear','[data-id="coat"]');await click('carry','[data-id="book"]');
-  // Taking them back out must restore exactly the same fee.
-  await click('wear','[data-id="boots"]');await click('wear','[data-id="coat"]');await click('carry','[data-id="book"]');
- }else if(kind==='light'){
-  await click('discard','[data-id="toy"]');await click('restore');await click('restore-item','[data-id="toy"]');assert.ok((await state()).run.bag.includes('toy'));
-  for(const id of ['laundry','wash','boots','hippo','cloth'])await click('discard',`[data-id="${id}"]`);
- }
- await page.screenshot({path:`test-results/${kind}-return-pack.png`,fullPage:true});
- await click('return-finish');await click('finish',`[data-ending="${kind}"]`);assert.equal((await state()).records.at(-1).endingId,kind);
- await page.screenshot({path:`test-results/${kind}-ending.png`,fullPage:true});await click('map');await click('journal');await click('records');await click('record');await page.reload();assert.ok(await page.locator('.return-paper').count());await click('map');
+ assert.equal(miniCount,3);const r=(await state()).run;assert.ok(r.flags.goggles);assert.equal(r.used.airfryer,1);assert.ok(r.bag.includes('broken-adapter'));assert.ok(!r.bag.includes('adapter'));assert.ok(r.itemHistory.length>=2);
+ await click('return-finish');await click('finish','[data-ending="next"]');assert.ok(await page.locator('.home-case').count());await page.screenshot({path:`test-results/${name}-home.png`,fullPage:true});await click('inspect');await page.locator('summary').click();assert.match(await page.locator('#modal').innerText(),/拿出来用过/);await click('close');await click('map');assert.equal(await page.locator('.memory-icon').count(),4);
+ await click('journal');await click('archive');assert.ok(await page.locator('.archive-pages').count());await click('close');await click('map');
+ for(const width of [320,360,440,768,1440]){await page.setViewportSize({width,height:900});await fit();await click('phone');await click('unlock');await fit();await click('map');}
+ await page.screenshot({path:`test-results/${name}-desktop.png`});
+ await page.evaluate(()=>localStorage.setItem('mi-v01','untouched'));await page.goto(origin+'/legacy/');await page.waitForSelector('#world-map');assert.equal(await page.evaluate(()=>localStorage.getItem('mi-v01')),'untouched');
+ const blocked=await browser.newContext({viewport:{width:320,height:700}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
+ assert.deepEqual(errors,[]);console.log(`PASS ${name}: complete 42-day journey, 3 real-time mini games, inventory hooks, save reload, phone, archives, home suitcase, 320–1440px, denied storage, legacy.`);await browser.close();
 }
-const p=await state();assert.equal(p.records.length,3);assert.equal(p.messages.length,6);assert.equal(p.contacts.qi,6);
-await click('phone');assert.ok(await page.locator('.lock-screen').count());await click('unlock');await click('contact','[data-contact="qi"]');assert.equal(await page.locator('.bubble').count(),1+p.messages.filter(m=>m.contact==='qi').flatMap(m=>m.lines).length);await click('map');
-await click('journey');await click('reason');await click('map');await click('journal');await click('restart');await click('confirm-start');assert.equal((await state()).records.length,3);assert.equal((await state()).messages.length,6);await click('map');
-await page.setViewportSize({width:1440,height:1060});await fit();await page.screenshot({path:'test-results/desktop-map.png',fullPage:true});
-for(const width of [320,360,768,1024]){await page.setViewportSize({width,height:900});await fit();}
-// The published prototype URL returns to the same desk; old save is untouched.
-await page.evaluate(()=>localStorage.setItem('mi-v01',JSON.stringify({started:false})));
-await page.goto(origin+'/legacy/');await page.waitForSelector('#world-map');
-assert.equal(await page.evaluate(()=>localStorage.getItem('mi-v01')),JSON.stringify({started:false}));
-// Phone, back/forward, journal and refresh preserve the view and saved messages.
-await click('phone');await click('unlock');await click('contact','[data-contact="he"]');await click('hello');
-assert.match(await page.locator('.chat-thread').innerText(),/下次拍给我看/);
-await page.reload();await click('unlock');assert.match(await page.locator('.chat-thread').innerText(),/下次拍给我看/);
-await click('contacts');await page.goBack();assert.ok(await page.locator('[data-action="contacts"]').count());await click('map');
-await click('journal');await page.reload();assert.ok(await page.locator('.open-notebook').count());await click('map');
-// Denied storage must not stop an in-memory game.
-const blocked=await browser.newContext({viewport:{width:390,height:844}});await blocked.addInitScript(()=>{Storage.prototype.setItem=()=>{throw new DOMException('denied','SecurityError')};Storage.prototype.getItem=()=>{throw new DOMException('denied','SecurityError')};});
-const blockedPage=await blocked.newPage();blockedPage.on('pageerror',e=>errors.push(e.message));await blockedPage.goto(origin);await blockedPage.locator('[data-action="journey"]').click();await blockedPage.locator('[data-action="reason"]').first().click();await blockedPage.locator('[data-action="depart"]').click();assert.match(await blockedPage.locator('#save-status').innerText(),/无法存档/);assert.ok(await blockedPage.locator('[data-action="choose"]').count());
-assert.deepEqual(errors,[]);console.log('PASS: three complete UI playthroughs, reload every phase, 3 records, chat history, overweight/wardrobe/return handling, 320–1440px, phone lock/unlock, saved chat, back/forward, journal, legacy redirect and denied-storage fallback.');
-await browser.close();

@@ -18,7 +18,7 @@ function travel({seed=.1,choice=()=>0,share=true,profile=packed(seed)}={}){
  return profile;
 }
 test('20 kg departure limit, exact weight, and no unlimited packing',()=>{
- const p=packed(),r=p.run;assert.equal(E.checkedWeight(r),12);assert.equal(E.carryWeight(r),.4);assert.equal(E.totalWeight(r),12.4);
+ const p=packed(),r=p.run;assert.equal(E.checkedWeight(r),12.6);assert.equal(E.carryWeight(r),.4);assert.equal(E.totalWeight(r),13);
  ITEMS.filter(i=>!i.souvenir).forEach(i=>E.addItem(r,i.id));assert.ok(E.checkedWeight(r)>20);assert.equal(E.depart(r),false);
  assert.equal(r.stage,'packing');assert.equal(r.money,42000);
 });
@@ -26,8 +26,8 @@ test('clothing has physical weight and removing it clears paper doll',()=>{
  const r=packed().run;assert.ok(E.equip(r,'top','stripe'));const before=E.totalWeight(r);E.removeItem(r,'stripe');assert.equal(r.outfit.top,null);assert.equal(E.totalWeight(r),before-.4);assert.equal(E.equip(r,'top','stripe'),false);
 });
 test('return handling conserves total weight, respects hand limit and one item per slot',()=>{
- const r=packed().run;const before=E.totalWeight(r);assert.ok(E.relocate(r,'boots','worn'));assert.equal(E.totalWeight(r),before);assert.equal(E.checkedWeight(r),10.7);
- assert.ok(E.relocate(r,'sandals','worn'));assert.deepEqual(r.worn,['sandals']);assert.equal(E.checkedWeight(r),11.6);
+ const r=packed().run;const before=E.totalWeight(r);assert.ok(E.relocate(r,'boots','worn'));assert.equal(E.totalWeight(r),before);assert.equal(E.checkedWeight(r),11.3);
+ assert.ok(E.relocate(r,'sandals','worn'));assert.deepEqual(r.worn,['sandals']);assert.equal(E.checkedWeight(r),12.2);
  assert.equal(E.relocate(r,'powerbank','carry'),false);
  E.addItem(r,'spare');E.addItem(r,'tripod');E.relocate(r,'laundry','carry');E.relocate(r,'spare','carry');assert.equal(E.relocate(r,'tripod','carry'),false);assert.ok(E.carryWeight(r)<=7);
 });
@@ -73,4 +73,16 @@ test('malformed storage is rejected; additive schema changes keep earlier v2 sav
 test('route references and all item effects resolve to registered data',()=>{
  const ids=africa.nodes.map(n=>n.id);assert.equal(new Set(ids).size,ids.length);for(const n of africa.nodes)for(const c of n.choices){if(c.add)assert.ok(itemById[c.add]);if(c.addIfMissing)assert.ok(itemById[c.addIfMissing]);}
  assert.equal(ENDINGS.length,11);
+});
+test('previous node-index saves migrate by identity and keep their inventory',()=>{
+ const p=packed();delete p.run.revision;p.run.node=12;p.run.stage='event';const oldBag=[...p.run.bag];const parsed=E.parseSave(JSON.stringify(p));assert.equal(E.currentNode(parsed.run).id,'last-shop');assert.deepEqual(parsed.run.bag,oldBag);
+ delete p.run.revision;p.run.node=13;assert.equal(E.currentNode(E.parseSave(JSON.stringify(p)).run).id,'sunday');
+});
+test('conditional objects unlock uses, consume items and retain return traces',()=>{
+ const p=packed(),r=p.run;r.stage='event';r.node=africa.nodes.findIndex(n=>n.id==='kitchen');E.addItem(r,'airfryer');const i=E.currentNode(r).choices.findIndex(c=>c.requires==='airfryer');assert.equal(E.choose(r,i),false);E.addItem(r,'adapter');assert.equal(E.choose(r,i),true);assert.equal(r.used.airfryer,1);
+ r.stage='event';r.node=africa.nodes.findIndex(n=>n.id==='broken-plug');assert.ok(E.choose(r,1));assert.equal(r.bag.includes('adapter'),false);assert.ok(r.bag.includes('broken-adapter'));assert.equal(r.itemHistory.at(-1).id,'adapter');
+});
+test('every packed object has a reachable special use and all nine countries have stories',()=>{
+ for(const i of ITEMS.filter(i=>!i.souvenir)){assert.ok(i.volume>0&&i.tags.length&&i.hooks.length,i.id);assert.ok(africa.nodes.some(n=>n.choices.some(c=>c.requires===i.id))||['goggles','raincoat','bags','waterproof','paper'].includes(i.id),i.id);}
+ for(const id of ['bus-wait','cape-glasses','falls-walk','sunrise','cold-coach','atm','sunday','border-two','chobe-river','whale'])assert.ok(africa.nodes.some(n=>n.id===id),id);
 });

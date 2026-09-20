@@ -21,6 +21,7 @@ export function drawPerson(c,x,y,scale=1,outfit={}){
  rect(c,'#58665a',6,26,5,5);rect(c,'#58665a',12,26,5,5);
  rect(c,itemById[outfit.shoes]?.color||'#e6d7b1',5,30,6,3);rect(c,itemById[outfit.shoes]?.color||'#e6d7b1',12,30,6,3);
  if(outfit.hat){rect(c,'#d9bd74',2,5,19,3);rect(c,'#d9bd74',6,0,10,6);rect(c,'#8a744c',6,4,10,1);}
+ if(outfit.goggles){rect(c,'#3a7f81',4,8,14,5);rect(c,'#afd9c7',5,9,5,3);rect(c,'#afd9c7',12,9,5,3);}
  c.restore();
 }
 export function avatar(canvas,outfit={}){const c=context(canvas,120,144);rect(c,'#dfe1cc',0,0,120,144);rect(c,'#cbd2b8',0,113,120,31);for(let i=0;i<8;i++)rect(c,'#b7c2a3',i*19,126+(i%2)*8,9,2);drawPerson(c,20,6,4,outfit);}
@@ -36,11 +37,11 @@ export function drawMap(canvas){
  const pts=[[35,-3],[55,-5],[26,-18],[25,-18],[17,-23],[18,-34],[58,-20]].map(([lon,lat])=>[54+(lon+180)/2*3.4,36+(90-lat)/2*3.4]);
  c.strokeStyle='#f1e6b3';c.lineWidth=2;c.setLineDash([4,3]);c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.setLineDash([]);
  pts.forEach(([x,y],i)=>{rect(c,P.ink,x-3,y-3,7,7);rect(c,i<2?'#f5e19a':'#e7e8d7',x-1,y-1,3,3);});
- rect(c,'#bac2b0',650,17,13,13);rect(c,'#d7ddca',650,17,9,10);
- c.font='12px Pixel, monospace';c.fillStyle='#81917e';c.fillText('LUNAR ORBIT · ?',548,23);c.fillText('90° N',12,44);c.fillText('0°',18,197);c.fillText('90° S',12,344);c.fillText('180° W',48,369);c.fillText('0°',354,369);c.fillText('180° E',623,369);
+
+ c.font='12px Pixel, monospace';c.fillStyle='#81917e';c.fillText('90° N',12,44);c.fillText('0°',18,197);c.fillText('90° S',12,344);c.fillText('180° W',48,369);c.fillText('0°',354,369);c.fillText('180° E',623,369);
  c.fillStyle='#687e6b';c.font='12px Pixel, monospace';c.fillText('PACIFIC OCEAN',61,239);c.fillText('ATLANTIC',272,213);c.fillText('INDIAN OCEAN',470,278);
 }
-export function scene(canvas,type='savanna',outfit={}){
+export function scene(canvas,type='savanna',outfit={},frame=0){
  const c=context(canvas,384,216),random=rng(42);rect(c,P.sky,0,0,384,216);
  if(type==='savanna'||type==='camp'){
   const camp=type==='camp';rect(c,camp?'#7b9290':'#b7c6ab',0,0,384,105);rect(c,camp?'#e0b565':'#efdb9c',282,26,30,28);rect(c,camp?'#d5b17a':'#bac097',0,92,384,28);
@@ -50,9 +51,9 @@ export function scene(canvas,type='savanna',outfit={}){
   acacia(c,58,95,1.7);acacia(c,313,112,.7);acacia(c,199,115,.5);
   if(camp){poly(c,'#586d55',[[228,109],[276,163],[187,163]]);poly(c,'#b5ac77',[[228,109],[264,109],[309,163],[276,163]]);poly(c,'#354f45',[[228,122],[251,163],[213,163]]);rect(c,'#665f40',234,163,3,10);rect(c,'#e5bb60',282,153,5,8);}else{giraffe(c,249,137,1.1);giraffe(c,204,132,.65);}
   rect(c,'#364b3e',84,160,68,25);rect(c,'#4e6851',81,157,73,15);rect(c,'#71856b',91,143,47,15);rect(c,'#a9c1ac',94,146,18,11);rect(c,'#a9c1ac',116,146,18,11);rect(c,'#314338',88,179,13,14);rect(c,'#314338',136,179,13,14);rect(c,'#d0c499',87,168,8,4);rect(c,'#d0c499',145,167,7,4);drawPerson(c,167,165,1.25,outfit);
-  if(!camp){cloud(c,36,36,1.6);cloud(c,150,52,1);}
+  if(!camp){cloud(c,36+frame*2,36,1.6);cloud(c,150,52,1);}
  }else if(type==='island'){
-  rect(c,'#b6d2c6',0,0,384,89);cloud(c,56,32,1.6);cloud(c,241,22,1.1);rect(c,'#efdd9c',330,36,20,20);
+  rect(c,'#b6d2c6',0,0,384,89);cloud(c,56+frame*2,32,1.6);cloud(c,241,22,1.1);rect(c,'#efdd9c',330,36,20,20);
   poly(c,'#729d8f',[[0,90],[33,67],[51,67],[76,82],[101,81],[127,95],[0,99]]);rect(c,'#5d9fa0',0,95,384,85);rect(c,'#72b9ae',0,126,384,51);rect(c,'#92c9b4',0,151,384,30);
   for(let i=0;i<85;i++){const x=random()*384,y=101+random()*77;rect(c,i%3===0?'#bdded0':'#81bdae',x,y,4+Math.floor(random()*13),1);}
   poly(c,'#f0e3b9',[[0,160],[37,169],[97,166],[162,176],[223,177],[285,170],[336,180],[384,176],[384,216],[0,216]]);
@@ -75,8 +76,22 @@ export function scene(canvas,type='savanna',outfit={}){
   rect(c,'#7c8060',19,105,141,13);rect(c,'#83876a',19,119,139,53);rect(c,'#f0e6bf',22,107,132,41);rect(c,'#6d8974',52,107,100,43);rect(c,'#87997b',57,111,91,4);rect(c,'#f0e6bf',25,109,25,29);rect(c,'#747756',20,163,7,17);rect(c,'#747756',149,163,7,17);
   rect(c,'#8e8667',277,128,61,5);rect(c,'#8e8667',282,133,4,37);rect(c,'#8e8667',331,133,4,37);rect(c,'#d9c99a',299,99,20,29);rect(c,'#576e53',306,91,6,13);rect(c,'#748765',298,88,10,7);rect(c,'#576e53',310,81,13,9);
   rect(c,'#ede1b6',34,29,87,49);rect(c,'#7f9376',41,36,73,35);rect(c,'#b4bf92',48,42,31,16);rect(c,'#b4bf92',84,51,23,13);
-  drawPerson(c,179,119,2,outfit);suitcase(c,222,170,1.1,type==='home');
+  drawPerson(c,179,119+(frame%2),2,outfit);suitcase(c,222,170,1.1,type==='home');
  }
+ if(['falls','river','desert','road','coach','cape','city','busstop'].includes(type)){
+  const sea=['cape','river','busstop'].includes(type);rect(c,'#a7bda7',0,0,384,100);cloud(c,45+frame*2,31,1.5);rect(c,'#d6c382',304,29,20,20);
+  rect(c,sea?'#719e90':'#bbaa75',0,100,384,116);
+  if(sea){for(let i=0;i<18;i++)rect(c,'#afc9aa',i*24+(frame%2)*4,120+(i%3)*9,13,2);poly(c,'#c8bc8e',[[0,155],[150,177],[384,149],[384,216],[0,216]]);}
+  if(type==='desert'){poly(c,'#b69255',[[0,166],[122,68],[244,166]]);poly(c,'#c1a465',[[144,173],[300,89],[384,175]]);acacia(c,312,133,.6);}
+  if(['road','city','cape','busstop'].includes(type)){rect(c,'#7b8875',0,179,384,24);for(let x=0;x<384;x+=40)rect(c,'#c6c6a0',x+frame*2,190,16,2);}
+  if(['cape','city'].includes(type))for(let x=15;x<170;x+=32){rect(c,'#798b71',x,83+(x%3)*12,24,83);rect(c,'#cabf89',x+5,104,7,12);}
+  if(type==='road'){const x=120+frame*4;rect(c,'#4e6851',x,158,65,28);rect(c,'#aac0a5',x+8,162,45,9);rect(c,'#354b3c',x+4,184,12,10);rect(c,'#354b3c',x+48,184,12,10);}
+  if(type==='busstop'){rect(c,'#64765b',80,92,4,81);rect(c,'#d3cf9f',72,84,24,17);rect(c,'#d7d3ac',70,174,60,3);}
+  if(type==='falls'){rect(c,'#637d62',0,95,384,83);rect(c,'#ccddbe',96,95,195,88);for(let i=0;i<24;i++)rect(c,'#edf0cf',104+(i*23)%182,103+(i*13+frame*8)%72,2,12);rect(c,'#859e85',0,183,384,33);}
+  if(type==='coach'){rect(c,'#667b65',0,0,384,216);rect(c,'#91a58b',16,22,350,74);for(let x=30;x<384;x+=91){rect(c,'#364f40',x,102,53,80);rect(c,'#a5ad8a',x+8,125,44,56);}rect(c,'#c1c7a1',23+frame*3,47,60,2);}
+  drawPerson(c,190,161+(frame%2),1.4,outfit);
+ }
+ if(type==='home'||type==='room'){rect(c,frame%2?'#e4d09b':'#dfcd9b',316,42,7,7);}
  // A fine inset frame gives every scene the same cartridge-like edge.
  c.strokeStyle='#263c3720';c.lineWidth=2;c.strokeRect(1,1,382,214);
 }

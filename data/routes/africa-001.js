@@ -1,3 +1,4 @@
+import { expandAfrica } from './africa-stories.js';
 const choice=(id,label,result,effect={},extra={})=>({id,label,result,effect,...extra});
 export const africa={
  id:'africa-001',number:'001',name:'AFRICA',label:'非洲环线',region:'africa',days:42,budget:42000,
@@ -63,3 +64,5 @@ export const africa={
   choice('home-short','买一段短一点的回程','我决定再买六小时睡眠。回家以后，账单明天看。',{fatigue:-1,flags:{comfort:true}},{cost:6200,detail:'较短转机 · 托运 20 kg'})]}
  ]
 };
+
+expandAfrica(africa);
