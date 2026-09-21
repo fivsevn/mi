@@ -1,4 +1,4 @@
-import { ITEMS } from '../items.js?v=pocket-1';
+import { ITEMS } from '../items.js?v=pocket-2';
 const c=(label,result,extra={})=>({label,result,...extra});
 const has=(r,id)=>r.bag.includes(id);
 const n=(id,day,scene,title,text,choices,extra={})=>({id,day,scene,title,text,choices,eyebrow:'',...extra});

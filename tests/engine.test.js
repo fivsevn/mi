@@ -94,3 +94,12 @@ test('notebook contains only completed choices in the current run',()=>{
  p.run.notes.push({nodeId:'cape-glasses',day:33,text:'not encountered'});assert.equal(E.visibleNotes(p.run).length,1);
  assert.deepEqual(E.visibleNotes(null),[]);
 });
+test('legacy prefilled notes never become notebook entries, even with entered IDs and matching days',()=>{
+ const p=packed();E.depart(p.run);const r=p.run;delete r.notebookVersion;
+ r.notes=africa.nodes.map(n=>({nodeId:n.id,day:n.day,place:n.place,text:'prefilled'}));r.notes.push({day:1,text:'legacy without ID'});r.entered=africa.nodes.map(n=>n.id);
+ const migrated=E.parseSave(JSON.stringify(p));assert.equal(E.visibleNotes(migrated.run).length,0);assert.equal(migrated.run.notes.length,49);
+ E.choose(migrated.run,0);assert.equal(E.visibleNotes(migrated.run).length,1);
+ const loaded=E.parseSave(JSON.stringify(migrated));assert.equal(E.visibleNotes(loaded.run).length,1);
+ loaded.run.notes.push({...loaded.run.notes.at(-1),runId:'another-run'});assert.equal(E.visibleNotes(loaded.run).length,1);
+ loaded.run.stage='event';loaded.run.pending=null;assert.equal(E.visibleNotes(loaded.run).length,0);
+});

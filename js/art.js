@@ -1,5 +1,5 @@
-import { LAND, AFRICA } from '../assets/world-grid.js?v=pocket-1';
-import { itemById } from '../data/items.js?v=pocket-1';
+import { LAND, AFRICA } from '../assets/world-grid.js?v=pocket-2';
+import { itemById } from '../data/items.js?v=pocket-2';
 const P={ink:'#263c37',leaf:'#527252',grass:'#9ba266',sand:'#d8b777',cream:'#f0e8cb',sun:'#f1d779',sky:'#a6c7bc',blue:'#508c91',dark:'#315e60'};
 function context(canvas,w,h){canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;return c;}
 function rect(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
@@ -35,7 +35,7 @@ export function drawMap(canvas,visited=[]){
  // Madagascar and tiny ocean islands remain visible at this map scale.
  [[47,-20],[55,-5],[58,-20]].forEach(([lon,lat])=>rect(c,'#bd9144',54+(lon+180)/2*3.4,36+(90-lat)/2*3.4,4,5));
  const stops=[['safari',35,-3],['seychelles',55,-5],['falls',26,-18],['chobe',25,-18],['namibia',17,-23],['cape',18,-34],['mauritius',58,-20]];
- const pts=stops.filter(([id])=>visited.includes(id)).map(([,lon,lat])=>[54+(lon+180)/2*3.4,36+(90-lat)/2*3.4]);
+ const pts=stops.map(([id,lon,lat])=>[54+(lon+180)/2*3.4-(id==='chobe'?7:0),36+(90-lat)/2*3.4]);
  pts.forEach(([x,y])=>{rect(c,P.ink,x-3,y-3,7,7);rect(c,'#e4cf8c',x-1,y-1,3,3);});
  c.font='12px Pixel, monospace';c.fillStyle='#81917e';c.fillText('90° N',12,44);c.fillText('0°',18,197);c.fillText('90° S',12,344);c.fillText('180° W',48,369);c.fillText('0°',354,369);c.fillText('180° E',623,369);
  c.fillStyle='#687e6b';c.font='12px Pixel, monospace';c.fillText('PACIFIC OCEAN',61,239);c.fillText('ATLANTIC',272,213);c.fillText('INDIAN OCEAN',470,278);
@@ -97,7 +97,12 @@ export function scene(canvas,type='savanna',outfit={},frame=0){
 function suitcase(c,x,y,s=1,open=false){c.save();c.translate(x,y);c.scale(s,s);rect(c,'#445949',0,0,32,27);rect(c,'#c6a958',3,2,26,21);rect(c,'#9d864d',8,2,3,21);rect(c,'#9d864d',22,2,3,21);rect(c,'#445949',9,-5,15,3);rect(c,'#445949',9,-5,3,6);rect(c,'#445949',21,-5,3,6);rect(c,'#e9dbaa',14,9,9,7);rect(c,'#445949',4,26,4,3);rect(c,'#445949',24,26,4,3);if(open){rect(c,'#7c865e',-27,3,27,23);rect(c,'#e9e5c9',-23,7,18,12);}c.restore();}
 
 export function africaHitPath(){return [...AFRICA].map(v=>{const x=54+(v%180)*3.4,y=36+Math.floor(v/180)*3.4;return `M${x} ${y}h3.4v3.4h-3.4z`;}).join('');}
-export function drawMiniMap(canvas,coord){const c=context(canvas,64,64);rect(c,'#bcc6a3',0,0,64,64);
- for(const v of (coord?AFRICA:[])){const x=v%180,y=Math.floor(v/180);rect(c,'#6f8766',5+(x-81)*1.4,4+(y-27)*1.4,1,1);}
- if(coord){const [lon,lat]=coord,x=5+((lon+180)/2-81)*1.4,y=4+((90-lat)/2-27)*1.4;rect(c,'#ead28a',x-2,y-2,5,5);rect(c,'#304c3d',x,y,1,1);}else{rect(c,'#4c694c',26,29,12,11);poly(c,'#4c694c',[[23,29],[32,21],[41,29]]);rect(c,'#d8c689',31,32,3,8);}
+export function drawMiniMap(canvas,type='home'){
+ const c=context(canvas,64,64);rect(c,'#b9c69c',0,0,64,64);
+ const water=['island','sea','coast','falls','river'].some(x=>type.includes(x));
+ if(water){poly(c,'#839e94',[[0,0],[28,0],[24,13],[35,26],[25,40],[31,64],[0,64]]);for(let y=6;y<64;y+=12)rect(c,'#b1c6ac',4,y,12,2);}
+ else {for(let y=8;y<64;y+=16)for(let x=7;x<64;x+=18)rect(c,'#91a579',x,y,3,3);}
+ if(type==='home'||type==='room'||type==='hotel'){rect(c,'#7b9069',10,9,43,44);rect(c,'#c8cea8',14,13,35,36);rect(c,'#9bad82',17,17,13,10);rect(c,'#8b9e75',39,15,6,14);rect(c,'#c8cea8',30,46,9,9);}
+ else {poly(c,'#d6cb9a',[[39,0],[44,0],[39,20],[47,39],[43,64],[38,64],[42,39],[34,21]]);rect(c,'#718b65',48,13,9,7);rect(c,'#718b65',24,44,7,6);}
+ rect(c,'#e7cd7d',32,32,7,7);rect(c,'#354f3b',34,34,3,3);
 }

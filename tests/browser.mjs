@@ -25,6 +25,12 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  await click('journey');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');
  await fit();assert.ok(await page.locator('.choice-scroll').evaluate(e=>e.scrollHeight>e.clientHeight));assert.equal(await page.evaluate(()=>scrollY),0);assert.doesNotMatch(await page.locator('#app').innerText(),/\d+\.\d+ kg/);await page.screenshot({path:`test-results/${name}-pocket-packing.png`});
  await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');await click('depart');
+ // Reproduce the old populated save before the first choice, not just a clean browser.
+ await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('mi-v02'));delete p.run.notebookVersion;p.run.notes=[{nodeId:'flight-out',day:1,text:'OLD PREFILLED STORY'},{day:6,text:'FUTURE PREFILLED STORY'}];localStorage.setItem('mi-v02',JSON.stringify(p));});
+ await page.reload();await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await page.reload();await click('unlock');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');
+ await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('mi-v02'));p.run.notebookVersion=1;localStorage.setItem('mi-v02',JSON.stringify(p));});await page.reload();
+ assert.ok(await page.locator('.scene-view').evaluate(e=>Math.abs(e.getBoundingClientRect().height-e.parentElement.clientHeight)<2));
+
  let count=0,miniCount=0;
  while((await state()).run.stage!=='return-pack'){
   assert.ok(++count<240);const before=await state(),r=before.run;await fit();

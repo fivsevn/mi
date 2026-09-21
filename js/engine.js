@@ -1,12 +1,12 @@
-import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=pocket-1';
-import { routeById } from '../data/routes/index.js?v=pocket-1';
-import { selectEnding, returnQuestions } from '../data/endings.js?v=pocket-1';
-import { conversation } from '../data/contacts.js?v=pocket-1';
+import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=pocket-2';
+import { routeById } from '../data/routes/index.js?v=pocket-2';
+import { selectEnding, returnQuestions } from '../data/endings.js?v=pocket-2';
+import { conversation } from '../data/contacts.js?v=pocket-2';
 export const SAVE_KEY='mi-v02';
 export function freshProfile(){return {version:2,records:[],contacts:{},messages:[],run:null};}
 export function createRun(routeId='africa-001',seed=Math.random()){
  if(!routeById[routeId])throw new Error('Unknown route');
- return {id:globalThis.crypto?.randomUUID?.()||`${Date.now()}-${seed}`,routeId,revision:3,mini:{},itemHistory:[],used:{},seed,stage:'reason',node:0,bag:[],carry:[],worn:[],outfit:{top:null,outer:null,hat:null,shoes:null},money:routeById[routeId].budget,hidden:{},flags:{},entered:[],notes:[],messages:[],pending:null,reason:'',returnReason:'',departureWeight:0,returnWeight:0,departureBag:[],removed:[],packingFeePaid:false,returnFeePaid:false};
+ return {id:globalThis.crypto?.randomUUID?.()||`${Date.now()}-${seed}`,routeId,revision:3,notebookVersion:1,mini:{},itemHistory:[],used:{},seed,stage:'reason',node:0,bag:[],carry:[],worn:[],outfit:{top:null,outer:null,hat:null,shoes:null},money:routeById[routeId].budget,hidden:{},flags:{},entered:[],notes:[],messages:[],pending:null,reason:'',returnReason:'',departureWeight:0,returnWeight:0,departureBag:[],removed:[],packingFeePaid:false,returnFeePaid:false};
 }
 export const value=(v,r)=>typeof v==='function'?v(r):v;
 export const sumWeight=ids=>Math.round(ids.reduce((sum,id)=>sum+(itemById[id]?.weight||0),0)*10)/10;
@@ -56,7 +56,7 @@ export function choose(r,index){
  if(n.memory)r.flags[n.memory]=true;
  if(c.add)addItem(r,c.add);if(c.addIfMissing)addItem(r,c.addIfMissing);
  r.pending={nodeId:n.id,label:c.label,text:result,cost,stamp:c.stamp||n.eyebrow,shared:false};
- r.notes.push({nodeId:n.id,day:n.day,place:n.place,title:n.title?value(n.title,r):n.id,text:result});
+ r.notes.push({runId:r.id,choiceIndex:index,nodeIndex:r.node,nodeId:n.id,day:n.day,place:n.place,title:n.title?value(n.title,r):n.id,text:result});
  r.stage='result';return true;
 }
 export function afterResult(r){if(r.stage!=='result')return;const n=currentNode(r);if(n.social&&!r.pending?.shared)r.stage='social';else advance(r);}
@@ -93,5 +93,6 @@ export function parseSave(raw){
 // Notes belong to this run, never to profile history or future nodes.
 export function visibleNotes(r){
  if(!r||['reason','packing'].includes(r.stage))return [];
- return (r.notes||[]).filter(note=>note.nodeId?r.entered.includes(note.nodeId):Number.isFinite(note.day)&&note.day<=(currentNode(r)?.day||42));
+ const nodes=routeById[r.routeId]?.nodes||[];
+ return (r.notes||[]).filter(note=>note.runId===r.id&&Number.isInteger(note.choiceIndex)&&nodes[note.nodeIndex]?.id===note.nodeId&&nodes[note.nodeIndex]?.choices[note.choiceIndex]&&(note.nodeIndex<r.node||note.nodeIndex===r.node&&['result','social','chat'].includes(r.stage)&&r.pending?.nodeId===note.nodeId));
 }
