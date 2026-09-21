@@ -1,17 +1,18 @@
-import { ITEMS } from '../items.js?v=journey-3';
+import { ITEMS } from '../items.js?v=pocket-1';
 const c=(label,result,extra={})=>({label,result,...extra});
 const has=(r,id)=>r.bag.includes(id);
 const n=(id,day,scene,title,text,choices,extra={})=>({id,day,scene,title,text,choices,eyebrow:'',...extra});
 export const places=[
- {id:'safari',end:12,en:'SAFARI',name:'肯尼亚 / 坦桑尼亚',country:'肯尼亚、坦桑尼亚',memory:'车停下来，草还在动。',route:'内罗毕、奈瓦沙湖、马赛马拉；越境到塞伦盖蒂、恩戈罗恩戈罗、曼雅拉湖、塔兰吉雷，再经阿鲁沙回肯尼亚安博塞利。',archive:['第一天六点接机，十点到湖边。下午坐了一小时船。酒店院子里有长颈鹿、斑马，晚上河马来吃草。','第二天七点出发，下午两点到马赛马拉。行程表的一整天 Safari，真正开进草原是两个半小时。第三天却看见花豹、猎豹、狮子、秃鹫和角马过河。','第四天跨境换车。原来的司机空车回去，另一位司机空开九小时来接。预计中午到，最终傍晚才到塞伦盖蒂。接下来的两天几乎没有新收获。','第七天去火山口，路上突然遇见小狮子和很近的猎豹；之后看到犀牛。第八、九天经过曼雅拉湖和塔兰吉雷。第十天先在阿鲁沙瀑布徒步，再返回肯尼亚。','安博塞利的山躲在云里，象群和鬣狗幼崽没有。第十二天从 Emali 乘火车回内罗毕。向导、无线电、天气和偶然性，都没写在动物清单上。']},
- {id:'seychelles',end:17,en:'SEYCHELLES',name:'塞舌尔 · 马埃岛',country:'塞舌尔',memory:'等车的地方，海很好看。',route:'内罗毕休整后飞到塞舌尔，在马埃岛坐公交、步行、看海。',archive:['关于公交的研究成果：App 不可信。时刻表也不一定可信。站台出现一个当地人，可信度显著提高。暂无理论解释。','手机里装了 SPTC。Journey Planner 选出发地和目的地，再和 Bus Timetable 对照。两处都写着同一班，仍不保证它会来。','那次坐车记下的是每人八卢比。充值时用了八的倍数。越远离始发站，时间越难猜；有的车早到，有的晚到，有的没来。','公交亭、地上白框、稍宽的路边，都可能是站。问路的人比屏幕上的转圈有帮助。','没有国外自驾经验，于是选了公交。节省的钱和花掉的时间没有互相抵消。细沙不磨脚，海还是那片海。']},
- {id:'falls',end:20,en:'VICTORIA FALLS',name:'维多利亚瀑布 / 两边的边境',country:'津巴布韦、赞比亚',memory:'还没看见水，就已经听见了。',route:'塞舌尔之后抵达瀑布城，再经津巴布韦边境、桥、赞比亚边境到另一侧。',archive:['周日到了。机场电话卡柜台和镇上的店都关门。周一办卡：卡一美元、五 GB 九美元；柜台付钱、小窗注册、回柜台开套餐，排了接近半小时。','经理说 ATM 手续费 2%。机器收了 2.5%。之前问过他多出来的能不能补，他真的补了。那次几家机器低于五美元也按五美元收；FBC 会先显示手续费。','酒店到边境约一公里，第一次被要了七美元。三个路段的出租车不能直接贯通。桥很短，尘土里的路很长。','N1 的早餐很好吃，房间勉强打开两个登机箱。瀑布这边和赞比亚那边都看了，后者景区里还能连上津巴布韦的信号。','远处先听见轰鸣，走近像被大雨淋湿。照片存下了风景，没有存下袜子里的水。']},
- {id:'chobe',end:21,en:'CHOBE',name:'乔贝 / 卡萨内',country:'博茨瓦纳',memory:'这次没有列清单。',route:'离开瀑布区域到乔贝，之后从卡萨内坐大巴去温得和克。',archive:['六小时的 Safari，看见活跃的花豹和大象群体过河。和同路的人聊，大家都带着各自的惊喜。','卡萨内是 Intercape 中间站。票写 10:05，提醒 9:05 等；实际十一点才来。附近工作人员似乎早就知道。','在 Tlou Safari Mall 附近候车。上车只剩两个单人座，有人一人占两座。到 Katima 换大车，腿并没有多出地方。']},
- {id:'namibia',end:30,en:'NAMIBIA',name:'纳米比亚 · 路上',country:'纳米比亚',memory:'日出团的日出，在出发时结束。',route:'卡萨内到温得和克；斯瓦科普蒙德、鲸湾、斯皮兹考普、红沙漠、箭袋树，最后在 Keetmanshoop 上开往开普敦的车。',archive:['大巴外面约十五度，里面还在制冷。Wi-Fi 连不上，到城市才勉强有信号。当地乘客带了棉被。','温得和克走了一圈教堂附近，吃了猪肘，住处的热水很好调。斯瓦八月是冬天，阴天比照片诚实。出海主要见海狮。','去斯皮兹考普包车，两个人花了约两千元，五小时路程换十分钟拍照。山很值得看，车程也很难忘。','Go2 的小巴准时、座椅舒服，石子路也不太颠，有信号处有 Wi-Fi，还给一瓶水。那次记录单程 790 纳币；温得和克八点出发，中午到斯瓦，之后到鲸湾。','斯瓦七点出发，经鲸湾，中午到红沙漠。日出团只是日出时出发，日落团停在无名山头。向导却认真找狐狸、松鼠、剑羚和跳羚，还讲树木果实。','他用登山杖在沙地画纳米比亚地图，解释沙漠。那天团到一点半才回门口，而另一班回温得和克的车一点就走。','Camp 和 Lodge 相隔约六公里，那次接送往返每人 75 纳币。Camp 有空调，Wi-Fi 很差。去箭袋树的路上在 Mariental 换车。Garas 从傍晚拍到天黑，再赶夜车。']},
- {id:'cape',end:37,en:'CAPE TOWN',name:'南非 · 开普敦',country:'南非',memory:'眼镜消失的地方。海也在这里。',route:'从纳米比亚陆路入境南非，到开普敦；之后飞往毛里求斯。',archive:['刚到开普敦遇到抢钱抢东西。朋友的眼镜被抢走，箱子里还有泳镜。','后来去了 Camps Bay。海很好看。前一句和这一句都没有删掉。','那次旅行办理了南非 ETA，也顺利从纳米比亚陆路入境。这是一张旧行程留下的记录。','回家后仍然想再来。泳镜留在箱子里，没有重新写用途。']},
- {id:'mauritius',end:42,en:'MAURITIUS',name:'毛里求斯 · 海边',country:'毛里求斯',memory:'又一片海。脚先认出了区别。',route:'从开普敦飞到毛里求斯，住下来五天，最后回家。',archive:['五天里大部分时间在酒店，出海追鲸，也试了海上项目。等鲸的时候，海面一直很空。','这里有碎石，沙比塞舌尔磨脚。并不妨碍坐下来很久。','出门前写下：肯坦十二天，加一日休整；塞舌尔四天；两侧瀑布三天；乔贝一天；纳米比亚九天；南非四天；毛里求斯五天。转场和停留有重叠，最后总共四十二天。','回家的时候，票根比护照更皱。计划里还留着马达加斯加、三角洲和再来一次开普敦。没写日期。']}
+ {id:'safari',end:12,name:'肯尼亚 / 坦桑尼亚',coord:[35,-3]},
+ {id:'seychelles',end:17,name:'塞舌尔 · 马埃岛',coord:[55,-5]},
+ {id:'falls',end:20,name:'维多利亚瀑布',coord:[26,-18]},
+ {id:'chobe',end:21,name:'博茨瓦纳 · 乔贝',coord:[25,-18]},
+ {id:'namibia',end:30,name:'纳米比亚',coord:[17,-23]},
+ {id:'cape',end:37,name:'南非 · 开普敦',coord:[18,-34]},
+ {id:'mauritius',end:42,name:'毛里求斯',coord:[58,-20]}
 ];
 export const placeFor=day=>places.find(p=>day<=p.end)||places.at(-1);
+const eventPlaces={"hotel-safari": "肯尼亚 · 奈瓦沙湖营地", "hippo-night": "肯尼亚 · 奈瓦沙湖", "safari-morning": "肯尼亚 · 马赛马拉", "welcome": "肯尼亚 · 马赛马拉营地", "safari-leopard": "肯尼亚 · 马赛马拉", "radio": "肯尼亚 · 马赛马拉", "safari-moment": "肯尼亚 · 马赛马拉", "safari-evening": "坦桑尼亚 · 塞伦盖蒂营地", "socket": "坦桑尼亚 · 曼雅拉湖附近", "small-room": "坦桑尼亚 · 阿鲁沙", "mountain": "肯尼亚 · 安博塞利", "flight-island": "肯尼亚 · 内罗毕机场", "bus-wait": "塞舌尔 · 马埃岛路边", "kitchen": "塞舌尔 · 马埃岛住处", "sunday": "津巴布韦 · 维多利亚瀑布城", "sim-monday": "津巴布韦 · 维多利亚瀑布城", "atm": "津巴布韦 · 维多利亚瀑布城", "falls-walk": "津巴布韦 · 维多利亚瀑布", "wet-clothes": "津巴布韦 · 维多利亚瀑布", "border-one": "津巴布韦 · 边境路上", "border-stamp": "津巴布韦 · 边检口", "border-bridge": "津巴布韦 / 赞比亚 · 桥上", "border-two": "赞比亚 · 利文斯通", "chobe-river": "博茨瓦纳 · 乔贝河", "coach-late": "博茨瓦纳 · 卡萨内", "cold-coach": "开往温得和克的夜车", "quiet-day": "纳米比亚 · 温得和克", "five-hours": "纳米比亚 · 斯皮兹考普", "seal-trip": "纳米比亚 · 鲸湾", "sunrise": "纳米比亚 · 红沙漠路上", "sand-map": "纳米比亚 · 红沙漠", "tree-sunset": "纳米比亚 · 箭袋树林", "cape-glasses": "南非 · 开普敦街头", "goggles": "南非 · 开普敦", "cape-sea": "南非 · 开普敦 Camps Bay", "broken-plug": "南非 · 开普敦住处", "laundry-day": "南非 · 开普敦住处", "island-again": "毛里求斯 · 海边", "whale": "毛里求斯 · 海上", "delay-home": "毛里求斯 · 机场", "flight-home": "毛里求斯 · 机场"};
 export function expandAfrica(route){
  const old=route.nodes;route.oldNodeIds=old.map(n=>n.id);route.revision=3;
  const extra=[
@@ -51,7 +52,7 @@ export function expandAfrica(route){
  n('delay-home',42,'airport','登机时间改了。','改过一次。\n又改了一次。',[c('找个位置坐','坐出了一个下午。'),c('到处走走','又走回同一个登机口。')],{hook:'delay'})
  ];
  route.nodes=[...old.filter(x=>x.id!=='interlude'),...extra].sort((a,b)=>a.day-b.day || (a.id==='flight-home'?1:b.id==='flight-home'?-1:0));
- for(const node of route.nodes){const p=placeFor(node.day);node.place=node.place||p.name;node.location=p.id;node.time=node.time||({sunrise:'06:08','sand-map':'09:24','safari-morning':'08:16','sunday':'13:12','sim-monday':'09:30',atm:'10:05','falls-walk':'14:22','wet-clothes':'15:03','coach-late':'10:05',mountain:'16:12',whale:'09:18'}[node.id])||(node.scene==='airport'?'06:10':node.scene==='camp'?'20:16':node.scene==='coach'?'02:14':node.id==='bus-wait'?'16:37':'18:42');node.eyebrow='';node.choices.forEach(c=>{if(c.detail?.startsWith('+ '))delete c.detail;});
+ for(const node of route.nodes){const p=placeFor(node.day);node.place=eventPlaces[node.id]||node.place||p.name;node.location=p.id;node.time=node.time||({sunrise:'06:08','sand-map':'09:24','safari-morning':'08:16','sunday':'13:12','sim-monday':'09:30',atm:'10:05','falls-walk':'14:22','wet-clothes':'15:03','coach-late':'10:05',mountain:'16:12',whale:'09:18'}[node.id])||(node.scene==='airport'?'06:10':node.scene==='camp'?'20:16':node.scene==='coach'?'02:14':node.id==='bus-wait'?'16:37':'18:42');node.eyebrow='';node.choices.forEach(c=>{if(c.detail?.startsWith('+ '))delete c.detail;});
   if(node.hook&&!node.mini)for(const item of ITEMS.filter(i=>i.hooks.includes(node.hook)))node.choices.push(c('拿出'+item.name,item.use,{requires:item.id,use:item.id,remove:['snacks','noodles'].includes(item.id)?item.id:undefined}));
  }
  const kitchen=route.nodes.find(x=>x.id==='kitchen');kitchen.choices.find(x=>x.requires==='airfryer').condition=r=>has(r,'adapter');

@@ -1,51 +1,39 @@
 # 米的地图 · MI’S MAP
 
-[打开米的地图](https://mi.fivsevn.com)
+[打开游戏](https://mi.fivsevn.com)
 
-桌上一张折过的世界地图、一部手机、一本日记。点击非洲的标记出发；有没走完的旅程时，回到当前场景。固定 440px 竖屏舞台。故事先发生，点场景才展开地点，再翻纸页进入真实旅行资料。
+桌上只有地图和手机。点击黄色非洲陆地开始或继续旅行。游戏固定在 440px 以内的竖屏舞台，页面不滚动；选项、行李列表和手机 App 在各自区域内滚动。
 
-## 游玩与存档
+## 手机和记录
 
-- 原有 Safari、塞舌尔、打包、换装、选择与归来结局保留。九国 42 天现在有 48 个事件节点，包含三个小游戏和 70 件有条件用途的物品。
-- 手机先锁屏，解锁后进入聊天软件。六个朋友以最后一句消息出现；桌面聊天和旅途分享都保存在同一个浏览器里。
-- 日记收录已经发生的片段；归来后可翻阅以前的结局。重新开始需要确认，不会清除以前的记录或聊天。
-- 使用 `mi-v02` 存档，旧版存档兼容；不会读写 `mi-v01`。`legacy/` 直接返回新首页。浏览器不能保存时仍可玩，并显示提示。
-- Hash 路由支持刷新、浏览器返回和 GitHub Pages，无需服务端路由设置。刷新手机后重新解锁，联系人仍保留。
+手机从锁屏进入 App 桌面：聊天、记事本、行李、设置。场景下方左侧的像素手机打开同一部手机，右侧迷你地图短暂显示当前地点，不提供路线预览。
 
-## 本地运行和验证
+记事本只显示当前周目实际选择产生的结果。结束后增加本周目的归来笔记；重新开始后记事本和可见聊天重新从空白开始。不会回退到 profile 历史记录，也不展示未发生的结局、物品用途或旅游资料。
+
+原有浏览器存档和 mi-v01 保留，旧节点索引按 ID 迁移。旧日记与记录书签统一进入手机记事本。浏览器拒绝存储时可继续游戏，并提示无法存档。
+
+## 实现和验证
+
+- js/app.js：固定场景、手机 App、当前周目笔记、小游戏界面。
+- js/engine.js：行李、选择、状态与存档；visibleNotes 限定已发生内容。
+- js/art.js：现有米的人物画法、场景和地图；非洲陆地点击与已到访地点标记。
+- css/pocket.css：固定视口、内部滚动、复古按钮和手机 App。
+- data/routes/africa-stories.js：可玩事件及最小地点坐标。没有说明性旅行档案。
 
 无需生产依赖或构建：
 
 ```sh
 python3 -m http.server 4173
 node --test tests/engine.test.js
+PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs CHROME_PATH=/path/to/chrome node tests/browser.mjs
 ```
 
-浏览器回归使用 Playwright 和 Chrome：
+浏览器回归在 Chromium 和 WebKit 完整走过 48 个事件，包括小游戏、物品变化、手机返回、当前周目隔离、旧书签处理、320×568 到 1440×1000 的固定屏幕，以及不可用存储。截图在 test-results/。
 
-```sh
-PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs \
-CHROME_PATH=/path/to/chrome \
-MI_TEST_URL=http://127.0.0.1:4173 \
-node tests/browser.mjs
-```
-
-回归在 Chromium 和 WebKit 中完整通关，覆盖三个真实计时小游戏、刷新继续、物品条件/消耗/损坏、开箱、聊天、三层记录、320–1440px 与存储不可用。截图输出到忽略的 `test-results/`。
-
-## 文件与发布
-
-- `js/app.js`：桌面物件、场景、手机、日记与导航。
-- `js/engine.js`：游戏状态与存档；revision 3 按旧节点 ID 迁移原来的索引进度。
-- `js/art.js`、`assets/world-grid.js`：原有像素地图、场景和人物。
-- `css/style.css`：游戏基础样式；`css/desk.css`：桌面、手机和纸页样式；`css/handheld.css` 统一竖屏与小游戏表现。
-- `data/`：剧情、物品、朋友与结局。`africa-stories.js` 维护新增事件和旅行资料。
-
-GitHub Pages 从 `main` 根目录发布。保留 `.nojekyll` 和 `CNAME`（`mi.fivsevn.com`），不改变 DNS 或域名设置。
+GitHub Pages 使用 main 根目录和 CNAME。发布时更新完整模块图和字体的版本标记，防止混用旧缓存。
 
 ## 字体与素材
 
-使用与 [Umwelt](https://umwelt.fivsevn.com) 及其 Tick 游戏相同的 **Fusion Pixel 12px Monospaced 简体中文**字体。字体随站点本地托管，按实际文案裁剪约 40 KB；预加载、`font-display: block`，字体准备好后显示首屏。加载失败时 2.5 秒后保留可玩性。来源：[Fusion Pixel Font](https://github.com/TakWolf/fusion-pixel-font)，许可证见 `assets/fonts/LICENSE-OFL.txt`（SIL OFL 1.1）。
+Fusion Pixel 12px Monospaced 简体中文字体本地托管，按文案裁剪，预加载并等待准备完成后显示首屏。字体许可见 assets/fonts/LICENSE-OFL.txt（SIL OFL 1.1）。脚本 scripts/subset-font.py 接受完整字体路径，需要 fonttools 和 brotli。
 
-场景、人物、物件为本项目 canvas / CSS 绘制。世界地图陆地数据来自 [Natural Earth](https://github.com/nvkelso/natural-earth-vector)，属于公共领域。
-
-小游戏使用可持久化的前台经过时间，切后台或打开资料时暂停；尊重 reduced-motion。音效默认关闭，瀑布场景可手动开启。场景日期为叙事重排，档案保留原始相对行程，不将旧价格和入境经历表述为当前建议。
+Canvas / CSS 场景为本项目绘制。世界地图陆地数据来自公共领域 Natural Earth。动画尊重 reduced-motion；小游戏切到手机、资料弹窗或后台时暂停。

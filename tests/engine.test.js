@@ -86,3 +86,11 @@ test('every packed object has a reachable special use and all nine countries hav
  for(const i of ITEMS.filter(i=>!i.souvenir)){assert.ok(i.volume>0&&i.tags.length&&i.hooks.length,i.id);assert.ok(africa.nodes.some(n=>n.choices.some(c=>c.requires===i.id))||['goggles','raincoat','bags','waterproof','paper'].includes(i.id),i.id);}
  for(const id of ['bus-wait','cape-glasses','falls-walk','sunrise','cold-coach','atm','sunday','border-two','chobe-river','whale'])assert.ok(africa.nodes.some(n=>n.id===id),id);
 });
+test('notebook contains only completed choices in the current run',()=>{
+ const previous=travel();E.beginReflection(previous.run);E.finish(previous,'next');
+ const p={...previous,run:E.createRun()};assert.deepEqual(E.visibleNotes(p.run),[]);assert.ok(p.records.length);
+ p.run.stage='packing';E.preset(p.run);assert.deepEqual(E.visibleNotes(p.run),[]);E.depart(p.run);assert.deepEqual(E.visibleNotes(p.run),[]);
+ E.choose(p.run,0);assert.equal(E.visibleNotes(p.run).length,1);assert.equal(E.visibleNotes(p.run)[0].nodeId,'flight-out');
+ p.run.notes.push({nodeId:'cape-glasses',day:33,text:'not encountered'});assert.equal(E.visibleNotes(p.run).length,1);
+ assert.deepEqual(E.visibleNotes(null),[]);
+});

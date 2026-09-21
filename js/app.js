@@ -1,162 +1,130 @@
-import { placeFor, places } from '../data/routes/africa-stories.js?v=journey-3';
-import { ROUTES, routeById } from '../data/routes/index.js?v=journey-3';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=journey-3';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=journey-3';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=journey-3';
-import * as E from './engine.js?v=journey-3';
-import { drawMap,scene,avatar } from './art.js?v=journey-3';
+import { placeFor } from '../data/routes/africa-stories.js?v=pocket-1';
+import { ROUTES } from '../data/routes/index.js?v=pocket-1';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=pocket-1';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=pocket-1';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=pocket-1';
+import * as E from './engine.js?v=pocket-1';
+import { drawMap,drawMiniMap,africaHitPath,scene,avatar } from './art.js?v=pocket-1';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN');
-const kg=n=>Number(n||0).toFixed(1);
-let caseOpen=false;
-let storageOK=true,hadCorrupt=false,phoneUnlocked=false;
-function readProfile(){try{const raw=localStorage.getItem(E.SAVE_KEY);if(!raw)return E.freshProfile();const parsed=E.parseSave(raw);if(parsed)return parsed;hadCorrupt=true;localStorage.setItem(E.SAVE_KEY+'-unreadable-backup',raw);return E.freshProfile();}catch{storageOK=false;return E.freshProfile();}}
-let profile=readProfile(),view='map',tab='衣服',selectedRegion='africa',selectedRouteId=ROUTES[0].id,selectedContact=null,selectedRecord=null,toastTimer;
-const run=()=>profile.run,route=()=>routeById[run()?.routeId]||ROUTES[0],active=()=>run()&&run().stage!=='ending';
+const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
+let storageOK=true,view='map',phoneApp='home',phoneUnlocked=false,phoneReturn='map',selectedContact=null,caseOpen=false,tab='衣服',toastTimer,locationTimer;
+function readProfile(){try{const raw=localStorage.getItem(E.SAVE_KEY);return raw?E.parseSave(raw)||E.freshProfile():E.freshProfile();}catch{storageOK=false;return E.freshProfile();}}
+let profile=readProfile();
+const run=()=>profile.run,active=()=>run()&&run().stage!=='ending';
+const current=()=>run()&&['event','result','social','chat'].includes(run().stage)?E.currentNode(run()):null;
+const clockTime=()=>current()?.time||'18:42';
 function save(){try{localStorage.setItem(E.SAVE_KEY,JSON.stringify(profile));storageOK=true;}catch{storageOK=false;}updateSaveStatus();}
-function updateSaveStatus(){const status=$('#save-status');status.textContent=storageOK?'':'暂时无法存档 · 请勿关闭本页';status.className=storageOK?'':'save-error';}
-function toast(text){$('#toast').textContent=text;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2600);}
-function btn(label,action,extra='',kind='primary'){return `<button class="btn ${kind}" data-action="${action}" ${extra}>${label}<span aria-hidden="true"><i class="px-arrow" aria-hidden="true"></i></span></button>`;}
-function sceneHTML(type,label,small=''){const n=view==='play'&&run()?.stage!=='reason'?E.currentNode(run()):null;if(n&&!['packing','reflect','ending','return-pack'].includes(run().stage))return miniScene(n); return `<div class="scene-frame"><canvas data-scene="${type}" role="img" aria-label="${esc(label)}的像素旅行场景"></canvas><span class="scene-label">${esc(label)}</span><span class="scene-bottom">${esc(small)}</span></div>`;}
-function openModal(title,body,actions=''){modal.innerHTML=`<div class="modal-head"><h2 id="modal-title">${title}</h2><button data-action="close" class="close-btn" aria-label="关闭">×</button></div><div class="modal-body">${body}</div>${actions?`<div class="modal-actions">${actions}</div>`:''}`;if(!modal.open)modal.showModal();drawCanvases();}
+function updateSaveStatus(){$('#save-status').textContent=storageOK?'':'暂时无法存档 · 请勿关闭本页';}
+function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2400);}
+const arrow='<i class="px-arrow" aria-hidden="true"></i>';
+function btn(label,action,extra='',kind=''){return `<button class="btn ${kind}" data-action="${action}" ${extra}>${label}${arrow}</button>`;}
+function openModal(title,body,actions=''){modal.innerHTML=`<div class="modal-head"><h2 id="modal-title">${title}</h2><button class="close-btn" data-action="close" aria-label="关闭">×</button></div><div class="modal-body">${body}</div><div class="modal-actions">${actions}</div>`;if(!modal.open)modal.showModal();drawCanvases();}
 function closeModal(){modal.close();}
-function render({scroll=true,sync=true}={}){
- document.body.dataset.view=view;
- if(sync){const hash=viewHash();if(location.hash!==hash)history.pushState(null,'',hash);}
- for(const b of document.querySelectorAll('nav button'))b.classList.toggle('active',b.dataset.action===view);
+function render({sync=true,keepScroll=false}={}){
+ const oldScroll=keepScroll?$('.choice-scroll')?.scrollTop||$('.phone-scroll')?.scrollTop||0:0;
+ clearTimeout(locationTimer);document.body.dataset.view=view;
  if(view==='play'&&!run())view='map';
- if(view==='map')renderMap();else if(view==='play')renderPlay();else if(view==='journal')renderJournal();else if(view==='phone')renderPhone();else if(view==='records')renderRecords();else if(view==='record')renderEnding(selectedRecord);else renderMap();
+ if(sync&&location.hash!==viewHash())history.pushState(null,'',viewHash());
+ if(view==='map')renderMap();else if(view==='phone')renderPhone();else renderPlay();
+ if(keepScroll){const scroller=$('.choice-scroll')||$('.phone-scroll');if(scroller)scroller.scrollTop=oldScroll;}
  drawCanvases();startMini();updateSaveStatus();
- if(scroll){window.scrollTo({top:0,behavior:'instant'});app.focus({preventScroll:true});}
 }
-function drawCanvases(){document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'));}
-const regions=[{id:'north',name:'北美洲',en:'N. AMERICA',x:24,y:33},{id:'south',name:'南美洲',en:'S. AMERICA',x:34,y:62},{id:'europe',name:'欧洲',en:'EUROPE',x:53,y:28},{id:'asia',name:'亚洲',en:'ASIA',x:74,y:33},{id:'africa',name:'非洲',en:'AFRICA',x:58.3,y:49},{id:'oceania',name:'大洋洲',en:'OCEANIA',x:83,y:69},{id:'antarctica',name:'南极洲',en:'ANTARCTICA',x:52,y:86}];
-function renderMap(){
- app.innerHTML=`<section class="desk" aria-label="米的桌面"><div class="desk-objects"><button class="desk-phone" data-action="phone" aria-label="拿起手机"><span class="mini-speaker"></span><span class="mini-screen"><span>18:42</span><i>▤</i></span><span class="mini-home"></span></button><button class="desk-journal" data-action="journal" aria-label="翻开旅行者日记"><span>旅行者<br>日记</span><i>mi</i></button></div><div class="map-paper"><span class="map-signature" aria-hidden="true">mi.</span><div class="map-view"><canvas id="world-map" role="img" aria-label="米的世界地图，非洲被涂成了黄色"></canvas>${regions.map(x=>x.id==='africa'?`<button class="region map-entry" style="left:${x.x}%;top:${x.y}%" data-action="journey" aria-label="非洲，${active()?'继续旅行':'出发'}"><span>AFRICA</span></button>`:`<span class="region quiet-region" style="left:${x.x}%;top:${x.y}%">${x.en}</span>`).join('')}</div><div class="map-margin"><span>01° S — 34° S</span></div></div>${memoryMap()}</section>`;
+function drawCanvases(){document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawMiniMap(c,current()?placeFor(current().day).coord:null));}
+function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><button class="desk-phone" data-action="phone" aria-label="拿起手机"><span class="mini-speaker"></span><span class="mini-screen"><span>${clockTime()}</span><i class="tiny-apps" aria-hidden="true"></i></span><span class="mini-home"></span></button><div class="map-paper"><div class="map-view"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 720 396"><a href="#play" data-action="journey" aria-label="非洲，${active()?'继续旅行':'出发'}"><path d="${africaHitPath()}"/><text x="353" y="166">AFRICA</text></a></svg></div></div></section>`;}
+function scenePanel(type,overlay=''){
+ const n=current(),place=n?n.place||placeFor(n.day).name:run()?.stage==='return-pack'?'毛里求斯 · 机场':'家 · 米的房间';
+ return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><span>${clockTime()}</span><i aria-hidden="true"></i></button><span class="location-whisper" role="status" hidden>${esc(place)}</span><button class="pocket-map" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
 }
-
-function travelHeader(){return `<div class="travel-head"><button class="back" data-action="map"><i class="px-arrow back-arrow"></i> 世界地图</button><button class="text-btn" data-action="wardrobe">行李</button><button class="text-btn" data-action="journal">日记</button><button class="text-btn" data-action="phone">手机</button></div>`;}
-function side(){const r=run();const frequent=CONTACTS.filter(c=>profile.contacts[c.id]).sort((a,b)=>profile.contacts[b.id]-profile.contacts[a.id])[0];const thought=frequent&&profile.contacts[frequent.id]>=2?frequent.thought:(r.notes.at(-1)?.text||'每次出门，都会装进一些“万一”。');return `<aside class="story-side"><div class="field-note"><p>${esc(thought)}</p></div><div class="side-tools">${btn('翻翻行李','wardrobe','','')}${btn('翻开日记','journal','','')}${btn('拿起手机','phone','','')}</div></aside>`;}
-
-function shellStory(content){return `<section class="travel">${travelHeader()}<div class="travel-layout"><div class="story">${content}</div>${side()}</div></section>`;}
-function renderPlay(){
- const r=run();
- if(r.stage==='reason'){app.innerHTML=shellStory(`${sceneHTML('home','出发前一天 / 米的房间','BEFORE DEPARTURE')}<div class="story-copy"><p class="kicker">ROUTE 001 / A SMALL QUESTION</p><h1>米为什么要出去旅行？</h1><p class="prose">行李箱打开了。\n这个问题倒是没有提前准备。</p></div><div class="choices">${['想看没见过的东西。','一直想去。','不知道。','票都买了。'].map((x,i)=>`<button class="choice" data-action="reason" data-id="${i}"><span class="choice-number">0${i+1}</span><b>${x}</b><span><i class="px-arrow" aria-hidden="true"></i></span></button>`).join('')}</div>`);return;}
- if(r.stage==='packing'||r.stage==='return-pack'){renderPacking(r.stage==='return-pack');return;}
- if(r.stage==='reflect'){renderReflect();return;}
- if(r.stage==='ending'){renderEnding(profile.records.find(x=>x.runId===r.id));return;}
- if(r.stage==='social'||r.stage==='chat'){renderSocial();return;}
- const n=E.currentNode(r);if(n?.mini&&r.stage==='event'){app.innerHTML=shellStory(`${miniScene(n)}${miniHTML(n)}`);return;}if(!n){r.stage='return-pack';save();renderPacking(true);return;}
- if(r.stage==='result'){
-  app.innerHTML=shellStory(`${sceneHTML(n.scene,n.place,'')}<section class="result-card"><span class="stamp">${esc(r.pending.stamp)}</span><h1>${esc(r.pending.label)}</h1><p class="prose">${esc(r.pending.text)}</p>${r.pending.cost?`<span class="receipt-cost">支出 ${money(r.pending.cost)} · 已记在小票上</span>`:''}</section>${btn(n.social?'拿出手机':'把这一页翻过去','next')}`);return;
- }
- app.innerHTML=shellStory(`${sceneHTML(n.scene,n.place,'')}<div class="story-copy"><p class="kicker">${n.eyebrow}</p><h1>${esc(E.value(n.title,r))}</h1><p class="prose">${esc(E.value(n.text,r))}</p>${n.kind==='booking'?`<p class="micro">秤上：${kg(E.checkedWeight(r))} kg · ${money(r.money)} 在口袋里</p>`:''}${['safari-morning','island-wind'].includes(n.id)&&CONTACTS.some(c=>(profile.contacts[c.id]||0)>=2)?`<p class="margin-thought">「${esc([...CONTACTS].sort((a,b)=>(profile.contacts[b.id]||0)-(profile.contacts[a.id]||0))[0].thought)}」</p>`:''}</div><div class="choices">${n.choices.map((c,i)=>{if(c.requires&&!r.bag.includes(c.requires)||c.condition&&!c.condition(r))return '';const cost=E.choiceCost(r,c),fee=c.limit?Math.ceil(E.overweightFee(r,c.limit)):0;return `<button class="choice" data-action="choose" data-index="${i}" ${E.canAfford(r,cost)?'':'disabled'}><span class="choice-number">${String(i+1).padStart(2,'0')}</span><span><b>${esc(c.label)}</b>${c.detail||cost?`<small>${esc(c.detail||'')}${fee?' · 含超重费 '+money(fee):''}</small>`:''}</span><span class="price">${cost?money(cost):'<i class="px-arrow" aria-hidden="true"></i>'}</span></button>`;}).join('')}</div><button class="text-btn mobile-tools" data-action="wardrobe" style="margin-top:10px">行李与换装 <i class="px-arrow" aria-hidden="true"></i></button>`);
+function gameScreen(type,title,text,choices,{overlay='',className='',extra=''}={}){return `<section class="play-screen ${className}">${scenePanel(type,overlay)}<div class="story-copy"><h1>${esc(title)}</h1><p class="prose ${className?'mini-text':''}">${esc(text)}</p>${extra}</div><div class="choice-scroll" tabindex="0" aria-label="选项">${choices}</div></section>`;}
+function choiceButtons(n){const r=run();return n.choices.map((c,i)=>{if(c.requires&&!r.bag.includes(c.requires)||c.condition&&!c.condition(r))return '';const cost=E.choiceCost(r,c);return `<button class="choice" data-action="choose" data-index="${i}" ${E.canAfford(r,cost)?'':'disabled'}><span class="choice-number">${String(i+1).padStart(2,'0')}</span><span><b>${esc(c.label)}</b>${c.detail?`<small>${esc(c.detail)}</small>`:''}</span><span class="price">${cost?money(cost):arrow}</span></button>`;}).join('');}
+function renderPlay(){const r=run();
+ if(r.stage==='reason'){app.innerHTML=gameScreen('home','米为什么要出去旅行？','行李箱打开了。\n这个问题倒是没有提前准备。',['想看没见过的东西。','一直想去。','不知道。','票都买了。'].map((x,i)=>btn(x,'reason',`data-id="${i}"`)).join(''));return;}
+ if(['packing','return-pack'].includes(r.stage)){renderPacking();return;}
+ if(r.stage==='reflect'){app.innerHTML=gameScreen('home','所以，米为什么出去旅行？','箱子摊在地上。\n这次想到的答案，跟出门前不太一样。',returnQuestions(r).map(q=>btn(esc(q.text),'finish',`data-ending="${q.id}"`)).join(''));return;}
+ if(r.stage==='ending'){const rec=profile.records.find(x=>x.runId===r.id);const end=ENDINGS.find(e=>e.id===rec?.endingId);app.innerHTML=gameScreen('home','回家，打开箱子。',end?.text||'箱子还在地上。',`<div class="case-items">${r.bag.map(id=>btn(esc(itemById[id].name),'inspect',`data-id="${id}"`)).join('')}</div>${btn('拿起手机','phone')}`);return;}
+ if(['social','chat'].includes(r.stage)){if(r.stage==='social')selectedContact=null;phoneReturn='play';phoneApp='chat';view='phone';render();return;}
+ const n=E.currentNode(r);if(!n){r.stage='return-pack';save();renderPacking();return;}
+ if(r.stage==='result'){app.innerHTML=gameScreen(n.scene,r.pending.label,r.pending.text,btn(n.social?'拿出手机':'继续走','next'),{extra:r.pending.cost?`<p class="receipt-cost">${money(r.pending.cost)} · 记在小票上</p>`:''});return;}
+ if(n.mini){app.innerHTML=miniHTML(n);return;}
+ app.innerHTML=gameScreen(n.scene,E.value(n.title,r),E.value(n.text,r),choiceButtons(n),{extra:n.kind==='booking'?`<p class="micro">秤上：${kg(E.checkedWeight(r))} kg</p>`:''});
 }
-function outfitControls(r){const clothes=r.bag.filter(id=>itemById[id]?.slot);return `<div class="wardrobe"><h3>今天穿什么</h3><p class="micro">从箱子里拿一件。</p>${clothes.length?`<div class="outfit-list">${clothes.map(id=>{const item=itemById[id],on=r.outfit[item.slot]===id;return `<button class="outfit-btn ${on?'active':''}" data-action="equip" data-id="${id}" aria-pressed="${on}">${item.name}${on?' ✓':''}</button>`;}).join('')}</div>`:'<p class="micro">米先穿着出门时的衣服。</p>'}</div>`;}
-function renderPacking(returning=false){
- const r=run(),weight=E.checkedWeight(r),over=weight>BAG_LIMIT,fee=Math.ceil(E.overweightFee(r));
- const action=returning?'return-finish':'depart';
- const go=over?(returning?`付 ${money(fee)} 超重费，带回家`:'拉链合不上，再拿出一点'):returning?'拉上箱子，回家':'关上箱子，出发';
- const inventory=returning?`<div><p class="kicker">带出去的 / 带回来的</p><div class="pack-toolbar"><p class="micro">随身包 ${kg(E.carryWeight(r))} / ${HAND_LIMIT} kg。<br>衣服可穿上，每个部位一件。</p><button class="text-btn" data-action="restore">放回刚才取出的物品</button></div>${r.bag.length?r.bag.map(id=>{const i=itemById[id];return `<div class="inventory-row"><div><strong>${i.name}</strong><small>${kg(i.weight)} kg · ${i.souvenir?'路上带来的':'出发时的东西'}${r.worn.includes(id)?' · 穿在身上':r.carry.includes(id)?' · 随身包':''}</small></div><div class="item-actions"><button data-action="carry" data-id="${id}" class="${r.carry.includes(id)?'active':''}" ${i.carryOnly?'disabled':''}>${r.carry.includes(id)?'放回箱子':'放随身包'}</button>${i.slot?`<button data-action="wear" data-id="${id}" class="${r.worn.includes(id)?'active':''}">${r.worn.includes(id)?'脱下':'穿上'}</button>`:''}<button data-action="discard" data-id="${id}">留下</button></div></div>`;}).join(''):'<p class="empty">箱子空了。还剩空箱自己。</p>'}</div>`:`<div><div class="tabs" role="group" aria-label="物品分类">${['衣服','日用','随身物'].map(t=>`<button data-action="tab" data-tab="${t}" class="${t===tab?'active':''}" aria-pressed="${t===tab}">${t}</button>`).join('')}</div><div class="pack-toolbar"><p class="micro">点一下放进箱子，再点一下取出。</p><button class="text-btn" data-action="preset">先装一套日常行李 <i class="px-arrow" aria-hidden="true"></i></button></div><div class="item-grid">${ITEMS.filter(i=>i.group===tab&&!i.souvenir).map(i=>{const on=r.bag.includes(i.id);return `<button class="item ${on?'selected':''}" data-action="item" data-id="${i.id}" aria-pressed="${on}" aria-label="${i.name}，${on?'已带上':'未带上'}"><b>${i.name}</b><span class="item-object" aria-hidden="true"></span><span class="item-note">${i.note}</span><span class="check" aria-hidden="true">${on?'✓':''}</span></button>`;}).join('')}</div></div>`;
- app.innerHTML=`<section class="packing">${travelHeader()}<div class="pack-heading"><p class="kicker">${returning?'RETURN / PACKING AGAIN':'出发前'}</p><h1>${returning?'什么跟米一起回家？':'米打开了行李箱。'}</h1><p class="prose">${returning?'箱子还是那个箱子。里面已经不全是原来的东西。':packingThought(r)}</p></div>${returning?'':`<button class="packing-room" data-action="open-case" aria-label="打开行李箱">${sceneHTML('home','米的房间','打开行李箱')}</button>`}<div class="pack-layout"><aside class="pack-summary ${over?'over':''}"><div class="avatar-row"><canvas data-avatar role="img" aria-label="米当前的像素穿搭"></canvas><p class="avatar-label">米 / MI<small>READY, MAYBE.</small></p></div>${returning?`<p class="weight-display">${kg(weight)} <small>/ 20 kg</small></p>`:''}<p class="weight-caption ${returning?'':'hidden'}"><b>${over?'超出 '+kg(weight-BAG_LIMIT)+' kg':'托运行李还剩 '+kg(BAG_LIMIT-weight)+' kg'}</b><br>空箱 1.4 kg · 随身包 ${kg(E.carryWeight(r))} kg<br>${returning?`出发总重 ${kg(r.departureWeight)} kg · 现在 ${kg(E.totalWeight(r))} kg`:'充电宝随身带，不放托运行李。'}</p>${btn(go,action,over&&(!returning||!E.canAfford(r,fee))?'disabled':'')}<p class="micro">${over?'也可以取出一些东西，再试着关箱子。':returning?'带回家什么，不必解释得很清楚。':'不用准备好一切，才能出发。'}</p>${returning?'':outfitControls(r)}</aside>${returning?inventory:`<div class="room-drawer" ${caseOpen?'':'hidden'}>${inventory}</div>`}</div></section>`;
-}
-function phoneFrame(content,{title='聊天',back='map',backLabel='放回桌上',insideBack=''}={}){return `<section class="phone-scene"><button class="back-link" data-action="${back}"><i class="px-arrow back-arrow" aria-hidden="true"></i> ${backLabel}</button><div class="pixel-phone"><div class="phone-hardware" aria-hidden="true"><i></i><b></b></div><div class="phone-screen"><div class="phone-status"><span>18:42</span><span aria-label="信号与电量">▂▄▆ ▰</span></div>${phoneUnlocked?`<div class="chat-bar">${insideBack?`<button data-action="${insideBack}" aria-label="返回聊天列表"><i class="px-arrow back-arrow" aria-hidden="true"></i></button>`:'<span>▤</span>'}<h1>${esc(title)}</h1><span>···</span></div>${content}`:`<div class="lock-screen"><div class="lock-time">18:42</div><p>星期六</p><div class="lock-landscape" aria-hidden="true"><i></i></div><button class="unlock" data-action="unlock">⌑<span>轻触解锁</span></button></div>`}</div><button class="phone-home" data-action="${phoneUnlocked?'lock':'unlock'}" aria-label="${phoneUnlocked?'锁屏':'解锁'}"></button></div></section>`;}
-function chatHTML(lines,c){return lines.map(l=>`<div class="bubble ${l.from==='mi'?'mi':''}"><span class="chat-speaker">${l.from==='mi'?'米':esc(c.name)}</span>${esc(l.text)}</div>`).join('');}
-function renderSocial(){const r=run();if(r.stage==='chat'){
- const chat=r.messages.at(-1),c=CONTACTS.find(x=>x.id===chat.contact);app.innerHTML=phoneFrame(`<div class="phone-scroll"><div class="chat-thread">${chatHTML(chat.lines,c)}</div></div><div class="phone-compose">${btn('把手机放进口袋','social-done','','')}</div>`,{title:c.name,back:'social-done',backLabel:'收起手机'});return;}
- app.innerHTML=phoneFrame(`<div class="phone-scroll"><p class="social-quote">${SOCIAL_PROMPT}</p><div class="contact-list">${CONTACTS.map(c=>contactButton(c,'send')).join('')}</div></div><div class="phone-compose">${btn('先留给自己','social-skip','','')}</div>`,{back:'social-skip',backLabel:'收起手机'});
-}
+function packingThought(r){const volume=r.bag.reduce((v,id)=>v+itemById[id].volume,0);return E.checkedWeight(r)>20?'箱子拎起来，手腕沉了一下。再拿出一点。':volume>40?'拉链有点难拉。换个方向压一压。':volume>20?'还能塞一点。也可以不塞。':'箱子里还有很大一块空地。';}
+function outfitControls(r){return `<div class="outfit-list">${r.bag.filter(id=>itemById[id].slot).map(id=>{const i=itemById[id],on=r.outfit[i.slot]===id;return `<button class="outfit-btn ${on?'active':''}" data-action="equip" data-id="${id}" aria-pressed="${on}">${esc(i.name)}</button>`;}).join('')}</div>`;}
+function packingItems(){const r=run();return `<div class="tabs">${['衣服','日用','随身物'].map(t=>`<button data-action="tab" data-tab="${t}" aria-pressed="${tab===t}">${t}</button>`).join('')}</div>${btn('先装一套日常行李','preset')}<div class="item-grid">${ITEMS.filter(i=>i.group===tab&&!i.souvenir).map(i=>`<button class="item ${r.bag.includes(i.id)?'selected':''}" data-action="item" data-id="${i.id}" aria-pressed="${r.bag.includes(i.id)}"><b>${esc(i.name)}</b><small>${esc(i.note)}</small></button>`).join('')}</div>`;}
+function returnItems(){const r=run();return `<p class="micro">随身包 ${kg(E.carryWeight(r))} / ${HAND_LIMIT} kg</p>${r.bag.map(id=>{const i=itemById[id];return `<div class="inventory-row"><strong>${esc(i.name)}</strong><small>${kg(i.weight)} kg${r.carry.includes(id)?' · 随身':r.worn.includes(id)?' · 穿着':''}</small><div class="item-actions"><button data-action="carry" data-id="${id}" ${i.carryOnly?'disabled':''}>${r.carry.includes(id)?'放回':'随身带'}</button>${i.slot?`<button data-action="wear" data-id="${id}">${r.worn.includes(id)?'脱下':'穿上'}</button>`:''}<button data-action="discard" data-id="${id}">留下</button></div></div>`;}).join('')}${r.removed.length?btn('放回刚才取出的东西','restore'):''}`;}
+function renderPacking(){const r=run(),ret=r.stage==='return-pack',over=E.checkedWeight(r)>20,fee=E.overweightFee(r);app.innerHTML=gameScreen(ret?'airport':'home',ret?'什么跟米一起回家？':'箱子摊开了。',ret?`秤上 ${kg(E.checkedWeight(r))} kg。\n箱子还是那个箱子。`:packingThought(r),`${btn(caseOpen?'合上箱子看看':'打开行李箱','open-case')}${caseOpen?(ret?returnItems():packingItems()):''}${btn(ret?(over?`付 ${money(fee)}，带回家`:'拉上箱子，回家'):'关上箱子，出发',ret?'return-finish':'depart',over&&(!ret||!E.canAfford(r,fee))?'disabled':'')}`,{overlay:`<button class="case-hotspot" data-action="open-case" aria-label="打开地上的行李箱"></button>`});}
 const greetings={he:['出门记得吃饭。','刚才吃过了。','那就好。下次拍给我看。'],lan:['看到好看的天，发给我。','刚才想起你了。','我在。慢慢说。'],you:['替我看看路边的小动物。','路上遇到什么再告诉你。','好，我等着。'],qi:['护照带了吧？','带了，放在最里面。','那就放心了。'],wu:['路上有怪东西记得叫我。','什么才算怪东西？','你犹豫的时候就算。'],blank:['到了说一声。','只是想跟你说一下。','嗯，我在。']};
-function contactButton(c,action){const last=allMessages().filter(m=>m.contact===c.id).at(-1)?.lines.at(-1)?.text||greetings[c.id][0];return `<button class="contact" data-action="${action}" data-contact="${c.id}"><span class="contact-avatar" style="background:${c.color}">${c.mark}</span><span><b>${esc(c.name)}</b><small>${esc(last)}</small></span></button>`;}
-
-function renderReflect(){const r=run();app.innerHTML=shellStory(`${sceneHTML('home','家 / 还是这个房间','回家以后')}<div class="story-copy"><p class="kicker">THE SAME QUESTION / AGAIN</p><h1>所以，米为什么出去旅行？</h1><p class="prose">箱子摊在地上。\n这次想到的答案，跟出门前不太一样。</p></div><div class="choices">${returnQuestions(r).map((q,i)=>`<button class="choice" data-action="finish" data-ending="${q.id}"><span class="choice-number">${String(i+1).padStart(2,'0')}</span><b>${esc(q.text)}</b><span><i class="px-arrow" aria-hidden="true"></i></span></button>`).join('')}</div>`);}
-function renderEnding(record){if(!record){view='map';renderMap();return;}const ending=ENDINGS.find(e=>e.id===record.endingId)||ENDINGS.find(e=>e.id==='next');app.innerHTML=`<section class="ending"><div class="return-paper"><p class="kicker">回家后的第 ${String(record.number)} 页</p>${homeCase(record)}<h1>${esc(ending.title)}</h1><p class="prose">${esc(ending.text)}</p><div class="return-scene"><canvas data-scene="home" data-record-outfit="${esc(JSON.stringify(record.outfit||{}))}" role="img" aria-label="回到家中的米，行李箱仍然打开着"></canvas></div><div class="return-qa"><small>出门前，米说</small>${esc(record.reason)}</div><div class="return-qa"><small>回家以后，米说</small>${esc(record.returnReason)}</div><div class="return-stats hidden"><div><span>带出去 → 带回来</span><b>${kg(record.departureWeight)} → ${kg(record.returnWeight)} kg</b></div><div><span>还剩的旅费</span><b>${money(record.money)}</b></div></div><p class="micro">地图还在原来的地方。</p></div><div class="ending-actions">${btn('把这一页放回地图','map')}${btn('同一条路线，再走一次','start','','')}${btn('看看这次的旅行手记','record-notes',`data-record="${record.runId}"`,'')}</div></section>`;}
-function allMessages(){const messages=[...(profile.messages||[]),...profile.records.flatMap(x=>x.messages||[]),...(run()?.messages||[])];return messages.filter((m,i)=>messages.findIndex(x=>x.id===m.id)===i);}
-function renderPhone(){const c=CONTACTS.find(x=>x.id===selectedContact),messages=c?allMessages().filter(m=>m.contact===c.id):[];app.innerHTML=phoneFrame(c?`<div class="phone-scroll"><div class="chat-thread">${chatHTML([{from:'friend',text:greetings[c.id][0]}],c)}${messages.map(m=>chatHTML(m.lines,c)).join('')}</div></div><div class="phone-compose">${messages.some(m=>m.event==='hello')?'<span class="unsent">光标闪了一会儿。</span>':`<button class="draft-message" data-action="hello" data-contact="${c.id}"><span>${esc(greetings[c.id][1])}</span><b>发送 <i class="px-arrow" aria-hidden="true"></i></b></button>`}</div>`:`<div class="phone-scroll"><div class="contact-list">${CONTACTS.map(c=>contactButton(c,'contact')).join('')}</div></div>`,{title:c?c.name:'聊天',insideBack:c?'contacts':''});}
-let journalRecord=null;
-
-function renderJournal(){const source=journalRecord||run()||profile.records.at(-1),notes=source?.notes||[];app.innerHTML=`<section class="notebook-scene"><button class="back-link" data-action="map"><i class="px-arrow back-arrow" aria-hidden="true"></i> 合上日记</button><div class="open-notebook"><div class="notebook-title"><span>旅行者日记</span><i>mi.</i></div><button class="text-btn" data-action="atlas">翻到夹着地图的那一页</button><div class="journal-list">${notes.length?notes.map((n,i)=>`<article class="journal-entry"><span class="journal-place">${esc(n.place)}</span><p class="prose">${esc(n.text)}</p><button class="text-btn" data-action="archive" data-place="${placeFor(n.day).id}">翻看这一页背面</button>${i===0?'<span class="ticket-scrap" aria-hidden="true">▥ ▥ ▥<br>一角票根</span>':''}</article>`).join(''):'<article class="journal-entry"><span class="journal-place">出发前，窗边</span><p class="prose">我把地图摊开了。<br>折痕正好穿过一片海。</p><p class="crossed-plan">把每天都安排好。</p><p class="prose">……先把箱子找出来。</p><span class="journal-doodle" aria-hidden="true"></span></article>'}</div>${profile.records.length?btn('翻到回家后的几页','records','',''):''}${active()?btn('把笔夹好，继续走','continue','','')+btn('重新收拾行李','restart','',''):''}</div></section>`;}
-
-function renderRecords(){app.innerHTML=`<section class="archive"><button class="back-link" data-action="map"><i class="px-arrow back-arrow" aria-hidden="true"></i> 回到地图</button><p class="kicker">夹在日记里的几页</p><h1>回来以后，剩下什么。</h1>${profile.records.length?`<div class="record-list">${[...profile.records].reverse().map(r=>{const e=ENDINGS.find(e=>e.id===r.endingId);return `<button class="record-tile" data-action="record" data-record="${r.runId}"><span class="kicker">${esc(routeById[r.routeId]?.name)} · ${String(r.number)}</span><h2>${esc(e?.title||'一份归来记录')}</h2><span class="micro">${kg(r.departureWeight)} → ${kg(r.returnWeight)} KG / <i class="px-arrow" aria-hidden="true"></i></span></button>`;}).join('')}</div>`:'<p class="empty">箱子还没有从远方回来。<br>这里不用急着填满。</p>'}</section>`;}
-function startRun(){profile.run=E.createRun(selectedRouteId);view='play';selectedRecord=null;journalRecord=null;save();closeModal();render();}
-function wardrobeModal(){if(!run())return;openModal('打开行李箱',`<div class="avatar-row"><canvas data-avatar role="img" aria-label="米的穿搭"></canvas><p>${packingThought(run())}</p></div>${outfitControls(run())}<div class="case-items">${run().bag.map(id=>`<button class="case-object" data-action="inspect" data-id="${id}">${esc(itemById[id].name)}</button>`).join('')}</div>`);}
-function menu(){openModal('把书签夹在这里','窗外的光慢慢移了一点。',`${active()?btn('继续旅行','continue'):''}${btn('放回桌上','map','','')}${btn('翻开日记','journal','','')}${run()?btn('重新收拾行李','restart','',''):''}`);}
-
-function restoreModal(){const r=run();if(!r.removed.length){toast('还没有取出任何东西。');return;}openModal('还在箱子旁边',`<p class="micro">最后关箱之前，随时可以放回去。</p><div class="contact-list">${r.removed.map(id=>`<button class="contact" data-action="restore-item" data-id="${id}"><b>${itemById[id].name}</b><span class="arrow">${kg(itemById[id].weight)} kg ＋</span></button>`).join('')}</div>`);}
-function dispatch(action,b){
- const r=run();
- if(extraAction(action,b))return;
- if(action==='journey'){selectedRouteId=ROUTES[0].id;if(active()){view='play';render();}else startRun();return;}
- if(action==='unlock'||action==='lock'){phoneUnlocked=action==='unlock';render({scroll:false});return;}
- if(action==='hello'){const c=CONTACTS.find(x=>x.id===b.dataset.contact);if(c&&!allMessages().some(m=>m.contact===c.id&&m.event==='hello')){profile.messages.push({id:crypto.randomUUID(),contact:c.id,event:'hello',day:0,lines:[{from:'mi',text:greetings[c.id][1]},{from:'friend',text:greetings[c.id][2]}]});save();render({scroll:false});}return;}
- if(['map','journal','phone','records'].includes(action)){closeModal();view=action;if(action==='journal')journalRecord=null;if(action==='phone'){selectedContact=null;phoneUnlocked=false;}render();return;}
- if(action==='continue'){closeModal();view='play';render();return;}
- if(action==='close'){closeModal();return;}if(action==='menu'){menu();return;}
- if(action==='region'){selectedRegion=b.dataset.region;render({scroll:false});return;}
- if(action==='select-route'){selectedRouteId=b.dataset.route;render({scroll:false});return;}
- if(action==='start'||action==='restart'){
-  if(active()){openModal('重新打包这一次？','这次还没走完的路，要从头再走。日记和聊天都还在。',btn('重新开始这一周目','confirm-start')+btn('继续原来的旅行','continue','',''));}else startRun();return;
- }
+function allMessages(){return run()?.messages||[];}
+function chatHTML(lines,c){return lines.map(l=>`<div class="bubble ${l.from==='mi'?'mi':''}"><span class="chat-speaker">${l.from==='mi'?'米':esc(c.name)}</span>${esc(l.text)}</div>`).join('');}
+function chatApp(){const r=run(),social=r?.stage==='social',chat=r?.stage==='chat'?r.messages.at(-1):null;const c=CONTACTS.find(c=>c.id===(chat?.contact||selectedContact));
+ if(c){const messages=allMessages().filter(m=>m.contact===c.id);return `<div class="phone-scroll"><div class="chat-thread">${chatHTML([{from:'friend',text:greetings[c.id][0]}],c)}${messages.map(m=>chatHTML(m.lines,c)).join('')}</div></div>${chat?btn('把手机放进口袋','close-phone'):r&&!messages.some(m=>m.event==='hello')?btn(esc(greetings[c.id][1]),'hello',`data-contact="${c.id}"`):''}`;}
+ return `<div class="phone-scroll">${social?`<p class="social-quote">${SOCIAL_PROMPT}</p>`:''}<div class="contact-list">${CONTACTS.map(c=>{const last=allMessages().filter(m=>m.contact===c.id).at(-1)?.lines.at(-1)?.text||greetings[c.id][0];return `<button class="contact" data-action="${social?'send':'contact'}" data-contact="${c.id}"><span class="contact-avatar" style="background:${c.color}">${c.mark}</span><span><b>${esc(c.name)}</b><small>${esc(last)}</small></span></button>`;}).join('')}</div></div>`;
+}
+function notesApp(){const r=run(),notes=E.visibleNotes(r),record=r?.stage==='ending'?profile.records.find(x=>x.runId===r.id):null,end=ENDINGS.find(e=>e.id===record?.endingId);return `<div class="phone-scroll notes-app">${notes.length?notes.map(n=>`<article class="phone-note"><small>第 ${n.day} 天 · ${esc(n.place)}</small><p>${esc(n.text)}</p></article>`).join(''):'<p class="empty-notes">还没写下什么。</p>'}${end?`<article class="phone-note ending-note"><small>回家以后</small><h2>${esc(end.title)}</h2><p>${esc(end.text)}</p><p>${esc(record.returnReason)}</p>${(r.itemHistory||[]).map(x=>`<p>${esc(itemById[x.id]?.name)} · ${esc(x.text)}</p>`).join('')}</article>`:''}</div>`;}
+function bagApp(){const r=run();return `<div class="phone-scroll">${r?`<div class="avatar-row"><canvas data-avatar aria-label="米的穿搭"></canvas><p>${packingThought(r)}</p></div>${outfitControls(r)}<div class="case-items">${r.bag.map(id=>btn(esc(itemById[id].name),'inspect',`data-id="${id}"`)).join('')}</div>`:'<p class="empty-notes">箱子还在房间里。</p>'}</div>`;}
+function renderPhone(){const labels={home:'',chat:'聊天',notes:'记事本',bag:'行李',settings:'设置'};const body=phoneApp==='chat'?chatApp():phoneApp==='notes'?notesApp():phoneApp==='bag'?bagApp():phoneApp==='settings'?`<div class="phone-scroll settings-app">${btn('回到桌上','map')}${run()?btn(active()?'继续旅行':'回到房间','continue'):''}${btn(run()?'重新收拾行李':'去看看地图',run()?'restart':'map')}<button class="btn" data-action="sound">${soundOn?'声音开':'声音关'}</button></div>`:`<div class="phone-apps">${[['chat','聊天'],['notes','记事本'],['bag','行李'],['settings','设置']].map(([id,name])=>`<button data-action="phone-app" data-app="${id}"><i class="app-icon icon-${id}" aria-hidden="true"></i><span>${name}</span></button>`).join('')}</div>`;
+ app.innerHTML=`<section class="phone-scene"><button class="back-link" data-action="close-phone"><i class="px-arrow back-arrow"></i> ${phoneReturn==='play'?'收起手机':'放回桌上'}</button><div class="pixel-phone"><div class="phone-hardware"><i></i></div><div class="phone-screen"><div class="phone-status"><span>${clockTime()}</span><i class="battery-icon" aria-label="电量充足"></i></div>${phoneUnlocked?`<div class="chat-bar"><button data-action="${phoneApp==='chat'&&selectedContact?'contacts':'phone-home'}" aria-label="返回手机桌面"><i class="px-arrow back-arrow"></i></button><h1>${labels[phoneApp]}</h1></div>${body}`:`<div class="lock-screen"><div class="lock-time">${clockTime()}</div><div class="lock-landscape" aria-hidden="true"><i></i></div><button class="unlock" data-action="unlock"><span>轻触解锁</span></button></div>`}</div><button class="phone-home" data-action="${phoneUnlocked?'phone-home':'unlock'}" aria-label="手机主屏幕"></button></div></section>`;
+}
+function startRun(){profile.run=E.createRun();profile.contacts={};profile.messages=[];phoneApp='home';selectedContact=null;caseOpen=false;view='play';closeModal();save();render();}
+function openPhone(){phoneReturn=view==='play'?'play':'map';phoneApp='home';phoneUnlocked=false;selectedContact=null;view='phone';render();}
+function closePhone(){if(phoneReturn==='play'&&['social','chat'].includes(run()?.stage)){E.advance(run());save();}view=phoneReturn;render();}
+function dispatch(action,b){const r=run();
+ if(miniAction(action,b))return;
+ if(action==='journey'){if(active()){view='play';render();}else startRun();return;}
+ if(action==='phone'){openPhone();return;}
+ if(action==='close-phone'){closePhone();return;}
+ if(action==='unlock'){phoneUnlocked=true;render();return;}
+ if(action==='phone-home'){phoneApp='home';selectedContact=null;render();return;}
+ if(action==='phone-app'){phoneApp=b.dataset.app;selectedContact=null;render();return;}
+ if(action==='map'){view='map';closeModal();render();return;}
+ if(action==='continue'){view='play';closeModal();render();return;}
+ if(action==='close'){closeModal();return;}
+ if(action==='location'){const el=$('.location-whisper');if(!el)return;el.hidden=false;b.setAttribute('aria-expanded','true');clearTimeout(locationTimer);locationTimer=setTimeout(()=>{el.hidden=true;b.setAttribute('aria-expanded','false');},3200);return;}
+ if(action==='restart'){openModal('重新收拾这次的行李？','手机里的这本记事本，也会从空白开始。',btn('重新出发','confirm-start')+btn('先不换','close'));return;}
  if(action==='confirm-start'){startRun();return;}
- if(action==='record'){selectedRecord=profile.records.find(x=>x.runId===b.dataset.record);view='record';render();return;}
- if(action==='record-notes'){journalRecord=profile.records.find(x=>x.runId===b.dataset.record);view='journal';render();return;}
  if(action==='contact'){selectedContact=b.dataset.contact;render();return;}
  if(action==='contacts'){selectedContact=null;render();return;}
- if(action==='wardrobe'){wardrobeModal();return;}
+ if(action==='inspect'){const i=itemById[b.dataset.id];if(!r||!r.bag.includes(i?.id))return;openModal(esc(i.name),`<p class="prose">${esc(i.note)}</p>${r.used?.[i.id]?`<p class="micro">这一路，拿出来用过 ${r.used[i.id]} 次。</p>`:''}`);return;}
  if(!r)return;
+ if(action==='hello'){const c=CONTACTS.find(x=>x.id===b.dataset.contact);if(c&&!allMessages().some(m=>m.contact===c.id&&m.event==='hello')){r.messages.push({id:crypto.randomUUID(),contact:c.id,event:'hello',day:current()?.day||0,lines:[{from:'mi',text:greetings[c.id][1]},{from:'friend',text:greetings[c.id][2]}]});save();render();}return;}
  if(action==='reason'&&r.stage==='reason'){r.reason=['想看没见过的东西。','一直想去。','不知道。','票都买了。'][Number(b.dataset.id)];r.stage='packing';save();render();return;}
- if(action==='tab'){tab=b.dataset.tab;render({scroll:false});return;}
- if(action==='item'&&r.stage==='packing'){E.toggleItem(r,b.dataset.id);save();render({scroll:false});return;}
- if(action==='preset'&&r.stage==='packing'){E.preset(r);save();render({scroll:false});toast('先装好了这些。随时可以取出来。');return;}
- if(action==='equip'){const i=itemById[b.dataset.id];if(i&&E.equip(r,i.slot,i.id)){save();if(modal.open)wardrobeModal();else render({scroll:false});}return;}
- if(action==='depart'&&r.stage==='packing'){if(!r.bag.includes('passport')){E.addItem(r,'passport');toast('摸了摸口袋。护照忘了，回头拿上。');}if(E.depart(r)){save();render();}else toast('出发托运上限 20 kg，再拿出一点东西吧。');return;}
+ if(action==='open-case'){caseOpen=!caseOpen;render();return;}
+ if(action==='tab'){tab=b.dataset.tab;render();return;}
+ if(action==='item'&&r.stage==='packing'){E.toggleItem(r,b.dataset.id);save();render({keepScroll:true});return;}
+ if(action==='preset'&&r.stage==='packing'){E.preset(r);save();render({keepScroll:true});return;}
+ if(action==='equip'){const i=itemById[b.dataset.id];if(i&&E.equip(r,i.slot,i.id)){save();render({keepScroll:true});}return;}
+ if(action==='depart'&&r.stage==='packing'){if(!r.bag.includes('passport')){E.addItem(r,'passport');toast('摸了摸口袋。护照忘了，回头拿上。');}if(E.depart(r)){save();render();}return;}
  if(action==='choose'){if(E.choose(r,Number(b.dataset.index))){save();render();}return;}
- if(action==='next'){phoneUnlocked=false;E.afterResult(r);save();render();return;}
- if(action==='send'){if(E.sendMessage(profile,b.dataset.contact)){save();render();}return;}
- if((action==='social-skip'&&r.stage==='social')||(action==='social-done'&&r.stage==='chat')){E.advance(r);save();render();return;}
+ if(action==='next'){E.afterResult(r);phoneUnlocked=false;save();render();return;}
+ if(action==='send'){if(E.sendMessage(profile,b.dataset.contact)){selectedContact=b.dataset.contact;save();render();}return;}
  if(r.stage==='return-pack'){
-  if(action==='carry'||action==='wear'){if(!E.relocate(r,b.dataset.id,action==='carry'?'carry':'worn'))toast('随身包最多 7 kg，先腾一点位置。');save();render({scroll:false});return;}
-  if(action==='discard'){E.removeItem(r,b.dataset.id,true);save();render({scroll:false});return;}
-  if(action==='restore'){restoreModal();return;}
-  if(action==='restore-item'){E.addItem(r,b.dataset.id);r.removed=r.removed.filter(x=>x!==b.dataset.id);save();closeModal();render({scroll:false});return;}
-  if(action==='return-finish'){if(E.beginReflection(r,true)){save();render();}else toast('旅费不够，再整理一下箱子吧。');return;}
+  if(action==='carry'||action==='wear'){if(!E.relocate(r,b.dataset.id,action==='carry'?'carry':'worn'))toast('随身包放不下了。');save();render({keepScroll:true});return;}
+  if(action==='discard'){E.removeItem(r,b.dataset.id,true);save();render({keepScroll:true});return;}
+  if(action==='restore'){openModal('还在箱子旁边',r.removed.map(id=>btn(esc(itemById[id].name),'restore-item',`data-id="${id}"`)).join(''));return;}
+  if(action==='restore-item'){E.addItem(r,b.dataset.id);r.removed=r.removed.filter(x=>x!==b.dataset.id);save();closeModal();render();return;}
+  if(action==='return-finish'){if(E.beginReflection(r,true)){save();render();}return;}
  }
- if(action==='finish'&&r.stage==='reflect'){const rec=E.finish(profile,b.dataset.ending);if(rec){save();render();}return;}
+ if(action==='finish'&&r.stage==='reflect'){if(E.finish(profile,b.dataset.ending)){save();render();}}
 }
-document.addEventListener('click',event=>{const b=event.target.closest('[data-action]');if(!b||b.disabled)return;dispatch(b.dataset.action,b);});
-document.querySelector('.brand').addEventListener('click',e=>{e.preventDefault();closeModal();view='map';render();});
-modal.addEventListener('click',e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeModal();}});
-// A second tab may have progressed further. Adopt its save instead of overwriting it.
-window.addEventListener('storage',event=>{if(event.key!==E.SAVE_KEY||!event.newValue)return;const incoming=E.parseSave(event.newValue);if(incoming){profile=incoming;closeModal();render({scroll:false});toast('旅行已与另一个窗口同步。');}});
-function viewHash(){return '#'+view+(view==='phone'&&selectedContact?'/'+selectedContact:view==='record'&&selectedRecord?'/'+selectedRecord.runId:'');}
-function readLocation(){const [next,id]=location.hash.slice(1).split('/');view=['map','play','journal','phone','records','record'].includes(next)?next:'map';selectedContact=next==='phone'&&CONTACTS.some(c=>c.id===id)?id:null;if(next==='record')selectedRecord=profile.records.find(r=>r.runId===id);closeModal();render({sync:false});}
+function viewHash(){return view==='phone'?`#phone/${phoneApp}/${phoneReturn}${selectedContact?'/'+selectedContact:''}`:'#'+view;}
+function readLocation(){const [v,a,b,c]=location.hash.slice(1).split('/');view=v==='play'&&run()?'play':v==='phone'||['journal','records','record'].includes(v)?'phone':'map';if(view==='phone'){phoneApp=['home','chat','notes','bag','settings'].includes(a)?a:['journal','records','record'].includes(v)?'notes':'home';phoneReturn=b==='play'&&run()?'play':'map';selectedContact=CONTACTS.some(x=>x.id===c)?c:null;}closeModal();render({sync:false});}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;e.preventDefault();dispatch(b.dataset.action,b);});
+// The title is a title, not a second navigation menu.
+document.querySelector('.brand').addEventListener('click',e=>e.preventDefault());
 window.addEventListener('popstate',readLocation);
-document.fonts.load('12px Pixel').then(()=>{document.documentElement.classList.add('font-ready');drawCanvases();}).catch(()=>document.documentElement.classList.add('font-ready'));
-setTimeout(()=>document.documentElement.classList.add('font-ready'),2500);
-if(hadCorrupt)toast('这一页暂时打不开，已经替你夹好。可以再出发。');
-if(!storageOK)toast('浏览器暂时不能存档，旅行仍可继续。');
-
-function packingThought(r){const volume=r.bag.reduce((v,id)=>v+itemById[id].volume,0);return E.checkedWeight(r)>20?'箱子拎起来，手腕沉了一下。再拿出一点。':volume>40?'拉链有点难拉。换个方向压一压。':volume>20?'还能塞一点。也可以不塞。':'箱子里还有很大一块空地。';}
-function storyDate(day){const d=new Date(Date.UTC(2026,7,1+day-1));return String(d.getUTCMonth()+1).padStart(2,'0')+'.'+String(d.getUTCDate()).padStart(2,'0');}
-function miniScene(n){const p=placeFor(n.day);return `<button class="mini-scene" data-action="location" aria-label="看看现在在哪里"><canvas data-scene="${n.scene}" role="img" aria-label="${p.name}的小场景"></canvas><span class="mini-coordinate">${storyDate(n.day)} · ${n.time}<br>${p.en}</span><i class="location-dot" aria-hidden="true"></i></button>`;}
-function homeCase(record){return `<div class="home-case"><h2>回家，打开箱子。</h2><div class="case-items">${record.bag.map(id=>`<button class="case-object" data-action="inspect" data-id="${id}" data-record="${record.runId}">${esc(itemById[id]?.name||id)}</button>`).join('')}</div>${(record.itemHistory||[]).map(x=>`<p class="micro">${esc(itemById[x.id]?.name)} · 留在第 ${x.day} 天<br>${esc(x.text)}</p>`).join('')}</div>`;}
-function memoryMap(){const flags={...Object.assign({},...profile.records.map(x=>x.flags||{})),...run()?.flags};return `<div class="memory-strip">${[['bus','等车的地方','seychelles'],['wet','湿透的地方','falls'],['blanket','很冷的车','namibia'],['glasses','眼镜消失的地方','cape']].filter(([k])=>flags[k]).map(([k,t,p])=>`<button data-action="archive" data-place="${p}" aria-label="${t}"><i class="memory-icon ${k}" aria-hidden="true"></i><span>${t}</span></button>`).join('')}<button class="text-btn" data-action="atlas">摊开这一段路</button></div>`;}
-function extraAction(a,b){const r=run();
- if(a==='open-case'){caseOpen=!caseOpen;render({scroll:false});if(caseOpen)document.querySelector('.tabs')?.scrollIntoView({behavior:'smooth',block:'start'});return true;}
- if(a==='location'){const n=E.currentNode(r),p=placeFor(n.day);openModal(p.name,`<p class="micro">${p.country} · DAY ${n.day} / 42 · ${n.time}</p><p class="prose">${p.memory}</p><p>${p.route}</p>`,btn('翻开夹着的记录','archive',`data-place="${p.id}"`)+btn('看看整段路','atlas','',''));return true;}
- if(a==='atlas'){openModal('折痕穿过的地方',`<div class="atlas-route">${places.map(p=>{const visited=(r?.notes||[]).some(n=>placeFor(n.day).id===p.id)||profile.records.some(rec=>rec.visited?.includes(p.id));return `<button data-action="archive" data-place="${p.id}"><i class="atlas-dot"></i><span>${p.name}<small>${visited?p.memory:'还没走到这里。'}</small></span></button>`;}).join('')}</div>`);return true;}
- if(a==='archive'){const p=places.find(p=>p.id===b.dataset.place)||placeFor(E.currentNode(r)?.day||1);openModal(p.name,`<p class="prose">${p.memory}</p><p class="micro">${p.route}</p><p class="micro">日历是米重新排过的记忆。这里夹着那次旅途的原始纸条。</p><div class="archive-pages">${p.archive.map((t,i)=>`<p><small>纸页 ${i+1}</small>${esc(t)}</p>`).join('')}</div><details><summary>夹在最后的行前纸条</summary><p>这些是那次旅行留下的旧记录。米把证件、现金、保险和订单装在一起。纳米比亚的签证等了很久，出发后还在查；肯尼亚和塞舌尔提前申请。其他口岸有的收现金，有的只刷卡。到了柜台，再问一次。</p><p>口罩、防晒和驱蚊放侧袋。给自己留休息日。给计划留一点空白。</p></details>`);return true;}
- if(a==='inspect'){const source=b.dataset.record?profile.records.find(x=>x.runId===b.dataset.record):r;const i=itemById[b.dataset.id];if(i)openModal(i.name,`<p class="prose">${esc(i.note)}</p><details><summary>翻过来看看</summary><p>${kg(i.weight)} kg。</p><p>${source?.departureBag?.includes(i.id)?'从家里带到这里。':'后来放进了箱子。'}</p><p>拿出来用过 ${source?.used?.[i.id]||0} 次。</p><p>${esc(i.use)}</p></details>`);return true;}
- if(a==='mini-tap'){const n=E.currentNode(r),m=r.mini[n.id];if(!m||m.done)return true;if(n.mini==='glasses'){m.taps=(m.taps||0)+1;const icon=document.querySelector('.escaping-glasses');if(icon)icon.style.marginLeft=-(m.taps%3)*3+'px';}else if(n.mini==='falls'){m.steps=Math.min(3,(m.steps||0)+1);waterSound(m.steps);if(m.steps===3){m.done=true;}}else {m.action=b.dataset.kind;m.waits=(m.waits||0)+1;}save();updateMini();return true;}
- if(a==='mini-finish'){const n=E.currentNode(r);if(r.mini[n.id]?.done&&E.choose(r,0)){save();render();}return true;}
- if(a==='sound'){soundOn=!soundOn;b.textContent=soundOn?'声音开':'声音关';if(!soundOn)stopSound();return true;}
+window.addEventListener('storage',e=>{if(e.key!==E.SAVE_KEY||!e.newValue)return;const p=E.parseSave(e.newValue);if(p){profile=p;closeModal();render();}});
+modal.addEventListener('click',e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeModal();}});
+function miniAction(a,b){const r=run(),n=current();
+ if(a==='sound'){soundOn=!soundOn;if(!soundOn)stopSound();render();return true;}
+ if(a==='mini-tap'&&n?.mini){const m=r.mini[n.id];if(!m||m.done)return true;if(n.mini==='glasses'){m.taps=(m.taps||0)+1;$('.escaping-glasses').style.marginLeft=-(m.taps%3)*3+'px';}else if(n.mini==='falls'){m.steps=Math.min(3,(m.steps||0)+1);waterSound(m.steps);m.done=m.steps===3;}else m.action=b.dataset.kind;save();updateMini();return true;}
+ if(a==='mini-finish'&&n?.mini){if(r.mini[n.id]?.done&&E.choose(r,0)){save();render();}return true;}
  return false;
 }
+function miniHTML(n){run().mini[n.id]??={elapsed:0,steps:0,taps:0,done:false};return gameScreen(n.scene,E.value(n.title,run()),E.value(n.text,run()),`<div class="mini-controls">${n.mini==='bus'?['继续等','往前走一站','重新看 App'].map((t,i)=>btn(t,'mini-tap',`data-kind="${i}"`)).join(''):btn(n.mini==='glasses'?'抓住眼镜':'再走近一点','mini-tap')}</div><button class="btn mini-done" data-action="mini-finish" hidden>${n.mini==='bus'?'上车':n.mini==='falls'?'抖一抖':'打开箱子'}</button>`,{className:`mini-game ${n.mini}`,extra:'<span class="mini-clock" role="status"></span>',overlay:'<div class="mini-stage" aria-hidden="true"><i class="escaping-glasses"></i><i class="waiting-person"></i><i class="arriving-bus"></i><div class="pixel-rain"></div></div>'});}
 let miniTimer,animFrame=0,soundOn=false,audioContext,soundSource,soundGain;
 function stopSound(){try{soundSource?.stop();}catch{}soundSource=null;}
 function waterSound(level){if(!soundOn)return;try{audioContext??=new (window.AudioContext||window.webkitAudioContext)();audioContext.resume();if(!soundSource){const buffer=audioContext.createBuffer(1,audioContext.sampleRate*2,audioContext.sampleRate);const samples=buffer.getChannelData(0);for(let i=0;i<samples.length;i++)samples[i]=(Math.random()*2-1)*.3;soundSource=audioContext.createBufferSource();soundSource.buffer=buffer;soundSource.loop=true;const filter=audioContext.createBiquadFilter();filter.type='lowpass';filter.frequency.value=650;soundGain=audioContext.createGain();soundSource.connect(filter);filter.connect(soundGain);soundGain.connect(audioContext.destination);soundSource.start();}soundGain.gain.value=level*.13;}catch{}}
-function miniHTML(n){const r=run();r.mini[n.id]??={elapsed:0,steps:0,taps:0,done:false};return `<div class="mini-game ${n.mini}" data-game="${n.mini}"><h1>${esc(E.value(n.title,r))}</h1><p class="prose mini-text">${esc(E.value(n.text,r))}</p><div class="mini-stage" aria-hidden="true"><i class="escaping-glasses"></i><i class="waiting-person"></i><i class="arriving-bus"></i><div class="pixel-rain"></div></div><p class="mini-clock" role="status"></p><div class="mini-controls">${n.mini==='bus'?['继续等','往前走一站','重新看 App'].map((t,i)=>btn(t,'mini-tap',`data-kind="${i}"`,'')).join(''):btn(n.mini==='glasses'?'抓住眼镜':'再走近一点','mini-tap','','')}${n.mini==='falls'?'<button class="text-btn" data-action="sound">声音关</button>':''}</div><button class="btn primary mini-done" data-action="mini-finish" hidden>${n.mini==='bus'?'上车':n.mini==='falls'?'抖一抖':'打开箱子'}</button></div>`;}
 function updateMini(){const r=run(),n=r&&E.currentNode(r),el=document.querySelector('.mini-game');if(!el||!n)return;const m=r.mini[n.id];
  if(n.mini==='glasses'){el.style.setProperty('--escape',Math.min(108,m.elapsed/12*108)+'%');el.querySelector('.mini-text').textContent=m.done?'眼镜被抢走了。':'抓住眼镜。';}
  if(n.mini==='bus'){el.classList.toggle('npc-here',m.elapsed>=9);el.classList.toggle('bus-here',m.done);el.querySelector('.mini-clock').textContent=m.done?'17:02':m.elapsed<5?'16:41':m.elapsed<9?'16:47':'16:54';el.querySelector('.mini-text').textContent=m.done?'车来了。':m.elapsed>=9?'有人来了。站在旁边。':m.action==='2'?'BUS 16:42。屏幕没有改口。':m.action==='1'?'又一个白框。还是这片海。':'手机写着 BUS 16:42。';}
@@ -168,4 +136,6 @@ function startMini(){clearInterval(miniTimer);stopSound();document.body.classLis
 }
 setInterval(()=>{if(document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;animFrame=(animFrame+1)%4;document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles},animFrame));},650);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSound();});
+document.fonts.load('12px Pixel').then(()=>{document.documentElement.classList.add('font-ready');drawCanvases();}).catch(()=>document.documentElement.classList.add('font-ready'));
+setTimeout(()=>document.documentElement.classList.add('font-ready'),2500);
 readLocation();

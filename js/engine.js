@@ -1,7 +1,7 @@
-import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=journey-3';
-import { routeById } from '../data/routes/index.js?v=journey-3';
-import { selectEnding, returnQuestions } from '../data/endings.js?v=journey-3';
-import { conversation } from '../data/contacts.js?v=journey-3';
+import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=pocket-1';
+import { routeById } from '../data/routes/index.js?v=pocket-1';
+import { selectEnding, returnQuestions } from '../data/endings.js?v=pocket-1';
+import { conversation } from '../data/contacts.js?v=pocket-1';
 export const SAVE_KEY='mi-v02';
 export function freshProfile(){return {version:2,records:[],contacts:{},messages:[],run:null};}
 export function createRun(routeId='africa-001',seed=Math.random()){
@@ -88,4 +88,10 @@ export function parseSave(raw){
    if(r.stage==='event'&&!currentNode(r))r.stage='return-pack';
   }return p;
  }catch{return null;}
+}
+
+// Notes belong to this run, never to profile history or future nodes.
+export function visibleNotes(r){
+ if(!r||['reason','packing'].includes(r.stage))return [];
+ return (r.notes||[]).filter(note=>note.nodeId?r.entered.includes(note.nodeId):Number.isFinite(note.day)&&note.day<=(currentNode(r)?.day||42));
 }
