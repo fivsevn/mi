@@ -34,3 +34,5 @@ button{touch-action:manipulation;transition:none!important}button:focus-visible,
 @media(min-width:440px){.desk-phone{top:235px}}
 .scene-panel{position:relative;display:block}.scene-view{height:100%;width:100%}.scene-dock{position:absolute;inset:auto 0 0;height:61px;background:transparent;border:0;pointer-events:none}.scene-dock button{pointer-events:auto}.location-whisper{background:#d6dabcdf;padding:4px;bottom:10px;color:#4b6347}.location-whisper[hidden]{display:none}
 @media(max-height:680px){.desk{padding-top:12px}.desk-phone{top:calc((min(100vw,440px) - 30px)/1.48 - 32px)}.scene-dock{height:51px}}
+
+.map-view canvas{object-fit:contain;object-position:center}.lock-screen{overflow:hidden;background:#aabfa6}.lock-screen #lock-selfie{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:pixelated;z-index:-1}.lock-time{align-self:center;margin-top:20px;color:#304b3b;text-shadow:2px 2px #dce2bd}.lock-screen .unlock{background:#405c45cc;border:2px solid #c6d0a5;color:#f1edcb;margin-bottom:18px;padding:7px 14px;min-height:44px}.lock-screen .unlock span{margin:0}

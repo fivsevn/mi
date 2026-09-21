@@ -1,5 +1,5 @@
-import { LAND, AFRICA } from '../assets/world-grid.js?v=pocket-2';
-import { itemById } from '../data/items.js?v=pocket-2';
+import { LAND, AFRICA } from '../assets/world-grid.js?v=pocket-3';
+import { itemById } from '../data/items.js?v=pocket-3';
 const P={ink:'#263c37',leaf:'#527252',grass:'#9ba266',sand:'#d8b777',cream:'#f0e8cb',sun:'#f1d779',sky:'#a6c7bc',blue:'#508c91',dark:'#315e60'};
 function context(canvas,w,h){canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;return c;}
 function rect(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
@@ -105,4 +105,17 @@ export function drawMiniMap(canvas,type='home'){
  if(type==='home'||type==='room'||type==='hotel'){rect(c,'#7b9069',10,9,43,44);rect(c,'#c8cea8',14,13,35,36);rect(c,'#9bad82',17,17,13,10);rect(c,'#8b9e75',39,15,6,14);rect(c,'#c8cea8',30,46,9,9);}
  else {poly(c,'#d6cb9a',[[39,0],[44,0],[39,20],[47,39],[43,64],[38,64],[42,39],[34,21]]);rect(c,'#718b65',48,13,9,7);rect(c,'#718b65',24,44,7,6);}
  rect(c,'#e7cd7d',32,32,7,7);rect(c,'#354f3b',34,34,3,3);
+}
+
+// A saved travel selfie: the same Mi sprite, framed close to the camera.
+export function selfie(canvas){
+ const c=context(canvas,192,288);rect(c,'#aabfa6',0,0,192,288);
+ cloud(c,18,48,1.4);cloud(c,128,76,.9);rect(c,'#e1ce8f',151,31,19,19);
+ poly(c,'#8da080',[[0,124],[39,102],[84,121],[131,95],[192,111],[192,165],[0,165]]);
+ rect(c,'#b5b17c',0,143,192,145);acacia(c,28,134,.7);giraffe(c,149,175,.8);
+ for(let i=0;i<28;i++)rect(c,i%2?'#919d6c':'#d1c58d',(i*47)%192,157+(i*19)%131,4,2);
+ drawPerson(c,20,117,7,{hat:'hat',top:'tee'});
+ // The outstretched arm falls outside the frame, as in a handheld selfie.
+ poly(c,'#e4b990',[[135,249],[155,252],[192,279],[192,288],[163,288],[139,271]]);
+ rect(c,'#c99a73',156,272,9,5);
 }
