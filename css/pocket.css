@@ -48,3 +48,29 @@ button{touch-action:manipulation;transition:none!important}button:focus-visible,
 .route-pin{z-index:3}.route-pin i{width:8px;height:8px;left:11px;top:11px;background:#c7c8bc;border:1px solid #9a9e92}.route-pin:disabled{opacity:1}.route-pin.visited i{width:10px;height:10px;left:10px;top:10px;border:2px solid #34513b;background:#75866b;box-shadow:0 0 0 2px #e7e8d7}.route-pin.ready i{width:12px;height:12px;left:9px;top:9px;background:#e2c467;border:2px solid #344e38;box-shadow:0 0 0 3px #eee4b0,0 0 0 4px #758466}.route-pin.ready .pin-label{display:block;background:#e7e8d7;font-size:10px}
 .pocket-map.map-paper{transform:none!important}.pocket-map.map-paper:active{transform:translate(1px,1px)!important}.location-whisper{border:0;box-shadow:none;min-height:28px;padding:5px 7px;color:#4b6347;font-family:inherit;pointer-events:auto}.location-whisper[hidden]{display:none}
 @media(max-height:680px){.route-map-screen{padding:12px 25px}.desk{padding-top:18px}}
+
+/* One atlas, unfolded at three scales. Paper relief follows the fold panels. */
+body{background:#899185}.app-shell{background:#d2d2bf;filter:saturate(.82)}
+.desk{padding:30px 18px 0;min-height:0}.route-map-screen{padding:30px 18px 18px}.route-paper{align-items:flex-start;padding-top:0}
+.map-paper,.route-map-view,.pocket-map.map-paper{border:0;background:#ddd9bd;box-shadow:2px 4px 0 #65715a25,5px 9px 12px #43534424;isolation:isolate}
+.map-paper,.route-map-view{clip-path:polygon(0 1%,24% 0,50% .6%,75% 0,99% 1%,100% 30%,99.6% 66%,100% 99%,75% 100%,50% 99.5%,25% 100%,.5% 99%,0 65%,.5% 32%);filter:drop-shadow(2px 5px 2px #43534430)}
+.map-paper:before,.route-map-view:before{background:linear-gradient(90deg,#fffae622,transparent 12%,#4e584117 24%,#fff6d52b 26%,transparent 42%,#4e58411c 49%,#fff6d533 51%,transparent 67%,#4e584119 74%,#fff6d52b 76%,transparent 89%,#fff9dc40),linear-gradient(0deg,#4c58401c,transparent 9%,transparent 86%,#fff8dc33);z-index:2}
+.map-paper:after,.route-map-view:after{background:linear-gradient(90deg,transparent 24.5%,#4a57432e 24.8%,#fffae676 25%,transparent 25.5%,transparent 49.5%,#4a574335 49.8%,#fffae688 50%,transparent 50.6%,transparent 74.5%,#4a574329 74.8%,#fffae66b 75%,transparent 75.5%),linear-gradient(transparent 49.4%,#4a574335 49.8%,#fffae688 50%,transparent 50.7%);z-index:2}
+.paper-title,.route-map-view .paper-title{font-size:12px;left:14px;top:13px;background:none;padding:0;box-shadow:none;text-shadow:1px 1px #e6e1c377;text-decoration:none!important;border:0;outline:none}
+.paper-title small{font-size:7px;margin-top:3px;letter-spacing:.7px}.paper-title:hover,.paper-title:focus-visible{color:#31483c;text-decoration:none!important;text-shadow:1px 1px #e9e2c2}.paper-title:active{transform:translate(1px,1px)}
+.pin-label,.route-pin.ready .pin-label{background:none;padding:0;color:#3f5548;text-shadow:1px 1px #e6e0b9;font-size:9px;bottom:26px}
+.route-pin i,.route-pin.visited i,.route-pin.ready i{width:8px;height:8px;left:11px;top:11px;border:2px solid #92988a;background:#ddd9bd;box-shadow:none}
+.route-pin.visited i,.route-pin.ready i{border-color:#526457;background:#c8bb83}
+.route-pin:hover:enabled i,.route-pin:focus-visible i,.route-pin:active:enabled i{outline:1px solid #526457;outline-offset:3px;box-shadow:none}.route-pin:focus-visible{outline:0}
+.pocket-map.map-paper{clip-path:none;filter:none;overflow:visible;box-shadow:2px 3px #42534235,4px 5px 5px #42534224}
+.pocket-map.map-paper:before{background:linear-gradient(110deg,#fff8df22,transparent 45%,#4c58401a)}
+.pocket-map.map-paper:after{background:linear-gradient(90deg,transparent 48%,#4a574330 49%,#fff9e477 50%,transparent 52%),linear-gradient(transparent 48%,#4a574330 49%,#fff9e477 50%,transparent 52%)}
+.play-screen{padding-top:22px}.scene-panel{border:0;box-shadow:2px 3px #63705a26}.scene-view>canvas{filter:saturate(.86)}
+@media(max-height:680px){.desk{padding-top:22px}.route-map-screen{padding-top:22px}.play-screen{padding-top:14px}}
+.map-view{aspect-ratio:720 / 396}.desk-phone{top:calc((min(100vw,440px) - 36px) * .55 - 14px);right:25px}
+.map-paper,.route-map-view{clip-path:none;filter:none;box-shadow:1px 2px #7b806a20,3px 7px 3px #4b594523,8px 12px 14px #4b59451a}
+.map-paper>.map-view,.route-map-view>canvas{clip-path:polygon(0 1%,24% 0,50% .6%,75% 0,99% 1%,100% 30%,99.6% 66%,100% 99%,75% 100%,50% 99.5%,25% 100%,.5% 99%,0 65%,.5% 32%)}
+.map-paper,.route-map-view{background:transparent}
+.map-paper:before,.route-map-view:before{box-shadow:inset 0 2px #f1ecd329,inset -2px -2px #69755b15}
+.map-hit text{fill:#526457;font-size:11px;text-shadow:1px 1px #ded8b8}
+@media(min-width:440px){.desk-phone{top:208px}}

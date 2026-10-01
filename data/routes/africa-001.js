@@ -1,4 +1,4 @@
-import { expandAfrica } from './africa-stories.js?v=paper-7';
+import { expandAfrica } from './africa-stories.js?v=atlas-8';
 const choice=(id,label,result,effect={},extra={})=>({id,label,result,effect,...extra});
 export const africa={
  id:'africa-001',number:'001',name:'AFRICA',label:'非洲环线',region:'africa',days:42,budget:42000,

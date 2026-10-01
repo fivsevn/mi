@@ -79,7 +79,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  const blocked=await browser.newContext({viewport:{width:320,height:568}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('.route-pin.ready').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
  const migratedCtx=await browser.newContext({viewport:{width:320,height:568}}),mp=await migratedCtx.newPage();await mp.goto(origin);
  const oldSave=await mp.evaluate(async()=>{
-  const E=await import('/js/engine.js?v=paper-7'),{africa}=await import('/data/routes/africa-001.js?v=paper-7');
+  const E=await import('/js/engine.js?v=atlas-8'),{africa}=await import('/data/routes/africa-001.js?v=atlas-8');
   const p=E.freshProfile();p.run=E.createRun();p.run.stage='packing';E.preset(p.run);E.depart(p.run);E.choose(p.run,0);
   p.run.node=africa.previousNodeIds.indexOf('cape-sea');p.run.revision=3;p.run.stage='event';p.run.pending=null;delete p.run.completedSegments;
   localStorage.setItem('mi-v02',JSON.stringify(p));return p;

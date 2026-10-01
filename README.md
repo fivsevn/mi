@@ -41,3 +41,5 @@ GitHub Pages 使用 main 根目录和 CNAME。发布时更新完整模块图和�
 Fusion Pixel 12px Monospaced 简体中文字体本地托管，按文案裁剪，预加载并等待准备完成后显示首屏。字体许可见 assets/fonts/LICENSE-OFL.txt（SIL OFL 1.1）。脚本 scripts/subset-font.py 接受完整字体路径，需要 fonttools 和 brotli。
 
 Canvas / CSS 场景为本项目绘制。世界地图陆地数据来自公共领域 Natural Earth；局部地图采用 1:10m 数据（[来源](https://www.naturalearthdata.com/downloads/10m-physical-vectors/)），按地点裁剪后随游戏托管，不依赖外部地图服务。地理坐标为剧情地点的近似中心；scripts/build-context-maps.py 可从 Natural Earth GeoJSON 重建底图。动画尊重 reduced-motion；小游戏切到手机、资料弹窗或后台时暂停。
+
+地图视觉采用同一像素绘制方法：灰绿水域、连续纸色陆地、海岸与碎线纹理；世界图、地区图和局部图共用方框坐标。仅显示的位置是灰色空框，可进入的位置填色，悬停或点击时增加外层方框。大纸有四列折面，迷你纸仅保留十字折痕；标题和地点名直接印在地图上。
