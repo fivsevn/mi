@@ -1,6 +1,6 @@
-import { finishPaper } from './paper.js?v=atlas-14';
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-14';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-14';
+import { finishPaper } from './paper.js?v=atlas-15';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-15';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-15';
 export function projectMap(coord,bounds,width=384,height=420,padding=20,verticalBias=0){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2+verticalBias;
@@ -30,17 +30,20 @@ export function paintTerrain(c,width,height,mask,cell=2,inverse=null){
   if(land[i]){
    const desert=(lon>-17&&lon<49&&lat>16&&lat<31)||(lon>39&&lon<61&&lat>16&&lat<29);
    const red=(lon>10&&lon<22&&lat<-19&&lat>-30)||(lon>117&&lon<142&&lat<-20&&lat>-31);
-   const forest=(Math.abs(lat)<8&&lon>-76&&lon<-44)||(Math.abs(lat)<5&&lon>9&&lon<32)||(lon>96&&lon<133&&lat<18&&lat>-8);
+   const forest=(Math.pow((lon+61)/17,2)+Math.pow((lat+3)/9,2)<1)||(Math.pow((lon-21)/12,2)+Math.pow((lat+1)/7,2)<1)||(lon>96&&lon<133&&lat<18&&lat>-8);
+   const relief=Math.sin(lon*.21+Math.sin(lat*.22)*2)+Math.cos(lat*.27+lon*.08); const field=Math.sin(lon*.63+lat*.24)+Math.cos(lat*.69-lon*.13);
    col=desert?'#d9c697':red?'#c5a786':forest?'#a4ac7b':'#d6cca1';
+   if(d>2&&!forest){if(relief>1.1)col=desert?'#cebd8d':red?'#bd9e7d':'#c3c397';else if(relief<-.8)col=desert?'#e0cda0':'#ded3a4';if(field>1.2&&bayer[(y%4)*4+x%4]<5)col='#b8b68b';}
    if(d===0)col=(x+y)%3===0?'#a3a879':'#879773';else if(d===1)col='#b5ba88';
    const m=mountains(lon,lat),xx=x%7,yy=y%6;
    if(d>2&&m<1.7){col='#b7b58a';if(m<1&&yy<4&&xx>yy&&xx<7-yy)col=xx<4?'#889268':'#e2d3a4';if(m<.7&&yy===4&&xx<5)col='#9ea072';}
-   if(forest&&d>2){const xx=(x+Math.floor(y/7)*3)%8,yy=y%7;if((xx-3)*(xx-3)/9+(yy-3)*(yy-3)/4<1)col=yy<3?'#c1c596':xx<3?'#9da977':'#85976a';}
+   if(forest&&d>2){col=field>0?'#aeb586':'#bac095';const xx=(x+Math.floor(y/7)*3)%8,yy=y%7;if((xx-3)*(xx-3)/9+(yy-3)*(yy-3)/4<1)col=yy<3?'#c1c596':xx<3?'#9da977':'#85976a';}
    // Short hand-shaped marks and selected transitions; most of the land stays quiet.
    if(!forest&&m>2&&d>2&&y%11===0&&(x+Math.floor(y/11)*3)%17<4)col=desert?'#bcb384':red?'#b99179':'#b2b58b';
    if((forest||red)&&d===2&&bayer[(y%4)*4+x%4]<4)col='#ccca98';
   }else{
-   col=d<2?'#b1bfa0':d<4?'#9eb59a':d<7?'#8daa91':'#7c9f89';
+   col=d<2?'#b1bfa0':d<4?'#9eb59a':d<7?'#8daa91':Math.sin(lon*.12)+Math.cos(lat*.17)>1?'#80a18b':'#7c9f89';
+   if(d>0&&d<9&&bayer[(y%4)*4+x%4]<4)col=d<4?'#b3c0a0':'#91ae93';
    if(y%12===0&&(x+Math.floor(y/12)*5)%21<7)col='#9bb398';
    if(y%19===4&&(x+Math.floor(y/19)*3)%17<4)col='#688b77';
   }
