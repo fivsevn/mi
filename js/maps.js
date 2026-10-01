@@ -1,15 +1,15 @@
-import { WORLD } from '../assets/world-grid.js?v=atlas-54';
-import { elevation } from '../assets/relief-grid.js?v=atlas-54';
-import { finishPaper } from './paper.js?v=atlas-54';
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-54';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-54';
+import { WORLD } from '../assets/world-grid.js?v=atlas-55';
+import { elevation } from '../assets/relief-grid.js?v=atlas-55';
+import { finishPaper } from './paper.js?v=atlas-55';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-55';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-55';
 export function projectMap(coord,bounds,width=384,height=420,padding=20,verticalBias=0){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2+verticalBias;
  return [ox+(coord[0]-bounds[0])*scale,oy+(bounds[3]-coord[1])*scale];
 }
 const JOURNEY_BOUNDS=[9,-41,64,14];
-export const pinPosition=(pin,height=384)=>{const [x,y]=projectMap(pin.coord,JOURNEY_BOUNDS,384,384,18);return [x+(pin.offset?.[0]||0),y+(pin.offset?.[1]||0)];};
+export const pinPosition=(pin,height=384)=>{const [x,y]=projectMap(pin.coord,JOURNEY_BOUNDS,384,height,18);return [x+(pin.offset?.[0]||0),y+(pin.offset?.[1]||0)];};
 function geometry(c,g,project,fill,stroke){
  if(!g)return;
  if(g.type==='GeometryCollection'){g.geometries.forEach(child=>geometry(c,child,project,fill,stroke));return;}
@@ -115,12 +115,12 @@ export function drawLocalMap(canvas,node){
 
 // A quiet navigation basemap, independent of the printed terrain atlas.
 export function drawPhoneMap(canvas,visited=[]){
- canvas.width=384;canvas.height=384;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
- const project=coord=>projectMap(coord,JOURNEY_BOUNDS,384,384,18);
- c.fillStyle='#000';c.fillRect(0,0,384,384);geometry(c,{type:'MultiPolygon',coordinates:WORLD},project,'#fff');geometry(c,CONTEXT_MAPS.africa.water,project,'#000');
- const mask=c.getImageData(0,0,384,384).data;
- for(let y=0;y<384;y+=2)for(let x=0;x<384;x+=2){
-  const lon=9+(x-18)/348*55,lat=14-(y-18)/348*55;
+ const height=Number(canvas.dataset.height)||384;canvas.width=384;canvas.height=height;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
+ const project=coord=>projectMap(coord,JOURNEY_BOUNDS,384,height,18);
+ c.fillStyle='#000';c.fillRect(0,0,384,height);geometry(c,{type:'MultiPolygon',coordinates:WORLD},project,'#fff');geometry(c,CONTEXT_MAPS.africa.water,project,'#000');
+ const mask=c.getImageData(0,0,384,height).data;
+ for(let y=0;y<height;y+=2)for(let x=0;x<384;x+=2){
+  const lon=9+(x-18)/348*55,lat=14-(y-(height-348)/2)/348*55;
   const green=((lon-25)**2/170+(lat+3)**2/115)<1||((lon-34)**2/50+(lat+9)**2/120)<1;
   const dry=lon<23&&lat<-17;
   c.fillStyle=mask[(y*384+x)*4]>180?(green?'#c7d5b5':dry?'#eee3c8':'#ebe9d9'):'#b4ccd0';c.fillRect(x,y,2,2);
@@ -131,6 +131,6 @@ export function drawPhoneMap(canvas,visited=[]){
  text('KENYA',[37,4]);text('TANZANIA',[33,-7]);text('NAMIBIA',[18,-18]);text('SOUTH AFRICA',[26,-32]);text('MADAGASCAR',[47,-26]);text('INDIAN OCEAN',[53,-31]);
  c.textAlign='start';
  // Leader lines explain displaced points where two destinations almost coincide.
- for(const p of routePins.filter(p=>p.offset)){const a=project(p.coord),b=pinPosition(p,384);c.strokeStyle='#a2afa5';c.lineWidth=1;c.beginPath();c.moveTo(...a);c.lineTo(...b);c.stroke();}
+ for(const p of routePins.filter(p=>p.offset)){const a=project(p.coord),b=pinPosition(p,height);c.strokeStyle='#a2afa5';c.lineWidth=1;c.beginPath();c.moveTo(...a);c.lineTo(...b);c.stroke();}
  canvas.dataset.visited=visited.join(',');
 }
