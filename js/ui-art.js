@@ -26,23 +26,26 @@ function icon(c,type){
  }
 }
 function shell(c,w,h,small=false){
- // Quiet casing: one pixel outline and a single muted surface, without stacked bevels.
- edge(c,'dark',1,1,w-2,h-2,3);edge(c,'sage',2,2,w-4,h-4,2);
+ edge(c,'#8f9773',1,1,w-2,h-2,3);edge(c,'sage',2,2,w-4,h-4,2);
+ r(c,'light',4,3,w-9,1);r(c,'#bbc098',3,4,1,h-9);r(c,'#9ba47e',w-4,5,1,h-10);
  const sy=small?11:12,sh=h-(small?24:38);
  r(c,'moss',6,sy-1,w-12,sh+1);r(c,'light',7,sy,w-14,sh-1);
  r(c,'dark',Math.floor(w/2)-7,5,14,1);r(c,'moss',Math.floor(w/2)+10,5,2,1);
- if(small){const x=Math.floor(w/2)-7,y=Math.floor(h*.51);for(const [dx,dy]of [[0,0],[9,0],[0,9],[9,9]])r(c,'cream',x+dx,y+dy,6,6);r(c,'cream',Math.floor(w/2)-6,h-9,12,3);}
+ if(small){const x=Math.floor(w/2)-7,y=Math.floor(h*.51);for(const [dx,dy]of [[0,0],[9,0],[0,9],[9,9]]){r(c,'cream',x+dx,y+dy,6,6);r(c,'pale',x+dx,y+dy,6,1);}r(c,'cream',Math.floor(w/2)-6,h-9,12,3);}
 }
 function paper(c,w,h){r(c,'cream',0,0,w,h);r(c,'pale',0,0,w,2);for(let y=7;y<h;y+=17){const x=(Math.floor(y/17)*11)%Math.max(1,w-6);r(c,'#d7cea0',x,y,3,1);r(c,'#ded3a3',x+2,y+1,2,1);}r(c,'light',w-2,0,2,h);hatch(c,'#d5cba0',0,h-4,w,3);}
 function plaque(c,w,h){edge(c,'dark',0,2,w,h-2,2);edge(c,'ochre',0,0,w-1,h-2,2);edge(c,'cream',1,0,w-3,h-4,2);r(c,'pale',3,1,w-8,2);hatch(c,'light',2,h-8,w-5,4);r(c,'clay',3,3,2,2);r(c,'dark',w-6,h-7,2,2);}
 function crystal(c,w,h,mint=false){
- // A flat pane. Colour distinguishes messages; light no longer models an extrusion.
- edge(c,mint?'sage':'#b9bc95',0,0,w,h,2);edge(c,mint?'#c4cdae':'#e7daac',1,1,w-2,h-2,1);
+ edge(c,mint?'#a8b48e':'#b7b98e',0,0,w,h,2);edge(c,mint?'#c4cdae':'#e7daac',1,1,w-2,h-2,1);
+ r(c,mint?'#d6dcba':'#f0e3b8',3,1,w-7,1);r(c,mint?'#d0d7b2':'#ebe0b4',1,3,1,h-7);
+ r(c,mint?'#b8c2a0':'#d6cda1',3,h-2,w-7,1);r(c,mint?'#b8c2a0':'#d6cda1',w-2,3,1,h-7);
+ r(c,mint?'#dae0c0':'#f2e6be',3,3,Math.min(9,w-8),1);
 }
 function homeKey(c,w,h){
- edge(c,'dark',1,1,w-2,h-2,3);edge(c,'cream',2,2,w-4,h-4,2);
+ edge(c,'#8f9773',1,1,w-2,h-2,3);edge(c,'#ddd2a6',2,2,w-4,h-4,2);
+ r(c,'pale',5,2,w-11,1);r(c,'light',4,h-3,w-9,1);
  const x=Math.floor(w/2),y=Math.floor(h/2)-4;
- poly(c,'dark',[[x-6,y+4],[x,y-1],[x+6,y+4],[x+4,y+4],[x+4,y+9],[x-4,y+9],[x-4,y+4]]);r(c,'cream',x-1,y+5,2,4);
+ poly(c,'dark',[[x-6,y+4],[x,y-1],[x+6,y+4],[x+4,y+4],[x+4,y+9],[x-4,y+9],[x-4,y+4]]);r(c,'#ddd2a6',x-1,y+5,2,4);
 }
 export function drawUI(canvas,type){
  const small=type==='small-phone',iconType=type.startsWith('icon-');
