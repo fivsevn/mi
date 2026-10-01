@@ -50,7 +50,7 @@ function homeKey(c,w,h){
  round(c,'#eddfb1',x-5,y-6,11,11,2);round(c,'#93996c',x-4,y-5,9,9,1);
 }
 function shell(c,w,h,small=false){
- const rad=small?7:17;
+ const rad=small?7:23;
  round(c,'#65714f',1,2,w-2,h-3,rad);round(c,'#a18f6d',2,1,w-4,h-3,rad-1);round(c,'#e2d5a4',3,2,w-6,h-5,rad-2);round(c,'#899263',4,4,w-8,h-8,rad-3);round(c,'#70794f',6,5,w-12,h-10,rad-4);
  r(c,'#c5c69a',3,rad,w>80?2:1,h-rad*2);r(c,'#eddfb1',5,rad,1,h-rad*2);r(c,'#bb997e',w-5,rad,2,h-rad*2);r(c,'#eddfb1',w-7,rad+3,1,h-rad*2-7);
  poly(c,'#899263',[[7,rad],[w*.43,7],[w*.59,7],[7,h*.32]].map(([x,y])=>[Math.round(x),Math.round(y)]));poly(c,'#65714f',[[w-7,h*.71],[w-7,h*.94],[w*.6,h-7],[w*.38,h-7]].map(([x,y])=>[Math.round(x),Math.round(y)]));
