@@ -1,12 +1,12 @@
-import { geographyFor,routePins } from '../data/geography.js?v=maps-6';
-import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=maps-6';
-import { placeFor } from '../data/routes/africa-stories.js?v=maps-6';
-import { ROUTES } from '../data/routes/index.js?v=maps-6';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=maps-6';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=maps-6';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=maps-6';
-import * as E from './engine.js?v=maps-6';
-import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=maps-6';
+import { geographyFor,routePins } from '../data/geography.js?v=paper-7';
+import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=paper-7';
+import { placeFor } from '../data/routes/africa-stories.js?v=paper-7';
+import { ROUTES } from '../data/routes/index.js?v=paper-7';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=paper-7';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=paper-7';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=paper-7';
+import * as E from './engine.js?v=paper-7';
+import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=paper-7';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -33,17 +33,19 @@ function render({sync=true,keepScroll=false}={}){
  drawCanvases();startMini();updateSaveStatus();
 }
 function drawCanvases(){if($('#lock-selfie'))selfie($('#lock-selfie')); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));}
-function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><button class="desk-phone" data-action="phone" aria-label="拿起手机"><span class="mini-speaker"></span><span class="mini-screen"><span>${clockTime()}</span><i class="tiny-apps" aria-hidden="true"></i></span><span class="mini-home"></span></button><div class="map-paper"><div class="map-view"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 720 396" preserveAspectRatio="xMidYMid meet"><a href="#route-map" data-action="journey" aria-label="展开非洲地图"><path d="${africaHitPath()}"/><text x="353" y="166">AFRICA</text></a></svg></div></div></section>`;}
+function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><button class="desk-phone" data-action="phone" aria-label="拿起手机"><span class="mini-speaker"></span><span class="mini-screen"><span>${clockTime()}</span><i class="tiny-apps" aria-hidden="true"></i></span><span class="mini-home"></span></button><div class="map-paper"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><div class="map-view"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 720 396" preserveAspectRatio="xMidYMid meet"><a href="#route-map" data-action="journey" aria-label="展开非洲地图"><path d="${africaHitPath()}"/><text x="353" y="166">AFRICA</text></a></svg></div></div></section>`;}
 function mapNode(){const r=run();return current()||(r?.stage==='rest'?ROUTES[0].nodes[r.node-1]:r&&['return-pack','reflect'].includes(r.stage)?ROUTES[0].nodes.at(-1):null);}
 function visitedPlaces(){
  const r=run();if(!r)return [];
  const nodes=E.visibleNotes(r).map(note=>ROUTES[0].nodes.find(n=>n.id===note.nodeId));if(current())nodes.push(current());
  return routePins.filter(p=>nodes.some(n=>n?.location===p.id&&geographyFor(n).key!=='shanghai'&&!(p.id==='seychelles'&&n.id==='flight-island'))).map(p=>p.id);
 }
-function renderRouteMap(){const visited=visitedPlaces();app.innerHTML=`<section class="route-map-screen"><button class="back-link" data-action="map" aria-label="收起非洲地图"><i class="px-arrow back-arrow"></i></button><div class="route-paper"><div class="route-map-view"><canvas id="africa-map" role="img" aria-label="非洲行程地图，虚线连接已到访的地点"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin),on=visited.includes(pin.id);return `<button class="route-pin ${on?'visited':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/420*100}%" aria-label="${esc(pin.label)}${on?'，已到访':'，尚未到访'}" ${on?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div></div>${btn(!run()?'收拾行李':run().stage==='ending'?'回到房间':'继续旅行','map-continue')}</section>`;}
+function nextPlace(){const r=run();if(!r||['reason','packing'].includes(r.stage))return 'safari';if(r.stage==='ending')return null;return E.segmentFor(r)?.id||'mauritius';}
+function continueJourney(){const r=run();if(!r)startRun();else{if(r.stage==='rest')E.resumeSegment(r);view='play';save();render();}}
+function renderRouteMap(){const visited=visitedPlaces(),next=nextPlace();app.innerHTML=`<section class="route-map-screen"><div class="route-paper"><div class="route-map-view"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><canvas id="africa-map" role="img" aria-label="非洲行程地图，浅色虚线为尚未走过的路线"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin),on=visited.includes(pin.id),ready=next===pin.id;return `<button class="route-pin ${on?'visited':''} ${ready?'ready':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/420*100}%" aria-label="${esc(pin.label)}${ready?'，下一步':on?'，已到访':'，尚未到访'}" ${on||ready?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div></div></section>`;}
 function scenePanel(type,overlay=''){
  const place=geographyFor(mapNode()).label;
- return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><span>${clockTime()}</span><i aria-hidden="true"></i></button><span class="location-whisper" role="status" hidden>${esc(place)}</span><button class="pocket-map map-paper" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
+ return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><span>${clockTime()}</span><i aria-hidden="true"></i></button><button class="location-whisper" data-action="hide-location" hidden>${esc(place)}</button><button class="pocket-map map-paper" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
 }
 function gameScreen(type,title,text,choices,{overlay='',className='',extra=''}={}){return `<section class="play-screen ${className}">${scenePanel(type,overlay)}<div class="story-copy"><h1>${esc(title)}</h1><p class="prose ${className?'mini-text':''}">${esc(text)}</p>${extra}</div><div class="choice-scroll" tabindex="0" aria-label="选项">${choices}</div></section>`;}
 function choiceButtons(n){const r=run();return n.choices.map((c,i)=>{if(c.requires&&!r.bag.includes(c.requires)||c.condition&&!c.condition(r))return '';const cost=E.choiceCost(r,c);return `<button class="choice" data-action="choose" data-index="${i}" ${E.canAfford(r,cost)?'':'disabled'}><span class="choice-number">${String(i+1).padStart(2,'0')}</span><span><b>${esc(c.label)}</b>${c.detail?`<small>${esc(c.detail)}</small>`:''}</span><span class="price">${cost?money(cost):arrow}</span></button>`;}).join('');}
@@ -83,11 +85,9 @@ function closePhone(){if(phoneReturn==='play'&&['social','chat'].includes(run()?
 function dispatch(action,b){const r=run();
  if(miniAction(action,b))return;
  if(action==='journey'){view='route-map';closeModal();render();return;}
- if(action==='map-continue'){if(!r)startRun();else if(r.stage==='rest'){E.resumeSegment(r);view='play';save();render();}else{view='play';render();}return;}
  if(action==='visit-place'){
-  const id=b.dataset.place;if(!visitedPlaces().includes(id))return;
-  if(current()?.location===id&&r.stage!=='ending'){view='play';render();}
-  else{notesRegion=id;phoneReturn='route-map';phoneApp='notes';phoneUnlocked=true;view='phone';render();}return;
+  const id=b.dataset.place;if(id===nextPlace()){continueJourney();return;}if(!visitedPlaces().includes(id))return;
+  notesRegion=id;phoneReturn='route-map';phoneApp='notes';phoneUnlocked=true;view='phone';render();return;
  }
  if(action==='resume-segment'){if(r&&E.resumeSegment(r)){view='play';closeModal();save();render();}return;}
  if(action==='phone'){openPhone();return;}
@@ -98,7 +98,7 @@ function dispatch(action,b){const r=run();
  if(action==='map'){view='map';closeModal();render();return;}
  if(action==='continue'){view='play';closeModal();render();return;}
  if(action==='close'){closeModal();return;}
- if(action==='location'){const el=$('.location-whisper');if(!el)return;el.hidden=false;b.setAttribute('aria-expanded','true');clearTimeout(locationTimer);locationTimer=setTimeout(()=>{el.hidden=true;b.setAttribute('aria-expanded','false');},3200);return;}
+ if(action==='location'||action==='hide-location'){const el=$('.location-whisper'),map=$('.pocket-map');if(!el)return;el.hidden=action==='hide-location'||!el.hidden;map?.setAttribute('aria-expanded',String(!el.hidden));return;}
  if(action==='restart'){openModal('重新收拾这次的行李？','手机里的这本记事本，也会从空白开始。',btn('重新出发','confirm-start')+btn('先不换','close'));return;}
  if(action==='confirm-start'){startRun();return;}
  if(action==='contact'){selectedContact=b.dataset.contact;render();return;}

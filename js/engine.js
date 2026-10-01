@@ -1,7 +1,7 @@
-import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=maps-6';
-import { routeById } from '../data/routes/index.js?v=maps-6';
-import { selectEnding, returnQuestions } from '../data/endings.js?v=maps-6';
-import { conversation } from '../data/contacts.js?v=maps-6';
+import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=paper-7';
+import { routeById } from '../data/routes/index.js?v=paper-7';
+import { selectEnding, returnQuestions } from '../data/endings.js?v=paper-7';
+import { conversation } from '../data/contacts.js?v=paper-7';
 export const SAVE_KEY='mi-v02';
 export function freshProfile(){return {version:2,records:[],contacts:{},messages:[],run:null};}
 export function createRun(routeId='africa-001',seed=Math.random()){

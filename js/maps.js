@@ -1,5 +1,5 @@
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=maps-6';
-import { geographyFor,routePins } from '../data/geography.js?v=maps-6';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=paper-7';
+import { geographyFor,routePins } from '../data/geography.js?v=paper-7';
 export function projectMap(coord,bounds,width=384,height=420,padding=20){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2;
@@ -32,9 +32,11 @@ function baseMap(canvas,map,width,height,{africa=false,padding=0}={}){
 }
 export function drawJourneyMap(canvas,visited=[]){
  const {c,project}=baseMap(canvas,CONTEXT_MAPS.africa,384,420,{africa:true,padding:20});
- const arrived=routePins.filter(p=>visited.includes(p.id));
- c.strokeStyle='#536b50';c.lineWidth=1.7;c.setLineDash([3,6]);c.beginPath();
- arrived.forEach((p,i)=>{const [x,y]=project(p.coord);i?c.lineTo(x,y):c.moveTo(x,y);});c.stroke();c.setLineDash([]);
+ c.setLineDash([3,6]);
+ for(let i=1;i<routePins.length;i++){
+  const a=routePins[i-1],b=routePins[i],walked=visited.includes(a.id)&&visited.includes(b.id);
+  c.strokeStyle=walked?'#3f5946':'#aeb3a2';c.lineWidth=walked?2:1.2;c.beginPath();c.moveTo(...project(a.coord));c.lineTo(...project(b.coord));c.stroke();
+ }c.setLineDash([]);
  // Tiny Indian Ocean islands are too small for this continental scale.
  for(const p of routePins.filter(p=>['seychelles','mauritius'].includes(p.id))){const [x,y]=project(p.coord);c.fillStyle='#b79b55';c.fillRect(Math.round(x)-2,Math.round(y)-2,5,5);}
  for(const p of routePins.filter(p=>p.offset)){const a=project(p.coord),b=pinPosition(p);c.strokeStyle='#82906e';c.lineWidth=.7;c.beginPath();c.moveTo(...a);c.lineTo(...b);c.stroke();}

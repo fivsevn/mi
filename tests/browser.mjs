@@ -28,7 +28,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('phone-home');await page.screenshot({path:`test-results/${name}-pocket-apps.png`});await click('close-phone');
  // Old bookmark URLs cannot recover cross-run records or background pages.
  await page.goto(origin+'/#record/previous-run');await page.reload();await click('unlock');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');
- await click('journey');assert.equal(await page.locator('.route-pin:disabled').count(),7);await mapFit();await page.screenshot({path:`test-results/${name}-africa-unvisited.png`});await click('map-continue');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');
+ await click('journey');assert.equal(await page.locator('.route-pin:disabled').count(),6);await mapFit();await page.screenshot({path:`test-results/${name}-africa-unvisited.png`});await click('visit-place','.ready');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');
  await fit();assert.ok(await page.locator('.choice-scroll').evaluate(e=>e.scrollHeight>e.clientHeight));assert.equal(await page.evaluate(()=>scrollY),0);assert.doesNotMatch(await page.locator('#app').innerText(),/\d+\.\d+ kg/);await page.screenshot({path:`test-results/${name}-pocket-packing.png`});
  await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');await click('depart');
  // Reproduce the old populated save before the first choice, not just a clean browser.
@@ -55,7 +55,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
    }
   }else if(r.stage==='result'){
    if(count===2){
-    assert.equal(await page.locator('.travel-head').count(),0);await click('location');assert.equal(await page.locator('.location-whisper').isVisible(),true);assert.equal(await page.locator('dialog[open]').count(),0);await page.waitForTimeout(3350);assert.equal(await page.locator('.location-whisper').isVisible(),false);
+    assert.equal(await page.locator('.travel-head').count(),0);await click('location');assert.equal(await page.locator('.location-whisper').isVisible(),true);assert.equal(await page.locator('dialog[open]').count(),0);await page.waitForTimeout(3350);assert.equal(await page.locator('.location-whisper').isVisible(),true);await click('hide-location');assert.equal(await page.locator('.location-whisper').isVisible(),false);
     await phone('notes');assert.equal(await page.locator('.phone-note').count(),1);assert.doesNotMatch(await page.locator('.notes-app').innerText(),/泳镜|花豹|星期日/);await page.reload();await click('unlock');assert.equal(await page.locator('.phone-note').count(),1);await click('close-phone');
    }
    await click('next');
@@ -65,7 +65,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
    await click('journey');assert.equal(await page.locator('.route-pin').count(),7);assert.equal(await page.locator('.route-pin.visited').count(),rests);assert.equal(await page.locator('.journey-stops').count(),0);await fit();await mapFit();
    await page.screenshot({path:`test-results/${name}-journey-${rests}.png`});
    const visited=await page.locator('.route-pin.visited').first().getAttribute('data-place');await click('visit-place',`[data-place="${visited}"]`);assert.ok(await page.locator('.phone-note').count());assert.deepEqual(await state(),snapshot);await page.reload();await click('unlock');assert.ok(await page.locator('.phone-note').count());await click('close-phone');
-   await click('map-continue');assert.equal((await state()).run.id,snapshot.run.id);
+   await click('visit-place','.ready');assert.equal((await state()).run.id,snapshot.run.id);
   }else throw Error(r.stage);
  }
  assert.equal(rests,7);assert.equal(miniCount,3);const r=(await state()).run;assert.ok(r.flags.goggles);assert.equal(r.used.airfryer,1);assert.ok(r.bag.includes('broken-adapter'));assert.ok(!r.bag.includes('adapter'));
@@ -76,10 +76,10 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  for(const [width,height] of [[320,568],[360,640],[390,844],[440,956],[768,900],[1440,1000]]){await page.setViewportSize({width,height});await fit();const h=await page.locator('.scene-panel').evaluate(e=>e.getBoundingClientRect().height);assert.ok(h>height*.35);await phone('bag');await fit();await click('close-phone');await fit();}
  await page.screenshot({path:`test-results/${name}-pocket-desktop.png`});
  await page.evaluate(()=>localStorage.setItem('mi-v01','untouched'));await page.goto(origin+'/legacy/');await page.waitForSelector('#world-map');assert.equal(await page.evaluate(()=>localStorage.getItem('mi-v01')),'untouched');
- const blocked=await browser.newContext({viewport:{width:320,height:568}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('[data-action=map-continue]').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
+ const blocked=await browser.newContext({viewport:{width:320,height:568}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('.route-pin.ready').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
  const migratedCtx=await browser.newContext({viewport:{width:320,height:568}}),mp=await migratedCtx.newPage();await mp.goto(origin);
  const oldSave=await mp.evaluate(async()=>{
-  const E=await import('/js/engine.js?v=maps-6'),{africa}=await import('/data/routes/africa-001.js?v=maps-6');
+  const E=await import('/js/engine.js?v=paper-7'),{africa}=await import('/data/routes/africa-001.js?v=paper-7');
   const p=E.freshProfile();p.run=E.createRun();p.run.stage='packing';E.preset(p.run);E.depart(p.run);E.choose(p.run,0);
   p.run.node=africa.previousNodeIds.indexOf('cape-sea');p.run.revision=3;p.run.stage='event';p.run.pending=null;delete p.run.completedSegments;
   localStorage.setItem('mi-v02',JSON.stringify(p));return p;
