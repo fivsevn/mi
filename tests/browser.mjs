@@ -74,7 +74,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
   p.run.node=africa.previousNodeIds.indexOf('cape-sea');p.run.revision=3;p.run.stage='event';p.run.pending=null;delete p.run.completedSegments;
   localStorage.setItem('mi-v02',JSON.stringify(p));return p;
  });
- await mp.goto(origin+'/#play');assert.match(await mp.locator('.story-copy h1').innerText(),/海在这里/);
+ await mp.goto(origin+'/#play');await mp.reload();assert.match(await mp.locator('.story-copy h1').innerText(),/海在这里/);
  await mp.locator('[data-action=choose]').first().click();const migratedSave=await mp.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
  assert.equal(migratedSave.run.id,oldSave.run.id);assert.deepEqual(migratedSave.run.bag,oldSave.run.bag);assert.equal(migratedSave.run.notes[0].nodeId,'flight-out');assert.equal(migratedSave.run.completedSegments.length,5);await migratedCtx.close();
  assert.deepEqual(errors,[]);console.log(`PASS ${name}: complete 74 events and seven segment pauses; all minigames; no pre-run or cross-run notes; no archives; phone apps; fixed scene, internal menu scroll; 320x568–1440x1000; reload, old routes, legacy and denied storage.`);await browser.close();
