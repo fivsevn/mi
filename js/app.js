@@ -1,14 +1,14 @@
-import {drawUI} from './ui-art.js?v=atlas-45';
-import {paintSurface} from './scene.js?v=atlas-45';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-45';
-import { drawJourneyMap,drawLocalMap,pinPosition,compass } from './maps.js?v=atlas-45';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-45';
-import { ROUTES } from '../data/routes/index.js?v=atlas-45';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-45';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-45';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-45';
-import * as E from './engine.js?v=atlas-45';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-45';
+import {drawUI} from './ui-art.js?v=atlas-46';
+import {paintSurface} from './scene.js?v=atlas-46';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-46';
+import { drawJourneyMap,drawLocalMap,pinPosition,compass } from './maps.js?v=atlas-46';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-46';
+import { ROUTES } from '../data/routes/index.js?v=atlas-46';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-46';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-46';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-46';
+import * as E from './engine.js?v=atlas-46';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-46';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -75,7 +75,7 @@ function allMessages(){return run()?.messages||[];}
 function chatHTML(lines,c){return lines.map(l=>`<div class="bubble ${l.from==='mi'?'mi':''}"><span class="chat-speaker">${l.from==='mi'?'米':esc(c.name)}</span>${esc(l.text)}</div>`).join('');}
 function chatApp(){const r=run(),social=r?.stage==='social',chat=r?.stage==='chat'?r.messages.at(-1):null;const c=CONTACTS.find(c=>c.id===(chat?.contact||selectedContact));
  if(c){const messages=allMessages().filter(m=>m.contact===c.id);return `<div class="phone-scroll"><div class="chat-thread">${chatHTML([{from:'friend',text:greetings[c.id][0]}],c)}${messages.map(m=>chatHTML(m.lines,c)).join('')}</div></div>${!chat&&r&&!messages.some(m=>m.event==='hello')?btn(esc(greetings[c.id][1]),'hello',`data-contact="${c.id}"`):''}`;}
- return `<div class="phone-scroll">${social?`<p class="social-quote">${SOCIAL_PROMPT}</p>`:''}<div class="contact-list">${CONTACTS.map(c=>{const last=allMessages().filter(m=>m.contact===c.id).at(-1)?.lines.at(-1)?.text||greetings[c.id][0];return `<button class="contact" data-action="${social?'send':'contact'}" data-contact="${c.id}"><span class="contact-avatar" data-tone="${c.color}">${c.mark}</span><span><b>${esc(c.name)}</b><small>${esc(last)}</small></span></button>`;}).join('')}</div></div>`;
+ return `<div class="phone-scroll">${social?`<p class="social-quote">${SOCIAL_PROMPT}</p>`:''}<div class="contact-list">${CONTACTS.map(c=>{const last=allMessages().filter(m=>m.contact===c.id).at(-1)?.lines.at(-1)?.text||greetings[c.id][0];return `<button class="contact" data-action="${social?'send':'contact'}" data-contact="${c.id}"><span class="contact-avatar"><canvas data-ui="friend-${CONTACTS.indexOf(c)}" aria-hidden="true"></canvas></span><span><b>${esc(c.name)}</b><small>${esc(last)}</small></span></button>`;}).join('')}</div></div>`;
 }
 function notesApp(){const r=run(),notes=E.visibleNotes(r).filter(n=>!notesRegion||ROUTES[0].nodes.find(node=>node.id===n.nodeId)?.location===notesRegion),record=!notesRegion&&r?.stage==='ending'&&r.notebookVersion===1?profile.records.find(x=>x.runId===r.id):null,end=ENDINGS.find(e=>e.id===record?.endingId);return `<div class="phone-scroll notes-app">${notes.length?notes.map(n=>`<article class="phone-note"><small>第 ${n.day} 天 · ${esc(n.place)}</small><p>${esc(n.text)}</p></article>`).join(''):'<p class="empty-notes">还没写下什么。</p>'}${end?`<article class="phone-note ending-note"><small>回家以后</small><h2>${esc(end.title)}</h2><p>${esc(end.text)}</p><p>${esc(record.returnReason)}</p>${(r.itemHistory||[]).map(x=>`<p>${esc(itemById[x.id]?.name)} · ${esc(x.text)}</p>`).join('')}</article>`:''}</div>`;}
 function bagApp(){const r=run();return `<div class="phone-scroll">${r?`<div class="avatar-row"><canvas data-avatar aria-label="米的穿搭"></canvas><p>${packingThought(r)}</p></div>${outfitControls(r)}<div class="case-items">${r.bag.map(id=>btn(esc(itemById[id].name),'inspect',`data-id="${id}"`)).join('')}</div>`:'<p class="empty-notes">箱子还在房间里。</p>'}</div>`;}

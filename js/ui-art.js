@@ -86,6 +86,16 @@ function miniPhone(c){
  poly(c,'#323a30',[[6,10],[17,10],[6,27]]);poly(c,'#3d4334',[[25,25],[25,41],[14,41]]);r(c,'#515a43',6,12,1,24);r(c,'#68704f',7,9,15,1);
  r(c,'#78805a',7,43,18,5);circle(c,'#65714f',16,46,3);r(c,'#c5c69a',15,45,2,2);r(c,'#93996c',16,46,1,1);r(c,'#e2d5a4',9,49,13,1);r(c,'#bb997e',23,48,3,1);
 }
+function friendIcon(c,id){
+ const backgrounds=['#b5bf98','#a7bcb0','#d4bd98','#b6b0c0','#aaaF92','#bea599'];
+ r(c,'#65714f',0,1,24,23);r(c,'#adb388',0,0,23,22);r(c,'#eddfb1',1,1,21,1);r(c,backgrounds[id%6],2,3,19,17);r(c,'#93996c',22,3,1,18);r(c,'#78805a',2,22,20,1);
+ if(id===0){r(c,'#78805a',11,9,1,10);poly(c,'#65714f',[[11,11],[6,10],[4,6],[8,6],[11,9]]);poly(c,'#93996c',[[12,13],[16,12],[19,7],[15,7],[12,10]]);r(c,'#bb997e',8,17,7,3);r(c,'#eddfb1',9,17,5,1);}
+ if(id===1){r(c,'#eddfb1',5,7,9,3);r(c,'#eddfb1',8,5,5,6);r(c,'#c5c69a',12,9,6,2);r(c,'#bb997e',16,5,3,3);r(c,'#78805a',4,16,15,2);}
+ if(id===2){poly(c,'#65714f',[[3,19],[9,9],[15,19]]);poly(c,'#93996c',[[10,19],[16,7],[21,19]]);poly(c,'#eddfb1',[[7,12],[9,9],[11,12]]);r(c,'#bb997e',4,5,3,3);}
+ if(id===3){r(c,'#65714f',5,10,15,9);r(c,'#eddfb1',6,11,13,2);circle(c,'#b4a578',12,15,4);circle(c,'#65714f',12,15,2);r(c,'#bb997e',7,8,5,2);r(c,'#eddfb1',17,14,2,1);}
+ if(id===4){r(c,'#78805a',10,11,2,8);for(const [x,y] of [[7,7],[12,6],[15,10],[7,12]]){circle(c,'#bb997e',x,y,3);r(c,'#eddfb1',x,y,1,1);}r(c,'#65714f',13,15,5,2);}
+ if(id===5){circle(c,'#eddfb1',11,11,6);circle(c,'#bea599',14,9,5);r(c,'#eddfb1',18,6,1,3);r(c,'#eddfb1',17,7,3,1);r(c,'#78805a',5,18,14,1);}
+}
 function paper(c,w,h){r(c,'cream',0,0,w,h);}
 function plaque(c,w,h){edge(c,'dark',0,2,w,h-2,2);edge(c,'ochre',0,0,w-1,h-2,2);edge(c,'cream',1,0,w-3,h-4,2);r(c,'pale',3,1,w-8,2);hatch(c,'light',2,h-8,w-5,4);r(c,'clay',3,3,2,2);r(c,'dark',w-6,h-7,2,2);}
 function phonePane(c,w,h,type){
@@ -109,6 +119,6 @@ function phonePane(c,w,h,type){
  for(let x=4;x<w-4;x++)if(x%4===0)r(c,mint?'#adb388':'#c5c69a',x,h-5,1,1);
 }
 export function drawUI(canvas,type){
- const small=type==='small-phone',ico=type.startsWith('icon-'),w=type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
- if(ico)icon(c,type.slice(5));else if(small)miniPhone(c);else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='plaque')plaque(c,w,h);else paper(c,w,h);
+ const small=type==='small-phone',friend=type.startsWith('friend-'),ico=type.startsWith('icon-'),w=friend?24:type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=friend?24:type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
+ if(friend)friendIcon(c,Number(type.slice(7)));else if(ico)icon(c,type.slice(5));else if(small)miniPhone(c);else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='plaque')plaque(c,w,h);else paper(c,w,h);
 }
