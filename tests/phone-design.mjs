@@ -6,11 +6,8 @@ for(const browser of [chromium,webkit]){
  await p.goto('http://localhost:4173');await p.waitForSelector('.font-ready');
  assert.equal(await p.locator('.atlas-hint').count(),0);assert.equal(await p.locator('.desk-phone').evaluate(e=>getComputedStyle(e,'::after').content),'none');
  await p.locator('[data-action=phone]').click();assert.equal(await p.locator('.back-link').count(),0);assert.equal(await p.locator('[data-action=close-phone]').count(),1);
- assert.equal(await p.locator('.phone-status [data-clock]').innerText(),'03:40');await p.locator('.phone-home').click();assert.equal(await p.locator('.phone-scene').count(),0);
- await p.locator('[data-action=journey]').click();await p.locator('.route-pin.ready').click();await p.locator('[data-action=phone]').click();await p.locator('.unlock-arrow').click();assert.equal(await p.locator('.phone-apps').count(),0);
- const knob=await p.locator('.unlock-arrow').boundingBox(),track=await p.locator('.unlock').boundingBox();
- await p.mouse.move(knob.x+knob.width/2,knob.y+knob.height/2);await p.mouse.down();await p.mouse.move(knob.x+knob.width/2+20,knob.y+knob.height/2);await p.mouse.up();assert.equal(await p.locator('.phone-apps').count(),0);
- await p.mouse.move(knob.x+knob.width/2,knob.y+knob.height/2);await p.mouse.down();await p.mouse.move(track.x+track.width-15,knob.y+knob.height/2,{steps:10});await p.mouse.up();
+ assert.equal(await p.locator('.lock-time').innerText(),'03:40');await p.locator('.phone-home').click();assert.equal(await p.locator('.phone-scene').count(),0);
+ await p.locator('[data-action=journey]').click();await p.locator('.route-pin.ready').click();await p.locator('[data-action=phone]').click();assert.equal(await p.locator('.phone-status [data-clock]').count(),0);assert.equal(await p.locator('.phone-power').innerText(),'35%');assert.equal(await p.locator('.unlock').count(),0);await p.locator('.tap-unlock').click();
  assert.equal(await p.locator('.phone-apps').count(),1);assert.equal(await p.locator('.phone-launch-grid button').first().getAttribute('data-app'),'settings');assert.equal(await p.locator('.phone-launch-grid button').nth(1).getAttribute('data-app'),'bag');assert.equal(await p.locator('.phone-dock button').count(),2);assert.equal(await p.locator('.phone-patina').count(),0);assert.equal(await p.locator('.phone-scene').evaluate(e=>(getComputedStyle(e).userSelect||getComputedStyle(e).webkitUserSelect)),'none');
 
  await p.locator('[data-app=settings]').click();await p.clock.fastForward(60000);assert.equal(await p.locator('.phone-status [data-clock]').innerText(),'03:41');assert.equal(await p.locator('.settings-app').count(),1);assert.equal(await p.locator('.settings-app [data-action=map],.settings-app [data-action=continue]').count(),0);

@@ -47,10 +47,10 @@ function homeKey(c,w,h){
  const x=Math.floor(w/2),y=Math.floor(h/2),rad=Math.min(15,Math.floor(h/2)-1);
  circle(c,'#b4a578',x,y+1,rad);circle(c,'#65714f',x,y-1,rad-1);
  for(let i=-9;i<=9;i++){const yy=Math.round(Math.sqrt(Math.max(0,(rad-1)*(rad-1)-i*i)));r(c,i<0?'#c5c69a':'#eddfb1',x+i,y+yy,1,1);}
- round(c,'#eddfb1',x-5,y-6,11,11,2);round(c,'#93996c',x-4,y-5,9,9,1);
+
 }
 function shell(c,w,h,small=false){
- const rad=small?7:23;
+ const rad=small?7:30;
  round(c,'#65714f',1,2,w-2,h-3,rad);round(c,'#a18f6d',2,1,w-4,h-3,rad-1);round(c,'#e2d5a4',3,2,w-6,h-5,rad-2);round(c,'#899263',4,4,w-8,h-8,rad-3);round(c,'#70794f',6,5,w-12,h-10,rad-4);
  r(c,'#c5c69a',3,rad,w>80?2:1,h-rad*2);r(c,'#eddfb1',5,rad,1,h-rad*2);r(c,'#bb997e',w-5,rad,2,h-rad*2);r(c,'#eddfb1',w-7,rad+3,1,h-rad*2-7);
  poly(c,'#899263',[[7,rad],[w*.43,7],[w*.59,7],[7,h*.32]].map(([x,y])=>[Math.round(x),Math.round(y)]));poly(c,'#65714f',[[w-7,h*.71],[w-7,h*.94],[w*.6,h-7],[w*.38,h-7]].map(([x,y])=>[Math.round(x),Math.round(y)]));
@@ -58,6 +58,8 @@ function shell(c,w,h,small=false){
  // Broken silver highlights and warm oxidation give the casing its physical depth.
  for(let i=0;i<17;i++){const yy=rad+7+(i*31)%(h-rad*2-14);r(c,i%3?'#899263':'#e2d5a4',3,yy,2,2+i%4);if(i%4===0)r(c,'#bb997e',w-6,yy+6,2,4);}
  line(c,'#c5c69a',rad,5,w*.48,5);line(c,'#eddfb1',rad+4,h-4,w*.43,h-4);line(c,'#70794f',w*.6,h-4,w-rad,h-4);
+ for(const [xx,yy,k,ww] of [[rad+8,4,'#f0e3b7',8],[w-rad-13,3,'#c2ae8e',5],[4,h*.34,'#a7af82',2],[w-5,h*.46,'#ccad92',2],[rad+3,h-5,'#d8cca2',7],[w-rad-18,h-4,'#b39b84',6]])r(c,k,xx,yy,ww,1);
+ for(let i=0;i<8;i++){const yy=rad+17+i*(h-2*rad-34)/8;r(c,i%2?'#a3aa7a':'#c8c69d',4,yy,1,3);r(c,i%3?'#b69b81':'#c9b799',w-5,yy+5,1,2);}
  const sy=small?10:36,sh=h-(small?21:76);r(c,'#65714f',8,sy-1,w-16,sh+2);r(c,'#c5c69a',9,sy,w-18,sh);
  const speaker=small?10:34;round(c,'#65714f',Math.floor(w/2)-speaker/2,small?6:22,speaker,small?2:5,small?1:2);r(c,'#e2d5a4',Math.floor(w/2)-speaker/2+1,small?7:25,speaker-2,1);
  if(small){c.save();c.translate(10,sy+1);wallpaper(c,w-20,sh-2);for(const [type,x,y]of [['chat',2,14],['notes',13,14],['bag',2,25],['settings',13,25]]){c.save();c.translate(x,y);c.scale(.26,.26);icon(c,type);c.restore();}c.restore();c.save();c.translate(w/2-5,h-11);c.scale(.3,.3);homeKey(c,34,34);c.restore();}
