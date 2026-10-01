@@ -1,4 +1,4 @@
-@font-face{font-family:Pixel;src:url('../assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=atlas-53') format('woff2');font-display:block}
+@font-face{font-family:Pixel;src:url('../assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=atlas-54') format('woff2');font-display:block}
 :root{font-family:Pixel,monospace;font-synthesis:none;color:#435644;--paper:#e4d7aa;--ink:#435644;--line:#9ba17b;--leaf:#aab186;--clay:#b98b78;--deep:#607b65}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}body{position:fixed;inset:0;background:#556b58}#surface{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}.app-shell{position:relative;width:100%;max-width:560px;height:100dvh;margin:auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);overflow:hidden;background:var(--paper)}html:not(.font-ready) .app-shell{visibility:hidden}#app{flex:1;min-height:0;overflow:hidden;outline:none}.topbar{display:none}.footer{position:absolute;bottom:0;left:0;right:0;z-index:15;background:var(--paper);font-size:10px;padding:6px}.footer:has(#save-status:empty){display:none}h1,h2,h3,p{margin:0;font-weight:400}b,strong{font-weight:400}button,a{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button{cursor:pointer;border:0;border-radius:0}button:disabled{opacity:.48;cursor:default}[hidden]{display:none!important}button:focus-visible,a:focus-visible{outline:2px solid #b98b78;outline-offset:3px}a{text-decoration:none}canvas{image-rendering:pixelated}button:active{translate:1px 1px}
 /* The atlas fills the portrait stage. Its sheet can be moved directly. */
@@ -119,3 +119,17 @@ body:has(.phone-scene) #surface{visibility:visible}
 .desk .paper-title,.route-map-screen>.paper-title{top:22px;left:22px;font-size:22px;padding:9px 14px 10px}
 .route-pin i,.route-pin:disabled i,.route-pin.ready i,.route-pin.visited i{width:5px;height:5px;left:12px;top:12px;background:#b16c89;border:0;box-shadow:none;outline:none}
 .route-pin:hover i,.route-pin:focus-visible i{outline:none;box-shadow:none}
+
+@keyframes phone-buzz{0%,100%{transform:translateX(0) rotate(0)}12%,32%,52%,72%{transform:translateX(-2px) rotate(-3deg)}22%,42%,62%,82%{transform:translateX(2px) rotate(3deg)}}
+.desk-phone.phone-buzz{animation:phone-buzz .55s 3;transform-origin:50% 80%}
+@media(prefers-reduced-motion:reduce){.desk-phone.phone-buzz{animation-duration:1s;animation-iteration-count:1}}
+.navigation-app{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;background:#ebe9d9;color:#526b62;padding:10px 6px;overflow:hidden}
+.navigation-heading{padding:0 8px 12px;font-size:18px}.navigation-heading small{display:block;font-size:10px;margin-top:7px;color:#7d887d}
+.navigation-square{position:relative;width:100%;aspect-ratio:1;flex-shrink:0}.navigation-square>canvas{display:block;width:100%;height:100%}
+.navigation-footnote{padding:10px 8px 0;font-size:11px;color:#6c7d70}
+.navigation-app .route-pin{width:32px;height:32px}.navigation-app .route-pin i{width:6px;height:6px;background:#b16c89}
+.navigation-app .route-pin:disabled i{background:#b16c89}.navigation-app .route-pin.ready i{width:6px;height:6px;left:12px;top:12px}
+.navigation-app .pin-label{font-size:10px;color:#526b62;text-shadow:1px 1px #f8f5e9}
+.navigation-app .route-pin.ready .pin-label{display:block;white-space:nowrap}
+.phone-launch-grid{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:8px}
+@media(max-height:680px){.navigation-heading{font-size:14px;padding-bottom:5px}.navigation-heading small{font-size:9px;margin-top:4px}.navigation-footnote{font-size:10px;padding-top:5px}.navigation-app{padding:5px}.phone-launch-grid{row-gap:0}}

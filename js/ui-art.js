@@ -29,6 +29,7 @@ function icon(c,type){
   edge(c,'ink',3,6,27,20,2);edge(c,'sage',4,5,25,18,2);r(c,'pale',6,6,19,2);r(c,'moss',27,9,2,12);
   poly(c,'cream',[[5,9],[26,9],[26,21],[14,21],[8,27],[8,21],[5,21]]);r(c,'ochre',8,22,1,5);r(c,'pale',6,9,18,2);hatch(c,'light',6,18,18,3);
   for(let i=0;i<3;i++){r(c,'moss',9+i*5,14,2,2);r(c,'light',10+i*5,14,1,1);}
+ }else if(type==='maps'){poly(c,'#9ca77d',[[3,7],[11,4],[22,7],[30,4],[30,27],[22,30],[11,27],[3,30]]);poly(c,'#e0d9af',[[4,8],[11,5],[11,26],[4,29]]);poly(c,'#b4ccd0',[[12,5],[21,8],[21,29],[12,26]]);poly(c,'#c7d5b5',[[22,8],[29,5],[29,26],[22,29]]);r(c,'#f1ead4',9,16,17,2);r(c,'#f1ead4',17,11,2,15);r(c,'#b16c89',17,9,6,6);r(c,'#eadccc',19,11,2,2);r(c,'#b16c89',19,15,2,3);
  }else if(type==='notes'){
   edge(c,'ochre',6,3,23,27);edge(c,'clay',5,2,22,27);r(c,'cream',8,3,17,23);r(c,'pale',9,4,13,2);r(c,'ochre',5,3,3,25);r(c,'ink',5,3,1,24);
   for(let y=6;y<26;y+=5){r(c,'light',4,y,4,1);r(c,'dark',5,y+1,2,1);}labelLines(c,11,10,11);poly(c,'light',[[20,25],[25,20],[25,25]]);r(c,'rose',19,26,3,6);r(c,'pale',9,27,10,1);
@@ -119,8 +120,8 @@ function phonePane(c,w,h,type){
  for(let x=4;x<w-4;x++)if(x%4===0)r(c,mint?'#adb388':'#c5c69a',x,h-5,1,1);
 }
 export function drawUI(canvas,type){
- const small=type==='small-phone',friend=type.startsWith('friend-'),ico=type.startsWith('icon-'),w=friend?24:type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=friend?24:type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
- if(friend)friendIcon(c,Number(type.slice(7)));else if(ico)icon(c,type.slice(5));else if(small)miniPhone(c);else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='title-strip'){
+ const small=type==='small-phone'||type==='small-phone-lit',friend=type.startsWith('friend-'),ico=type.startsWith('icon-'),w=friend?24:type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=friend?24:type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
+ if(friend)friendIcon(c,Number(type.slice(7)));else if(ico)icon(c,type.slice(5));else if(small){miniPhone(c);if(type==='small-phone-lit'){round(c,'#b5c8ae',6,9,20,33,1);r(c,'#e9dfba',8,11,16,3);r(c,'#849e8f',8,17,16,22);r(c,'#c9d0af',9,18,8,12);r(c,'#b16c89',18,24,3,3);r(c,'#ede2c0',11,37,10,2);}}else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='title-strip'){
  // Uneven torn fibres, a gently bowed lower edge, and a single creased corner.
  for(let x=1;x<w-1;x++){
   const tear=(x*17+x*x*3)%19,top=tear<2?2:tear<6?1:0;
