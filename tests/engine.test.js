@@ -12,7 +12,7 @@ function travel({seed=.1,choice=()=>0,share=true,profile=packed(seed)}={}){
   if(r.stage==='event'){assert.ok(E.choose(r,choice(E.currentNode(r),r)));}
   else if(r.stage==='result')E.afterResult(r);
   else if(r.stage==='social'){if(share)assert.ok(E.sendMessage(profile,'lan'));else E.advance(r);}
-  else if(r.stage==='chat')E.advance(r);else throw Error(r.stage);
+  else if(r.stage==='chat')E.advance(r);else if(r.stage==='rest')E.resumeSegment(r);else throw Error(r.stage);
   assert.ok(r.money>=0);
  }
  return profile;
@@ -35,7 +35,7 @@ test('a complete run survives a reload at every scene and records exactly once',
  let p=packed(.8);E.depart(p.run);
  while(p.run.stage!=='return-pack'){
   const r=p.run;
-  if(r.stage==='event')E.choose(r,0);else if(r.stage==='result')E.afterResult(r);else if(r.stage==='social')E.sendMessage(p,'you');else if(r.stage==='chat')E.advance(r);
+  if(r.stage==='event')E.choose(r,0);else if(r.stage==='result')E.afterResult(r);else if(r.stage==='social')E.sendMessage(p,'you');else if(r.stage==='chat')E.advance(r);else if(r.stage==='rest')E.resumeSegment(r);
   p=E.parseSave(JSON.stringify(p));assert.ok(p);
  }
  assert.equal(p.run.notes.length,africa.nodes.length);assert.equal(p.run.messages.length,3);
@@ -97,9 +97,33 @@ test('notebook contains only completed choices in the current run',()=>{
 test('legacy prefilled notes never become notebook entries, even with entered IDs and matching days',()=>{
  const p=packed();E.depart(p.run);const r=p.run;delete r.notebookVersion;
  r.notes=africa.nodes.map(n=>({nodeId:n.id,day:n.day,place:n.place,text:'prefilled'}));r.notes.push({day:1,text:'legacy without ID'});r.entered=africa.nodes.map(n=>n.id);
- const migrated=E.parseSave(JSON.stringify(p));assert.equal(E.visibleNotes(migrated.run).length,0);assert.equal(migrated.run.notes.length,49);
+ const migrated=E.parseSave(JSON.stringify(p));assert.equal(E.visibleNotes(migrated.run).length,0);assert.equal(migrated.run.notes.length,africa.nodes.length+1);
  E.choose(migrated.run,0);assert.equal(E.visibleNotes(migrated.run).length,1);
  const loaded=E.parseSave(JSON.stringify(migrated));assert.equal(E.visibleNotes(loaded.run).length,1);
  loaded.run.notes.push({...loaded.run.notes.at(-1),runId:'another-run'});assert.equal(E.visibleNotes(loaded.run).length,1);
  loaded.run.stage='event';loaded.run.pending=null;assert.equal(E.visibleNotes(loaded.run).length,0);
+});
+
+test('seven pauses preserve the same journey and enter the next stop only on resume',()=>{
+ const p=packed();E.depart(p.run);const r=p.run;let rests=0;
+ while(r.stage!=='return-pack'){
+  if(r.stage==='event')E.choose(r,0);else if(r.stage==='result')E.afterResult(r);else if(r.stage==='social'||r.stage==='chat')E.advance(r);
+  else if(r.stage==='rest'){
+   rests++;assert.equal(r.completedSegments.length,rests);assert.equal(E.visibleNotes(r).length,r.node);
+   const snapshot=JSON.stringify(p);assert.deepEqual(E.parseSave(snapshot),p);
+   const next=E.currentNode(r);if(next)assert.ok(!r.entered.includes(next.id));
+   assert.equal(E.choose(r,0),false);assert.equal(E.advance(r),false);assert.ok(E.resumeSegment(r));assert.equal(E.resumeSegment(r),false);
+  }else throw Error(r.stage);
+ }
+ assert.equal(rests,7);assert.equal(r.notes.length,74);assert.equal(new Set(africa.segments.flatMap(s=>s.nodeIds)).size,74);
+});
+test('revision 3 pending choice and notes migrate by node ID without changing result or luggage',()=>{
+ const p=packed();const r=p.run;r.stage='event';r.node=africa.nodes.findIndex(n=>n.id==='cape-sea');E.choose(r,0);
+ r.revision=3;r.node=africa.previousNodeIds.indexOf('cape-sea');r.notes[0].nodeIndex=r.node;delete r.completedSegments;
+ const loaded=E.parseSave(JSON.stringify(p));assert.equal(E.currentNode(loaded.run).id,'cape-sea');assert.deepEqual(loaded.run.pending,r.pending);assert.deepEqual(loaded.run.bag,r.bag);assert.equal(E.visibleNotes(loaded.run).length,1);
+ assert.equal(loaded.run.completedSegments.length,5);
+});
+
+test('broken checkpoint metadata is rejected before UI rendering',()=>{
+ const p=packed();for(const completed of [null,{},['unknown'],['safari','safari']]){p.run.completedSegments=completed;p.run.stage='rest';assert.equal(E.parseSave(JSON.stringify(p)),null);}
 });

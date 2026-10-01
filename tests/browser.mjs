@@ -31,7 +31,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('mi-v02'));p.run.notebookVersion=1;localStorage.setItem('mi-v02',JSON.stringify(p));});await page.reload();
  assert.ok(await page.locator('.scene-view').evaluate(e=>Math.abs(e.getBoundingClientRect().height-e.parentElement.clientHeight)<2));
 
- let count=0,miniCount=0;
+ let count=0,miniCount=0,rests=0;
  while((await state()).run.stage!=='return-pack'){
   assert.ok(++count<240);const before=await state(),r=before.run;await fit();
   if(r.stage==='event'){
@@ -52,10 +52,14 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
     await phone('notes');assert.equal(await page.locator('.phone-note').count(),1);assert.doesNotMatch(await page.locator('.notes-app').innerText(),/泳镜|花豹|星期日/);await page.reload();await click('unlock');assert.equal(await page.locator('.phone-note').count(),1);await click('close-phone');
    }
    await click('next');
-  }else if(r.stage==='social'){await click('unlock');await click('send','[data-contact="qi"]');}else if(r.stage==='chat')await click('close-phone');else throw Error(r.stage);
+  }else if(r.stage==='social'){await click('unlock');await click('send','[data-contact="qi"]');}else if(r.stage==='chat')await click('close-phone');else if(r.stage==='rest'){
+   rests++;const snapshot=await state();await page.screenshot({path:`test-results/${name}-rest-${rests}.png`});
+   await click('map');assert.match(await page.locator('.desk-journey').innerText(),new RegExp(`${rests} / 7`));await page.reload();assert.deepEqual(await state(),snapshot);
+   await click('journey');assert.equal(await page.locator('.journey-stop').count(),7);await fit();await page.screenshot({path:`test-results/${name}-journey-${rests}.png`});await click('resume-segment');assert.equal((await state()).run.id,snapshot.run.id);
+  }else throw Error(r.stage);
  }
- assert.equal(miniCount,3);const r=(await state()).run;assert.ok(r.flags.goggles);assert.equal(r.used.airfryer,1);assert.ok(r.bag.includes('broken-adapter'));assert.ok(!r.bag.includes('adapter'));
- await click('return-finish');await click('finish','[data-ending="next"]');await phone('notes');assert.equal(await page.locator('.ending-note').count(),1);assert.equal(await page.locator('.phone-note:not(.ending-note)').count(),48);await fit();await page.screenshot({path:`test-results/${name}-pocket-notes.png`});
+ assert.equal(rests,7);assert.equal(miniCount,3);const r=(await state()).run;assert.ok(r.flags.goggles);assert.equal(r.used.airfryer,1);assert.ok(r.bag.includes('broken-adapter'));assert.ok(!r.bag.includes('adapter'));
+ await click('return-finish');await click('finish','[data-ending="next"]');await phone('notes');assert.equal(await page.locator('.ending-note').count(),1);assert.equal(await page.locator('.phone-note:not(.ending-note)').count(),africa.nodes.length);await fit();await page.screenshot({path:`test-results/${name}-pocket-notes.png`});
  await click('phone-home');await click('phone-app','[data-app="settings"]');await click('restart');await click('confirm-start');assert.ok((await state()).records.length);await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('phone-home');await click('phone-app','[data-app="chat"]');assert.doesNotMatch(await page.locator('.contact-list').innerText(),/豹子|后脑勺/);await click('close-phone');
  // App navigation must return to the exact scene without advancing it.
  await click('reason');await click('open-case');await click('preset');await click('depart');const saved=await state();await phone('bag');await click('inspect');assert.doesNotMatch(await page.locator('#modal').innerText(),/它在充电。米在床上。/);await click('close');await click('close-phone');assert.deepEqual(await state(),saved);
@@ -63,5 +67,15 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  await page.screenshot({path:`test-results/${name}-pocket-desktop.png`});
  await page.evaluate(()=>localStorage.setItem('mi-v01','untouched'));await page.goto(origin+'/legacy/');await page.waitForSelector('#world-map');assert.equal(await page.evaluate(()=>localStorage.getItem('mi-v01')),'untouched');
  const blocked=await browser.newContext({viewport:{width:320,height:568}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
- assert.deepEqual(errors,[]);console.log(`PASS ${name}: complete 48 events; all minigames; no pre-run or cross-run notes; no archives; phone apps; fixed scene, internal menu scroll; 320x568–1440x1000; reload, old routes, legacy and denied storage.`);await browser.close();
+ const migratedCtx=await browser.newContext({viewport:{width:320,height:568}}),mp=await migratedCtx.newPage();await mp.goto(origin);
+ const oldSave=await mp.evaluate(async()=>{
+  const E=await import('/js/engine.js?v=journey-4'),{africa}=await import('/data/routes/africa-001.js?v=journey-4');
+  const p=E.freshProfile();p.run=E.createRun();p.run.stage='packing';E.preset(p.run);E.depart(p.run);E.choose(p.run,0);
+  p.run.node=africa.previousNodeIds.indexOf('cape-sea');p.run.revision=3;p.run.stage='event';p.run.pending=null;delete p.run.completedSegments;
+  localStorage.setItem('mi-v02',JSON.stringify(p));return p;
+ });
+ await mp.goto(origin+'/#play');assert.match(await mp.locator('.story-copy h1').innerText(),/海在这里/);
+ await mp.locator('[data-action=choose]').first().click();const migratedSave=await mp.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
+ assert.equal(migratedSave.run.id,oldSave.run.id);assert.deepEqual(migratedSave.run.bag,oldSave.run.bag);assert.equal(migratedSave.run.notes[0].nodeId,'flight-out');assert.equal(migratedSave.run.completedSegments.length,5);await migratedCtx.close();
+ assert.deepEqual(errors,[]);console.log(`PASS ${name}: complete 74 events and seven segment pauses; all minigames; no pre-run or cross-run notes; no archives; phone apps; fixed scene, internal menu scroll; 320x568–1440x1000; reload, old routes, legacy and denied storage.`);await browser.close();
 }

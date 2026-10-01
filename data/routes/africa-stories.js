@@ -1,4 +1,5 @@
-import { ITEMS } from '../items.js?v=pocket-3';
+import { arrangeJourney } from './africa-journey.js?v=journey-4';
+import { ITEMS } from '../items.js?v=journey-4';
 const c=(label,result,extra={})=>({label,result,...extra});
 const has=(r,id)=>r.bag.includes(id);
 const n=(id,day,scene,title,text,choices,extra={})=>({id,day,scene,title,text,choices,eyebrow:'',...extra});
@@ -7,7 +8,7 @@ export const places=[
  {id:'seychelles',end:17,name:'塞舌尔 · 马埃岛',coord:[55,-5]},
  {id:'falls',end:20,name:'维多利亚瀑布',coord:[26,-18]},
  {id:'chobe',end:21,name:'博茨瓦纳 · 乔贝',coord:[25,-18]},
- {id:'namibia',end:30,name:'纳米比亚',coord:[17,-23]},
+ {id:'namibia',end:32,name:'纳米比亚',coord:[17,-23]},
  {id:'cape',end:37,name:'南非 · 开普敦',coord:[18,-34]},
  {id:'mauritius',end:42,name:'毛里求斯',coord:[58,-20]}
 ];
@@ -57,5 +58,6 @@ export function expandAfrica(route){
  }
  const kitchen=route.nodes.find(x=>x.id==='kitchen');kitchen.choices.find(x=>x.requires==='airfryer').condition=r=>has(r,'adapter');
  route.nodes.find(n=>n.id==='safari-leopard').day=3;route.nodes.find(n=>n.id==='safari-moment').day=4;route.nodes.sort((a,b)=>a.day-b.day||(a.id==='radio'?-1:b.id==='radio'?1:0));
+ arrangeJourney(route,placeFor);
  route.recordStops=places.map(p=>p.id);route.stops.forEach(s=>s.available=true);
 }

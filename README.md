@@ -2,7 +2,9 @@
 
 [打开游戏](https://mi.fivsevn.com)
 
-桌上只有地图和手机。点击黄色非洲陆地开始或继续旅行。游戏固定在 440px 以内的竖屏舞台，页面不滚动；选项、行李列表和手机 App 在各自区域内滚动。
+桌上只有地图和手机。点击黄色非洲陆地开始或继续旅行。非洲42天为完整的一卷，分成七段地点旅程，共74个事件。每段结束可回到桌面，下次从下一站续走，也可立即继续；行李、余额、聊天和记事本属于同一次旅行，只有最后才进入归来整理。
+
+游戏固定在 440px 以内的竖屏舞台，页面不滚动；选项、行李列表和手机 App 在各自区域内滚动。
 
 ## 手机和记录
 
@@ -18,6 +20,7 @@
 - js/engine.js：行李、选择、状态与存档；visibleNotes 限定已发生内容。
 - js/art.js：现有米的人物画法、场景和地图；非洲陆地点击与已到访地点标记。
 - css/pocket.css：固定视口、内部滚动、复古按钮和手机 App。
+- data/routes/africa-journey.js：七段路线、收尾及新剧情；资料和实录/虚构边界见 docs/africa-story-sources.md。
 - data/routes/africa-stories.js：可玩事件及最小地点坐标。没有说明性旅行档案。
 
 无需生产依赖或构建：
@@ -28,7 +31,7 @@ node --test tests/engine.test.js
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs CHROME_PATH=/path/to/chrome node tests/browser.mjs
 ```
 
-浏览器回归在 Chromium 和 WebKit 完整走过 48 个事件，包括小游戏、物品变化、手机返回、当前周目隔离、旧书签处理、320×568 到 1440×1000 的固定屏幕，以及不可用存储。截图在 test-results/。
+浏览器回归在 Chromium 和 WebKit 完整走过 74 个事件和七次段落停顿，包括小游戏、物品变化、手机返回、当前周目隔离、旧书签处理、320×568 到 1440×1000 的固定屏幕，以及不可用存储。截图在 test-results/。
 
 GitHub Pages 使用 main 根目录和 CNAME。发布时更新完整模块图和字体的版本标记，防止混用旧缓存。
 

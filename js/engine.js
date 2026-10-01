@@ -1,12 +1,12 @@
-import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=pocket-3';
-import { routeById } from '../data/routes/index.js?v=pocket-3';
-import { selectEnding, returnQuestions } from '../data/endings.js?v=pocket-3';
-import { conversation } from '../data/contacts.js?v=pocket-3';
+import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=journey-4';
+import { routeById } from '../data/routes/index.js?v=journey-4';
+import { selectEnding, returnQuestions } from '../data/endings.js?v=journey-4';
+import { conversation } from '../data/contacts.js?v=journey-4';
 export const SAVE_KEY='mi-v02';
 export function freshProfile(){return {version:2,records:[],contacts:{},messages:[],run:null};}
 export function createRun(routeId='africa-001',seed=Math.random()){
  if(!routeById[routeId])throw new Error('Unknown route');
- return {id:globalThis.crypto?.randomUUID?.()||`${Date.now()}-${seed}`,routeId,revision:3,notebookVersion:1,mini:{},itemHistory:[],used:{},seed,stage:'reason',node:0,bag:[],carry:[],worn:[],outfit:{top:null,outer:null,hat:null,shoes:null},money:routeById[routeId].budget,hidden:{},flags:{},entered:[],notes:[],messages:[],pending:null,reason:'',returnReason:'',departureWeight:0,returnWeight:0,departureBag:[],removed:[],packingFeePaid:false,returnFeePaid:false};
+ return {id:globalThis.crypto?.randomUUID?.()||`${Date.now()}-${seed}`,routeId,revision:4,notebookVersion:1,completedSegments:[],mini:{},itemHistory:[],used:{},seed,stage:'reason',node:0,bag:[],carry:[],worn:[],outfit:{top:null,outer:null,hat:null,shoes:null},money:routeById[routeId].budget,hidden:{},flags:{},entered:[],notes:[],messages:[],pending:null,reason:'',returnReason:'',departureWeight:0,returnWeight:0,departureBag:[],removed:[],packingFeePaid:false,returnFeePaid:false};
 }
 export const value=(v,r)=>typeof v==='function'?v(r):v;
 export const sumWeight=ids=>Math.round(ids.reduce((sum,id)=>sum+(itemById[id]?.weight||0),0)*10)/10;
@@ -66,7 +66,15 @@ export function sendMessage(profile,contactId){
  r.messages.push({id:`${r.id}-${r.node}`,contact:contactId,event,day:currentNode(r).day,lines:chat});
  profile.messages??=[];profile.messages.push(r.messages.at(-1));profile.contacts[contactId]=(profile.contacts[contactId]||0)+1;r.pending.shared=true;r.stage='chat';return true;
 }
-export function advance(r){r.pending=null;r.node++;r.stage='event';enterNode(r);}
+export function segmentFor(r){const route=routeById[r.routeId];return route.segments?.find(s=>s.nodeIds.includes(currentNode(r)?.id));}
+export function completedSegment(r){return routeById[r.routeId].segments?.find(s=>s.id===r.completedSegments?.at(-1));}
+export function resumeSegment(r){if(r.stage!=='rest')return false;r.stage=currentNode(r)?'event':'return-pack';if(r.stage==='event')enterNode(r);return true;}
+export function advance(r){
+ if(!['result','social','chat'].includes(r.stage))return false;
+ const segment=segmentFor(r);r.pending=null;r.node++;
+ if(segment&&segment.id!==segmentFor(r)?.id){r.completedSegments??=[];if(!r.completedSegments.includes(segment.id))r.completedSegments.push(segment.id);r.stage='rest';}
+ else{r.stage='event';enterNode(r);}return true;
+}
 export function beginReflection(r,pay=false){
  if(r.stage!=='return-pack')return false;const fee=Math.ceil(overweightFee(r));if(fee&&(!pay||!canAfford(r,fee)))return false;
  r.money-=fee;r.returnFeePaid=fee>0;r.returnWeight=totalWeight(r);r.stage='reflect';return true;
@@ -82,9 +90,17 @@ export function parseSave(raw){
   if(!Array.isArray(p.messages))p.messages=[];
   p.records=p.records.filter(x=>x&&typeof x.runId==='string'&&routeById[x.routeId]&&typeof x.endingId==='string'&&Array.isArray(x.notes)&&Array.isArray(x.messages)&&Array.isArray(x.bag));
   if(p.run){const r=p.run;
-   if(!r.revision&&routeById[r.routeId]&&Number.isInteger(r.node)){const route=routeById[r.routeId],oldId=route.oldNodeIds?.[r.node];r.node=oldId==='interlude'?route.nodes.findIndex(n=>n.id==='sunday'):route.nodes.findIndex(n=>n.id===oldId);if(r.node<0)r.node=route.nodes.length;r.revision=3;}
-   r.mini??={};r.itemHistory??=[];r.used??={};const stages=['reason','packing','event','result','social','chat','return-pack','reflect','ending'];
+   if(routeById[r.routeId]&&Number.isInteger(r.node)&&r.revision!==4){
+    const route=routeById[r.routeId],ids=r.revision?route.previousNodeIds:route.oldNodeIds;
+    const oldId=ids?.[r.node];r.node=oldId==='interlude'?route.nodes.findIndex(n=>n.id==='sunday'):route.nodes.findIndex(n=>n.id===oldId);if(r.node<0)r.node=route.nodes.length;
+    for(const note of r.notes||[]){const mapped=route.nodes.findIndex(n=>n.id===note.nodeId);if(mapped>=0&&Number.isInteger(note.nodeIndex))note.nodeIndex=mapped;}
+    r.revision=4;
+   }
+   r.completedSegments??=routeById[r.routeId]?.segments?.filter(s=>s.nodeIds.every(id=>r.entered?.includes(id)||routeById[r.routeId].nodes.findIndex(n=>n.id===id)<r.node)).map(s=>s.id)||[];
+   r.mini??={};r.itemHistory??=[];r.used??={};const stages=['reason','packing','event','result','social','chat','rest','return-pack','reflect','ending'];
    if(!routeById[r.routeId]||!stages.includes(r.stage)||!Number.isInteger(r.node)||r.node<0||r.node>routeById[r.routeId].nodes.length||!Number.isFinite(r.money)||r.money<0||!Number.isFinite(r.seed)||!r.outfit||!r.hidden||!r.flags||['bag','carry','worn','entered','notes','messages','departureBag','removed'].some(k=>!Array.isArray(r[k]))||r.bag.some(id=>!itemById[id])||['result','social','chat'].includes(r.stage)&&!r.pending)return null;
+   const segmentIds=routeById[r.routeId].segments.map(s=>s.id);
+   if(!Array.isArray(r.completedSegments)||r.completedSegments.some(id=>!segmentIds.includes(id))||new Set(r.completedSegments).size!==r.completedSegments.length||r.stage==='rest'&&!completedSegment(r))return null;
    if(r.stage==='event'&&!currentNode(r))r.stage='return-pack';
   }return p;
  }catch{return null;}
