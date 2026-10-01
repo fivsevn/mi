@@ -36,6 +36,10 @@ function icon(c,type){
   edge(c,'ink',11,3,12,8,1);r(c,'cream',13,4,8,2);r(c,'sage',14,6,6,5);
   edge(c,'dark',4,11,26,19,2);edge(c,'ochre',4,10,24,17,2);r(c,'cream',6,11,19,2);r(c,'clay',7,14,16,10);hatch(c,'ochre',7,21,16,3);
   for(const x of [9,22]){r(c,'dark',x,13,2,14);r(c,'light',x,13,1,8);r(c,'cream',x-1,19,4,3);r(c,'ochre',x,20,2,1);}r(c,'pale',14,15,5,5);r(c,'rose',15,16,3,2);r(c,'ink',7,28,3,3);r(c,'ink',23,28,3,3);
+ }else if(type==='photos'){
+  edge(c,'dark',5,5,25,23,2);edge(c,'sage',4,4,24,22,2);r(c,'pale',6,5,19,2);r(c,'cream',6,8,20,15);poly(c,'moss',[[7,21],[13,13],[18,19],[22,15],[26,21]]);r(c,'clay',21,10,3,3);r(c,'light',8,24,17,1);
+ }else if(type==='bills'){
+  edge(c,'clay',7,3,20,27,2);r(c,'cream',8,4,17,24);r(c,'pale',9,5,13,2);for(let y=11;y<25;y+=4)r(c,'ochre',11,y,10,1);r(c,'rose',20,22,3,3);r(c,'light',9,28,14,1);
  }else{
   // A small mechanical dial, with eight readable teeth and an inset brass hub.
   const teeth=[[14,3,6,5],[14,25,6,5],[3,14,5,6],[25,14,5,6],[6,6,6,5],[22,6,5,6],[6,22,6,5],[22,22,5,5]];
@@ -97,13 +101,13 @@ function phonePane(c,w,h,type){
  return;
  }
  if(type==='battery'){edge(c,'#586647',0,1,w-2,h-2,1);r(c,'#aab384',1,2,w-4,h-4);for(let x=2;x<6;x+=2)r(c,'#586647',x,3,1,h-6);r(c,'#78805a',w-2,Math.floor(h/2)-1,2,3);r(c,'#d4d0a6',2,1,w-5,1);return;}
- const mint=type==='phone-message-mi',inset=type==='phone-seal'?2:3;
- // Match the chat object's layered olive casing and ivory glass, without its speech tail.
- edge(c,'#65714f',0,2,w,h-2,3);edge(c,'#adb388',0,0,w-2,h-3,3);
- r(c,'#93996c',w-3,5,2,h-10);r(c,'#78805a',4,h-2,w-8,2);
- edge(c,mint?'#c5c69a':'#e2d5a4',inset,inset,w-inset*2-2,h-inset*2-2,2);
- r(c,'#eddfb1',inset+1,inset,w-inset*2-6,1);
- r(c,mint?'#adb388':'#c5c69a',inset,h-inset-4,w-inset*2-4,1);
+ const mint=type==='phone-message-mi';
+ // Same thin casing section as the 34px chat sprite; its speech tail is omitted for rectangular controls.
+ edge(c,'#65714f',1,2,w-1,h-2,2);edge(c,'#adb388',1,1,w-3,h-3,2);
+ r(c,'#93996c',w-2,4,1,h-8);
+ edge(c,mint?'#c5c69a':'#e2d5a4',2,3,w-5,h-6,2);
+ r(c,'#eddfb1',3,2,w-8,1);r(c,'#c5c69a',3,h-4,w-8,1);
+ for(let y=h-7;y<h-4;y++)for(let x=3;x<w-4;x++)if((x+y)%4===0)r(c,mint?'#adb388':'#c5c69a',x,y,1,1);
 }
 export function drawUI(canvas,type){
  const small=type==='small-phone',ico=type.startsWith('icon-'),w=type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
