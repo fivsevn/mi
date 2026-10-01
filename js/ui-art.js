@@ -44,10 +44,10 @@ function icon(c,type){
  }
 }
 function homeKey(c,w,h){
- const x=Math.floor(w/2),y=Math.floor(h/2),rad=10;
- circle(c,'#7f855d',x,y,rad);circle(c,'#5f694a',x,y-1,rad-1);
- for(let i=-7;i<=7;i++){const yy=Math.round(Math.sqrt(81-i*i));r(c,i<0?'#b1b38a':'#d3c79d',x+i,y+yy,1,1);}
- r(c,'#929b6c',x-3,y-9,6,1);
+ const x=Math.floor(w/2),y=Math.floor(h/2),rad=Math.min(15,Math.floor(h/2)-1);
+ circle(c,'#b4a578',x,y+1,rad);circle(c,'#65714f',x,y-1,rad-1);
+ for(let i=-9;i<=9;i++){const yy=Math.round(Math.sqrt(Math.max(0,(rad-1)*(rad-1)-i*i)));r(c,i<0?'#c5c69a':'#eddfb1',x+i,y+yy,1,1);}
+
 }
 function shell(c,w,h,small=false){
  const rad=small?7:30;
@@ -87,18 +87,14 @@ function plaque(c,w,h){edge(c,'dark',0,2,w,h-2,2);edge(c,'ochre',0,0,w-1,h-2,2);
 function phonePane(c,w,h,type){
  if(type==='phone-row'){r(c,'#b4a57877',25,h-1,w-25,1);return;}
  if(type==='phone-bar'||type==='phone-dock'){
- const matrix=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
- // Dither only within the two light-to-shadow transition bands. Solid fields stay intact.
- for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-  const v=y/Math.max(1,h-1),threshold=(matrix[(y%4)*4+x%4]+.5)/16;
-  let col='#afb689';
-  if(v<.2)col='#c0c497';
-  else if(v<.4)col=threshold<(v-.2)/.2?'#afb689':'#c0c497';
-  else if(v>.9)col='#98a174';
-  else if(v>.74)col=threshold<(v-.74)/.16?'#98a174':'#afb689';
-  r(c,col,x,y,1,1);
- }
- r(c,'#c5c69a',0,0,w,1);r(c,'#849061',0,h-1,w,1);return;
+ const matrix=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5],dock=type==='phone-dock';
+ const base=dock?'#a6af81':'#b9bf94',shade=dock?'#98a375':'#a9b487',light=dock?'#b6bd8e':'#c6cb9e';
+ r(c,base,0,0,w,h);
+ // Only a narrow material-light transition uses mixed pixels; the reading area stays quiet.
+ const band=dock?6:3;
+ for(let y=0;y<band;y++)for(let x=0;x<w;x++){const t=(y+.5)/band;r(c,matrix[(y%4)*4+x%4]/16<t?base:light,x,y,1,1);}
+ for(let y=h-3;y<h;y++)for(let x=0;x<w;x++){const t=(y-h+3)/3;r(c,matrix[(y%4)*4+x%4]/16<t?shade:base,x,y,1,1);}
+ return;
  }
  if(type==='battery'){edge(c,'#586647',0,1,w-2,h-2,1);r(c,'#aab384',1,2,w-4,h-4);for(let x=2;x<6;x+=2)r(c,'#586647',x,3,1,h-6);r(c,'#78805a',w-2,Math.floor(h/2)-1,2,3);r(c,'#d4d0a6',2,1,w-5,1);return;}
  if(type==='phone-seal'){round(c,'#93996c',0,0,w,h,4);round(c,'#c5c69a',1,1,w-2,h-2,3);r(c,'#eddfb1',4,2,w-9,1);r(c,'#bb997e',2,h-5,2,2);return;}

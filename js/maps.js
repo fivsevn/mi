@@ -1,6 +1,6 @@
-import { finishPaper } from './paper.js?v=atlas-31';
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-31';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-31';
+import { finishPaper } from './paper.js?v=atlas-32';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-32';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-32';
 export function projectMap(coord,bounds,width=384,height=420,padding=20,verticalBias=0){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2+verticalBias;
