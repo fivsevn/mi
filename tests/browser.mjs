@@ -16,6 +16,11 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  const click=async(a,extra='')=>page.locator(`[data-action="${a}"]${extra}`).first().click();
  const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
  const fit=async()=>{const sizes=await page.evaluate(()=>({width:innerWidth,height:innerHeight,sw:document.documentElement.scrollWidth,sh:document.documentElement.scrollHeight,body:document.body.scrollHeight,shell:document.querySelector('.app-shell').getBoundingClientRect().width}));assert.ok(sizes.sw<=sizes.width,'horizontal page overflow');assert.ok(sizes.sh<=sizes.height&&sizes.body<=sizes.height,'vertical page overflow');assert.ok(sizes.shell<=440);if(await page.locator('.story-copy').count())assert.ok(await page.locator('.story-copy').evaluate(e=>e.scrollHeight<=e.clientHeight+1),'clipped story');};
+ const mapFit=async()=>{
+  const size=await page.locator('#africa-map').evaluate(c=>({w:c.clientWidth,h:c.clientHeight}));assert.ok(Math.abs(size.w/size.h-384/420)<.01,'distorted geographic map');
+  const rects=await page.locator('.route-pin').evaluateAll(pins=>pins.map(p=>{const r=p.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};}));
+  for(let i=0;i<rects.length;i++)for(let j=i+1;j<rects.length;j++){const a=rects[i],b=rects[j];assert.ok(Math.min(a.right,b.right)<=Math.max(a.x,b.x)||Math.min(a.bottom,b.bottom)<=Math.max(a.y,b.y),'overlapping map targets');}
+ };
  const phone=async(app)=>{await click('phone');await click('unlock');await click('phone-app',`[data-app="${app}"]`);};
  await page.goto(origin);await page.waitForSelector('.font-ready');assert.ok(await page.evaluate(()=>document.fonts.check('12px Pixel')));await fit();
  assert.equal(await page.locator('.desk-journey,.desk-journal,.memory-strip,.map-entry,[data-action=atlas],[data-action=archive]').count(),0);
@@ -23,7 +28,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('phone-home');await page.screenshot({path:`test-results/${name}-pocket-apps.png`});await click('close-phone');
  // Old bookmark URLs cannot recover cross-run records or background pages.
  await page.goto(origin+'/#record/previous-run');await page.reload();await click('unlock');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');
- await click('journey');assert.equal(await page.locator('.route-pin:disabled').count(),7);await page.screenshot({path:`test-results/${name}-africa-unvisited.png`});await click('map-continue');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');
+ await click('journey');assert.equal(await page.locator('.route-pin:disabled').count(),7);await mapFit();await page.screenshot({path:`test-results/${name}-africa-unvisited.png`});await click('map-continue');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');
  await fit();assert.ok(await page.locator('.choice-scroll').evaluate(e=>e.scrollHeight>e.clientHeight));assert.equal(await page.evaluate(()=>scrollY),0);assert.doesNotMatch(await page.locator('#app').innerText(),/\d+\.\d+ kg/);await page.screenshot({path:`test-results/${name}-pocket-packing.png`});
  await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');await click('depart');
  // Reproduce the old populated save before the first choice, not just a clean browser.
@@ -57,7 +62,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
   }else if(r.stage==='social'){await click('unlock');await click('send','[data-contact="qi"]');}else if(r.stage==='chat')await click('close-phone');else if(r.stage==='rest'){
    rests++;const snapshot=await state();await page.screenshot({path:`test-results/${name}-rest-${rests}.png`});
    await click('map');assert.equal(await page.locator('.desk-journey').count(),0);await page.reload();assert.deepEqual(await state(),snapshot);
-   await click('journey');assert.equal(await page.locator('.route-pin').count(),7);assert.equal(await page.locator('.route-pin.visited').count(),rests);assert.equal(await page.locator('.journey-stops').count(),0);await fit();
+   await click('journey');assert.equal(await page.locator('.route-pin').count(),7);assert.equal(await page.locator('.route-pin.visited').count(),rests);assert.equal(await page.locator('.journey-stops').count(),0);await fit();await mapFit();
    await page.screenshot({path:`test-results/${name}-journey-${rests}.png`});
    const visited=await page.locator('.route-pin.visited').first().getAttribute('data-place');await click('visit-place',`[data-place="${visited}"]`);assert.ok(await page.locator('.phone-note').count());assert.deepEqual(await state(),snapshot);await page.reload();await click('unlock');assert.ok(await page.locator('.phone-note').count());await click('close-phone');
    await click('map-continue');assert.equal((await state()).run.id,snapshot.run.id);
@@ -74,7 +79,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  const blocked=await browser.newContext({viewport:{width:320,height:568}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('[data-action=map-continue]').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
  const migratedCtx=await browser.newContext({viewport:{width:320,height:568}}),mp=await migratedCtx.newPage();await mp.goto(origin);
  const oldSave=await mp.evaluate(async()=>{
-  const E=await import('/js/engine.js?v=maps-5'),{africa}=await import('/data/routes/africa-001.js?v=maps-5');
+  const E=await import('/js/engine.js?v=maps-6'),{africa}=await import('/data/routes/africa-001.js?v=maps-6');
   const p=E.freshProfile();p.run=E.createRun();p.run.stage='packing';E.preset(p.run);E.depart(p.run);E.choose(p.run,0);
   p.run.node=africa.previousNodeIds.indexOf('cape-sea');p.run.revision=3;p.run.stage='event';p.run.pending=null;delete p.run.completedSegments;
   localStorage.setItem('mi-v02',JSON.stringify(p));return p;

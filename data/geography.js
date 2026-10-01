@@ -36,9 +36,9 @@ export function geographyFor(node){const key=ids[node?.id]||regionKeys[node?.loc
 export const routePins=[
  {id:'safari',coord:[35.1,-1.45],label:'肯尼亚 / 坦桑尼亚'},
  {id:'seychelles',coord:[55.46,-4.67],label:'塞舌尔'},
- {id:'falls',coord:[25.86,-17.925],label:'维多利亚瀑布',offset:[12,-15]},
- {id:'chobe',coord:[25.15,-17.82],label:'乔贝',offset:[-16,14]},
- {id:'namibia',coord:[17.08,-22.57],label:'纳米比亚'},
- {id:'cape',coord:[18.42,-33.93],label:'开普敦'},
+ {id:'falls',coord:[25.86,-17.925],label:'维多利亚瀑布',offset:[54,-17]},
+ {id:'chobe',coord:[25.15,-17.82],label:'乔贝',offset:[2,24]},
+ {id:'namibia',coord:[17.08,-22.57],label:'纳米比亚',offset:[-16,-8]},
+ {id:'cape',coord:[18.42,-33.93],label:'开普敦',offset:[0,8]},
  {id:'mauritius',coord:[57.55,-20.2],label:'毛里求斯'}
 ];

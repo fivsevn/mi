@@ -1,5 +1,5 @@
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=maps-5';
-import { geographyFor,routePins } from '../data/geography.js?v=maps-5';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=maps-6';
+import { geographyFor,routePins } from '../data/geography.js?v=maps-6';
 export function projectMap(coord,bounds,width=384,height=420,padding=20){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2;
