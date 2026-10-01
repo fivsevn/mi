@@ -1,14 +1,14 @@
-import {drawUI} from './ui-art.js?v=atlas-16';
-import {paintSurface} from './scene.js?v=atlas-16';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-16';
-import { drawJourneyMap,drawLocalMap,pinPosition,compass } from './maps.js?v=atlas-16';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-16';
-import { ROUTES } from '../data/routes/index.js?v=atlas-16';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-16';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-16';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-16';
-import * as E from './engine.js?v=atlas-16';
-import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=atlas-16';
+import {drawUI} from './ui-art.js?v=atlas-17';
+import {paintSurface} from './scene.js?v=atlas-17';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-17';
+import { drawJourneyMap,drawLocalMap,pinPosition,compass } from './maps.js?v=atlas-17';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-17';
+import { ROUTES } from '../data/routes/index.js?v=atlas-17';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-17';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-17';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-17';
+import * as E from './engine.js?v=atlas-17';
+import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=atlas-17';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -80,7 +80,7 @@ function chatApp(){const r=run(),social=r?.stage==='social',chat=r?.stage==='cha
 function notesApp(){const r=run(),notes=E.visibleNotes(r).filter(n=>!notesRegion||ROUTES[0].nodes.find(node=>node.id===n.nodeId)?.location===notesRegion),record=!notesRegion&&r?.stage==='ending'&&r.notebookVersion===1?profile.records.find(x=>x.runId===r.id):null,end=ENDINGS.find(e=>e.id===record?.endingId);return `<div class="phone-scroll notes-app">${notes.length?notes.map(n=>`<article class="phone-note"><small>第 ${n.day} 天 · ${esc(n.place)}</small><p>${esc(n.text)}</p></article>`).join(''):'<p class="empty-notes">还没写下什么。</p>'}${end?`<article class="phone-note ending-note"><small>回家以后</small><h2>${esc(end.title)}</h2><p>${esc(end.text)}</p><p>${esc(record.returnReason)}</p>${(r.itemHistory||[]).map(x=>`<p>${esc(itemById[x.id]?.name)} · ${esc(x.text)}</p>`).join('')}</article>`:''}</div>`;}
 function bagApp(){const r=run();return `<div class="phone-scroll">${r?`<div class="avatar-row"><canvas data-avatar aria-label="米的穿搭"></canvas><p>${packingThought(r)}</p></div>${outfitControls(r)}<div class="case-items">${r.bag.map(id=>btn(esc(itemById[id].name),'inspect',`data-id="${id}"`)).join('')}</div>`:'<p class="empty-notes">箱子还在房间里。</p>'}</div>`;}
 function renderPhone(){const labels={home:'',chat:'聊天',notes:'记事本',bag:'行李',settings:'设置'};const body=phoneApp==='chat'?chatApp():phoneApp==='notes'?notesApp():phoneApp==='bag'?bagApp():phoneApp==='settings'?`<div class="phone-scroll settings-app">${run()?btn('重新收拾行李','restart'):''}<button class="btn" data-action="sound">${soundOn?'声音开':'声音关'}</button></div>`:`<div class="phone-apps"><canvas class="ui-paper" data-ui="paper" aria-hidden="true"></canvas>${[['chat','聊天'],['notes','记事本'],['bag','行李'],['settings','设置']].map(([id,name])=>`<button data-action="phone-app" data-app="${id}"><canvas class="app-icon" data-ui="icon-${id}" aria-hidden="true"></canvas><span>${name}</span></button>`).join('')}</div>`;
- app.innerHTML=`<section class="phone-scene"><div class="pixel-phone"><canvas class="phone-casing" data-ui="shell" aria-hidden="true"></canvas><div class="phone-hardware"><i></i></div><div class="phone-screen"><div class="phone-status"><span data-clock>${clockTime()}</span><i class="battery-icon" aria-label="电量充足"></i></div>${phoneUnlocked?`<div class="chat-bar"><button data-action="${phoneApp==='chat'&&selectedContact?'contacts':'phone-home'}" aria-label="返回手机桌面"><i class="px-arrow back-arrow"></i></button><h1>${labels[phoneApp]}</h1></div>${body}`:`<div class="lock-screen"><div class="lock-time" data-clock>${clockTime()}</div><canvas id="lock-selfie" role="img" aria-label="米戴着草帽在草原上的旅行自拍，身后有长颈鹿"></canvas><button class="unlock" data-action="unlock"><canvas data-ui="plaque" aria-hidden="true"></canvas><span>轻触解锁</span></button></div>`}</div><button class="phone-home" data-action="close-phone" aria-label="退出手机" title="退出手机"><canvas data-ui="home-key" aria-hidden="true"></canvas></button></div></section>`;
+ app.innerHTML=`<section class="phone-scene"><div class="pixel-phone"><canvas class="phone-casing" data-ui="shell" aria-hidden="true"></canvas><div class="phone-hardware"><i></i></div><div class="phone-screen"><div class="phone-status"><span data-clock>${clockTime()}</span><i class="battery-icon" aria-label="电量充足"></i></div>${phoneUnlocked?`<div class="chat-bar"><button data-action="${phoneApp==='chat'&&selectedContact?'contacts':'phone-home'}" aria-label="返回手机桌面"><i class="px-arrow back-arrow"></i></button><h1>${labels[phoneApp]}</h1></div>${body}`:`<div class="lock-screen"><div class="lock-time" data-clock>${clockTime()}</div><canvas id="lock-selfie" role="img" aria-label="米戴着草帽在草原上的旅行自拍，身后有长颈鹿"></canvas><button class="unlock" data-action="unlock"><canvas data-ui="crystal" aria-hidden="true"></canvas><span>轻触解锁</span></button></div>`}</div><button class="phone-home" data-action="close-phone" aria-label="退出手机" title="退出手机"><canvas data-ui="home-key" aria-hidden="true"></canvas></button></div></section>`;
 }
 function startRun(){profile.run=E.createRun();profile.contacts={};profile.messages=[];phoneApp='home';selectedContact=null;caseOpen=false;view='play';closeModal();save();render();}
 function openPhone(){notesRegion=null;phoneReturn=view==='play'?'play':view==='route-map'?'route-map':'map';phoneApp='home';phoneUnlocked=false;selectedContact=null;view='phone';render();}
