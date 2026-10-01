@@ -1,14 +1,14 @@
-import {drawUI} from './ui-art.js?v=atlas-48';
-import {paintSurface} from './scene.js?v=atlas-48';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-48';
-import { drawJourneyMap,drawLocalMap,pinPosition,compass } from './maps.js?v=atlas-48';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-48';
-import { ROUTES } from '../data/routes/index.js?v=atlas-48';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-48';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-48';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-48';
-import * as E from './engine.js?v=atlas-48';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-48';
+import {drawUI} from './ui-art.js?v=atlas-49';
+import {paintSurface} from './scene.js?v=atlas-49';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-49';
+import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=atlas-49';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-49';
+import { ROUTES } from '../data/routes/index.js?v=atlas-49';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-49';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-49';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-49';
+import * as E from './engine.js?v=atlas-49';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-49';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -35,7 +35,7 @@ function render({sync=true,keepScroll=false}={}){
  if(keepScroll){const scroller=$('.choice-scroll')||$('.phone-scroll');if(scroller)scroller.scrollTop=oldScroll;}
  drawCanvases();startMini();updateSaveStatus();
 }
-function drawCanvases(){document.querySelectorAll('.choice,.mini-controls .btn,.paper-title,.pin-label').forEach(el=>{if(!el.querySelector('canvas[data-ui]'))el.insertAdjacentHTML('afterbegin','<canvas class=control-paper data-ui=plaque aria-hidden=true></canvas>');});document.querySelectorAll('.phone-screen .btn,.phone-screen .contact,.phone-screen .bubble,.phone-screen .outfit-btn,.phone-screen .phone-note,.phone-screen .contact-avatar,.phone-screen .chat-bar,.phone-screen .phone-status,.phone-screen .avatar-row,.phone-modal,.phone-modal .btn,.phone-modal .close-btn').forEach(el=>{if(!el.querySelector(':scope > canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=crystal-surface data-ui="${el.classList.contains('contact')?'phone-row':el.classList.contains('contact-avatar')?'phone-seal':el.classList.contains('bubble')?(el.classList.contains('mi')?'phone-message-mi':'phone-message'):el.classList.contains('phone-note')?'phone-note':el.classList.contains('chat-bar')||el.classList.contains('phone-status')?'phone-bar':'phone-control'}" aria-hidden=true></canvas>`);});document.querySelectorAll('canvas[data-ui]').forEach(c=>drawUI(c,c.dataset.ui));if($('#atlas-rose')){const rose=$('#atlas-rose');rose.width=96;rose.height=96;compass(rose.getContext('2d'),48,46,32);}paintSurface($("#surface")); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));}
+function drawCanvases(){document.querySelectorAll('.choice,.mini-controls .btn,.paper-title,.pin-label').forEach(el=>{if(!el.querySelector('canvas[data-ui]'))el.insertAdjacentHTML('afterbegin','<canvas class=control-paper data-ui=plaque aria-hidden=true></canvas>');});document.querySelectorAll('.phone-screen .btn,.phone-screen .contact,.phone-screen .bubble,.phone-screen .outfit-btn,.phone-screen .phone-note,.phone-screen .contact-avatar,.phone-screen .chat-bar,.phone-screen .phone-status,.phone-screen .avatar-row,.phone-modal,.phone-modal .btn,.phone-modal .close-btn').forEach(el=>{if(!el.querySelector(':scope > canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=crystal-surface data-ui="${el.classList.contains('contact')?'phone-row':el.classList.contains('contact-avatar')?'phone-seal':el.classList.contains('bubble')?(el.classList.contains('mi')?'phone-message-mi':'phone-message'):el.classList.contains('phone-note')?'phone-note':el.classList.contains('chat-bar')||el.classList.contains('phone-status')?'phone-bar':'phone-control'}" aria-hidden=true></canvas>`);});document.querySelectorAll('canvas[data-ui]').forEach(c=>drawUI(c,c.dataset.ui));paintSurface($("#surface")); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));}
 function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><canvas id="atlas-rose" class="atlas-rose" aria-hidden="true"></canvas><button class="desk-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="small-phone" aria-hidden="true"></canvas><span class="mini-clock-face" data-clock>${clockTime()}</span></button><div class="map-paper"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><div class="map-view" style="--pan-x:${atlasPan}px"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 1080 600" preserveAspectRatio="xMidYMid meet"><a href="#route-map" data-action="journey" aria-label="展开非洲地图"><path d="${africaHitPath()}"/><text x="592" y="258">AFRICA</text></a></svg></div></div></section>`;}
 function mapNode(){const r=run();return current()||(r?.stage==='rest'?ROUTES[0].nodes[r.node-1]:r&&['return-pack','reflect'].includes(r.stage)?ROUTES[0].nodes.at(-1):null);}
 function visitedPlaces(){

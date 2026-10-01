@@ -1,6 +1,6 @@
-import { finishPaper } from './paper.js?v=atlas-48';
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-48';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-48';
+import { finishPaper } from './paper.js?v=atlas-49';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-49';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-49';
 export function projectMap(coord,bounds,width=384,height=420,padding=20,verticalBias=0){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2+verticalBias;
@@ -34,18 +34,45 @@ export function paintTerrain(c,width,height,mask,cell=2,inverse=null){
    const relief=Math.sin(lon*.21+Math.sin(lat*.22)*2)+Math.cos(lat*.27+lon*.08); const field=Math.sin(lon*.63+lat*.24)+Math.cos(lat*.69-lon*.13);
    col=desert?'#d9c697':red?'#c5a786':forest?'#a4ac7b':'#d6cca1';
    if(d>2&&!forest){if(relief>1.1)col=desert?'#cebd8d':red?'#bd9e7d':'#c3c397';else if(relief<-.8)col=desert?'#e0cda0':'#ded3a4';if(field>1.2&&bayer[(y%4)*4+x%4]<5)col='#b8b68b';}
-   if(d===0)col=(x+y)%3===0?'#a3a879':'#879773';else if(d===1)col='#b5ba88';
+   if(d===0)col=(x+y)%3===0?'#9da57a':'#849371';else if(d===1)col='#adb58a';else if(d===2&&!forest)col='#c0c298';
    const m=mountains(lon,lat),xx=x%7,yy=y%6;
    if(d>2&&m<1.7){col='#b7b58a';if(m<1&&yy<4&&xx>yy&&xx<7-yy)col=xx<4?'#889268':'#e2d3a4';if(m<.7&&yy===4&&xx<5)col='#9ea072';}
    if(forest&&d>2){col=field>0?'#aeb586':'#bac095';const xx=(x+Math.floor(y/7)*3)%8,yy=y%7;if((xx-3)*(xx-3)/9+(yy-3)*(yy-3)/4<1)col=yy<3?'#c1c596':xx<3?'#9da977':'#85976a';}
+   // Ecotones soften geographic region edges before reaching the interior palette.
+   if(d>2){
+    const amazon=Math.pow((lon+61)/17,2)+Math.pow((lat+3)/9,2);
+    const congo=Math.pow((lon-21)/12,2)+Math.pow((lat+1)/7,2);
+    const jungle=Math.min(amazon,congo);
+    const fleck=(Math.sin(lon*2.1+lat*1.3)+Math.cos(lat*2.7-lon*.8)+2)/4;
+    if(jungle>.72&&jungle<1.28&&mountains(lon,lat)>2){
+     const mix=Math.max(0,Math.min(1,(1.28-jungle)/.56));
+     col=mix<.25?'#c9c79c':mix<.5?'#bec397':mix<.75?'#b1ba8a':'#a5b182';
+     if(fleck>.77)col=mix>.5?'#9faa7c':'#b5bd8e';
+    }
+    const sahara=lon>-20&&lon<52&&lat>12&&lat<34;
+    if(sahara){
+     const southernEdge=16+Math.sin(lon*.16)*1.3;
+     const edge=lat-southernEdge;
+     if(edge>-2.5&&edge<3&&mountains(lon,lat)>2){
+      col=edge<-.8?'#bcc095':edge<.8?'#c9c499':edge<2?'#d0c397':'#d6c598';
+      if(fleck>.78)col=edge<.8?'#b4b98c':'#c5bc8f';
+     }
+    }
+    if(red&&mountains(lon,lat)>2){
+     const edge=Math.min(lon-10,22-lon,lat+30,-19-lat);
+     if(edge<2.5)col=edge<.8?'#d1c29a':edge<1.6?'#cdbb95':'#c7ae8b';
+    }
+   }
    // Short hand-shaped marks and selected transitions; most of the land stays quiet.
    if(!forest&&m>2&&d>2&&y%11===0&&(x+Math.floor(y/11)*3)%17<4)col=desert?'#bcb384':red?'#b99179':'#b2b58b';
    if((forest||red)&&d===2&&bayer[(y%4)*4+x%4]<4)col='#ccca98';
   }else{
-   col=d<2?'#b1bfa0':d<4?'#9eb59a':d<7?'#8daa91':Math.sin(lon*.12)+Math.cos(lat*.17)>1?'#80a18b':'#7c9f89';
-   if(d>0&&d<9&&bayer[(y%4)*4+x%4]<4)col=d<4?'#b3c0a0':'#91ae93';
-   if(y%12===0&&(x+Math.floor(y/12)*5)%21<7)col='#9bb398';
-   if(y%19===4&&(x+Math.floor(y/19)*3)%17<4)col='#688b77';
+   col=d<2?'#b0bfa0':d<4?'#9db99f':d<7?'#8eb19b':Math.sin(lon*.12)+Math.cos(lat*.17)>1?'#83aa98':'#7ea493';
+   if(d>0&&d<7&&Math.sin(x*.71+y*.39)>1-.14*d)col=d<4?'#a9bda0':'#92b19b';
+   const band=Math.floor(y/5),offset=(band*13)%23;
+   if(y%5===offset%3&&(x+offset)%23<5)col='#749887';
+   if(y%9===2&&(x+band*7)%29<8)col='#97b39b';
+   if(y%13===3&&(x+band*11)%31<3)col='#658c7d';
   }
   c.fillStyle=col;c.fillRect(x*cell,y*cell,cell,cell);
  }
@@ -63,24 +90,12 @@ export function paintTerrain(c,width,height,mask,cell=2,inverse=null){
   }
  }
  // Thin, uninterrupted ruling belongs to the chart, not to the paper folds.
- c.fillStyle='#879b7e';const grid=width>500?90:width>200?48:24;
- for(let x=grid;x<width;x+=grid)for(let y=0;y<height;y+=4)c.fillRect(x,y,1,2);
- for(let y=grid;y<height;y+=grid)for(let x=0;x<width;x+=4)c.fillRect(x,y,2,1);
+ c.globalAlpha=.24;c.fillStyle='#5d806f';const grid=width>500?90:width>200?48:24;
+ for(let x=grid;x<width;x+=grid)c.fillRect(x,0,1,height);
+ for(let y=grid;y<height;y+=grid)c.fillRect(0,y,width,1);
+ c.globalAlpha=1;
 }
 export function coordinate(c,x,y,size=7,filled=false){x=Math.round(x-size/2);y=Math.round(y-size/2);c.fillStyle=MAP_INK;c.fillRect(x-1,y-1,size+2,size+2);c.fillStyle=filled?'#c18483':'#eaddab';c.fillRect(x,y,size,size);c.fillStyle=filled?'#f3dfac':'#a69464';c.fillRect(x+2,y+2,size-4,size-4);}
-export function compass(c,x,y,size=16){
- c.save();c.translate(Math.round(x),Math.round(y));c.scale(size/32,size/32);
- const r=(col,a,b,w,h)=>{c.fillStyle=col;c.fillRect(Math.round(a),Math.round(b),Math.round(w),Math.round(h));};
- const poly=(col,p)=>{for(let yy=Math.min(...p.map(v=>v[1]));yy<Math.max(...p.map(v=>v[1]));yy++){const xs=[];for(let i=0,j=p.length-1;i<p.length;j=i++){const a=p[i],b=p[j];if((a[1]>yy)!==(b[1]>yy))xs.push(Math.round(a[0]+(yy-a[1])*(b[0]-a[0])/(b[1]-a[1])));}xs.sort((a,b)=>a-b);for(let i=0;i<xs.length;i+=2)r(col,xs[i],yy,xs[i+1]-xs[i],1);}};
- for(let yy=-32;yy<=32;yy++){const half=Math.floor(Math.sqrt(32*32-yy*yy));r('#85865b',-half,yy,half*2+1,1);if(half>2)r(yy<0?'#b5ad78':'#a19a6a',-half+1,yy,half*2-1,1);if(half>5)r(yy<0?'#89916a':'#8b805f',-half+3,yy,half*2-5,1);}
- // Botanical marks sit in the four quadrants of the field.
- for(const sx of [-1,1])for(const sy of [-1,1]){for(let i=0;i<5;i++){const xx=sx*(11+i*2),yy=sy*(10+i*2);r(sy<0?'#aaa574':'#a89972',xx,yy,2,3);r('#aaa574',xx-sx*3,yy+sy*2,3,1);r('#999467',xx+sx*2,yy-sy*3,2,2);}}
- for(let i=0;i<16;i++){const angle=i*Math.PI/8,xx=Math.round(Math.cos(angle)*28),yy=Math.round(Math.sin(angle)*28);r(i%2?'#b8b080':'#d4c58d',xx,yy,2,2);}
- for(const [dx,dy] of [[-18,-18],[18,-18],[18,18],[-18,18]]){poly('#b7ad78',[[0,0],[dx,dy],[Math.round(dx*.5),Math.round(dy*.8)]]);poly('#9c9469',[[0,0],[dx,dy],[Math.round(dx*.8),Math.round(dy*.5)]]);}
- for(let q=0;q<4;q++){c.save();c.rotate(q*Math.PI/2);poly(q===2?'#c7b183':'#e4d49b',[[0,-29],[-4,-8],[-11,0],[0,-3]]);poly(q===2?'#ac9978':'#b9ad79',[[0,-29],[4,-8],[11,0],[0,-3]]);r('#eadba7',-1,-23,1,15);c.restore();}
- r('#c4ad85',-4,-4,9,9);r('#e4d2a4',-3,-3,7,7);r('#b58c9b',-2,-2,5,5);r('#d9b9ad',-1,-1,2,2);r('#a38189',1,1,2,2);
- c.fillStyle='#ded09b';c.font='9px Pixel,monospace';c.fillText('N',-3,-35);c.fillText('S',-3,43);c.fillText('W',-43,3);c.fillText('E',37,3);c.restore();
-}
 function baseMap(canvas,map,width,height,{africa=false,padding=0}={}){
  canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
  c.fillStyle='#000';c.fillRect(0,0,width,height);
@@ -103,7 +118,7 @@ export function drawJourneyMap(canvas,visited=[]){
  // Tiny Indian Ocean islands are too small for this continental scale.
  for(const p of routePins.filter(p=>['seychelles','mauritius'].includes(p.id))){const [x,y]=project(p.coord);c.fillStyle='#b79b55';c.fillRect(Math.round(x)-2,Math.round(y)-2,5,5);}
  for(const p of routePins.filter(p=>p.offset)){const a=project(p.coord),b=pinPosition(p,height);c.strokeStyle='#82906e';c.lineWidth=.7;c.beginPath();c.moveTo(...a);c.lineTo(...b);c.stroke();}
- compass(c,268,height-125,height>600?69:32);c.fillStyle=MAP_INK;c.font='10px Pixel,monospace';c.fillText('ATLANTIC',19,height*.26);c.fillText('INDIAN OCEAN',226,height-235);c.font='18px Pixel,monospace';c.fillText('AFRICA',23,height-132);c.font='9px Pixel,monospace';c.fillText('0°     20° E     40° E',24,height-103);
+ c.fillStyle=MAP_INK;c.font='10px Pixel,monospace';c.fillText('ATLANTIC',19,height*.26);c.fillText('INDIAN OCEAN',226,height-235);c.font='18px Pixel,monospace';c.fillText('AFRICA',23,height-132);c.font='9px Pixel,monospace';c.fillText('0°     20° E     40° E',24,height-103);
  canvas.dataset.visited=visited.join(',');
 }
 export function drawLocalMap(canvas,node){
