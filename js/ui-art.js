@@ -7,20 +7,7 @@ function hatch(c,k,x,y,w,h){for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)if
 function round(c,k,x,y,w,h,rad=4){for(let yy=0;yy<h;yy++){const dy=yy<rad?rad-yy-.5:yy>=h-rad?yy-(h-rad)+.5:0,cut=dy?Math.ceil(rad-Math.sqrt(Math.max(0,rad*rad-dy*dy))):0;r(c,k,x+cut,y+yy,w-cut*2,1);}}
 function line(c,k,x,y,xx,yy){const n=Math.max(Math.abs(xx-x),Math.abs(yy-y));for(let i=0;i<=n;i++)r(c,k,x+(xx-x)*i/n,y+(yy-y)*i/n,1,1);}
 function circle(c,k,x,y,rad){for(let yy=-rad;yy<=rad;yy++){const w=Math.floor(Math.sqrt(rad*rad-yy*yy));r(c,k,x-w,y+yy,w*2+1,1);}}
-function wallpaper(c,w,h){
- const tones=['#bdb68d','#b7b18a','#afac83','#a6a47a','#9d9e73'];
- const matrix=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
- for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-  const v=y/h,u=x/w,value=Math.max(0,Math.min(3.98,v*3.4+u*.45));const lower=Math.floor(value),part=value-lower;
-  const edge=part>.42&&part<.58,index=lower+(edge?(part-.42)/.16>matrix[(y%4)*4+x%4]/16:part>=.58?1:0);
-  r(c,tones[index],x,y,1,1);
- }
- // Two quiet window reflections: upright panes, softened only at their pixel edges.
- poly(c,'#ede0b320',[[w*.10,h*.09],[w*.27,h*.07],[w*.21,h*.69],[w*.06,h*.73]]);
- poly(c,'#eee4bb12',[[w*.32,h*.07],[w*.40,h*.06],[w*.34,h*.57],[w*.27,h*.60]]);
- line(c,'#e2d5a43b',w*.11,h*.10,w*.07,h*.70);
- r(c,'#e2d5a438',2,Math.round(h*.12),1,Math.round(h*.60));r(c,'#68745228',w-3,Math.round(h*.18),1,Math.round(h*.63));
-}
+function wallpaper(c,w,h){r(c,'#adb388',0,0,w,h);}
 
 function labelLines(c,x,y,w=14){for(let i=0;i<3;i++){r(c,'ochre',x,y+i*4,w-i%2*3,1);r(c,'light',x+w-3,y+i*4+1,2,1);}}
 function icon(c,type){
@@ -71,7 +58,7 @@ function shell(c,w,h,small=false){
  const rad=small?7:30;
  round(c,'#65714f',1,2,w-2,h-3,rad);round(c,'#93996c',2,1,w-4,h-3,rad-1);round(c,'#e2d5a4',3,2,w-6,h-5,rad-2);round(c,'#7b8758',4,4,w-8,h-8,rad-3);round(c,'#626d48',6,5,w-12,h-10,rad-4);
  r(c,'#c5c69a',3,rad,w>80?2:1,h-rad*2);r(c,'#eddfb1',5,rad,1,h-rad*2);r(c,'#93996c',w-5,rad,2,h-rad*2);r(c,'#eddfb1',w-7,rad+3,1,h-rad*2-7);
- round(c,'#72805a',rad-3,7,w-rad*2+6,10,5);r(c,'#7f8a631f',rad+4,8,w-rad*2-8,2);round(c,'#59663f',rad-2,h-18,w-rad*2+4,9,4);line(c,'#78865b',rad+6,h-9,w-rad-6,h-9);
+ 
  // Quiet, fine rim glints; no chunky decorative notches.
  line(c,'#d8cda5',rad+5,3,w*.52,3);line(c,'#b3b58a',rad+4,h-4,w*.43,h-4);
  for(const [xx,yy,k] of [[4,h*.29,'#b6bd91'],[w-5,h*.53,'#adb388'],[rad+9,h-5,'#e2d5a4'],[w-rad-9,3,'#a7ad7b']])r(c,k,xx,yy,1,1);
