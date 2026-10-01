@@ -1,7 +1,7 @@
-import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=atlas-38';
-import { routeById } from '../data/routes/index.js?v=atlas-38';
-import { selectEnding, returnQuestions } from '../data/endings.js?v=atlas-38';
-import { conversation } from '../data/contacts.js?v=atlas-38';
+import { itemById, DEFAULT_BAG, BAG_LIMIT, CASE_WEIGHT, HAND_LIMIT } from '../data/items.js?v=atlas-39';
+import { routeById } from '../data/routes/index.js?v=atlas-39';
+import { selectEnding, returnQuestions } from '../data/endings.js?v=atlas-39';
+import { conversation } from '../data/contacts.js?v=atlas-39';
 export const SAVE_KEY='mi-v02';
 export function freshProfile(){return {version:2,records:[],contacts:{},messages:[],run:null};}
 export function createRun(routeId='africa-001',seed=Math.random()){
