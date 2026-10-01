@@ -8,18 +8,18 @@ function round(c,k,x,y,w,h,rad=4){for(let yy=0;yy<h;yy++){const dy=yy<rad?rad-yy
 function line(c,k,x,y,xx,yy){const n=Math.max(Math.abs(xx-x),Math.abs(yy-y));for(let i=0;i<=n;i++)r(c,k,x+(xx-x)*i/n,y+(yy-y)*i/n,1,1);}
 function circle(c,k,x,y,rad){for(let yy=-rad;yy<=rad;yy++){const w=Math.floor(Math.sqrt(rad*rad-yy*yy));r(c,k,x-w,y+yy,w*2+1,1);}}
 function wallpaper(c,w,h){
- const bayer=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+ const tones=['#bdb68d','#b7b18a','#afac83','#a6a47a','#9d9e73'];
+ const matrix=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-  const u=x/w,v=y/h,cloud=Math.sin(u*13+Math.sin(v*9)*2)+Math.cos(v*17-u*5),dx=(u-.82)/.50,dy=(v-.55)/.27,angle=Math.atan2(dy,dx),distance=Math.hypot(dx,dy)+Math.sin(angle*3)*.08+Math.sin(v*36)*.04;
-  let col=cloud>1?'#d1c196':cloud<-.8?'#b9ae85':'#c5b78f';
-  if(v>.2&&v<.82&&u<.4&&cloud>.1)col=cloud>1.3?'#e6d5aa':'#dac89d';
-  if(distance<1.05){const edge=distance>.91,shade=(u-v*.24)*3-1.4+Math.sin(v*8)*.15;col=shade>.8?'#969f72':shade<-.3?'#7e895b':'#8b9567';if(edge&&bayer[(y%4)*4+x%4]>(1.05-distance)*110)col='#c4b58e';}
-  if(u>.57&&v>.76&&cloud<.3)col='#b2a27d';
-  r(c,col,x,y,1,1);
+  const v=y/h,u=x/w,value=Math.max(0,Math.min(3.98,v*3.4+u*.45));const lower=Math.floor(value),part=value-lower;
+  const edge=part>.42&&part<.58,index=lower+(edge?(part-.42)/.16>matrix[(y%4)*4+x%4]/16:part>=.58?1:0);
+  r(c,tones[index],x,y,1,1);
  }
- // Large quiet reflections, with a few clustered chips in the aged glass.
- poly(c,'#f1e7db24',[[0,h*.15],[w*.19,0],[w*.4,0],[0,h*.73]].map(([x,y])=>[Math.round(x),Math.round(y)]));
- for(let i=0;i<25;i++){const x=(i*37+i*i*3)%w,y=Math.floor(h*.18)+(i*53)%Math.floor(h*.68);r(c,i%4?'#d1c196':'#e6d5aa',x,y,1+i%2,1);if(i%5===0){r(c,'#e6d5aa',x+1,y-1,1,3);r(c,'#c5c69a',x-1,y,3,1);}}
+ // Two quiet window reflections: upright panes, softened only at their pixel edges.
+ poly(c,'#ede0b320',[[w*.10,h*.09],[w*.27,h*.07],[w*.21,h*.69],[w*.06,h*.73]]);
+ poly(c,'#eee4bb12',[[w*.32,h*.07],[w*.40,h*.06],[w*.34,h*.57],[w*.27,h*.60]]);
+ line(c,'#e2d5a43b',w*.11,h*.10,w*.07,h*.70);
+ r(c,'#e2d5a438',2,Math.round(h*.12),1,Math.round(h*.60));r(c,'#68745228',w-3,Math.round(h*.18),1,Math.round(h*.63));
 }
 
 function labelLines(c,x,y,w=14){for(let i=0;i<3;i++){r(c,'ochre',x,y+i*4,w-i%2*3,1);r(c,'light',x+w-3,y+i*4+1,2,1);}}
@@ -71,7 +71,7 @@ function shell(c,w,h,small=false){
  const rad=small?7:30;
  round(c,'#65714f',1,2,w-2,h-3,rad);round(c,'#93996c',2,1,w-4,h-3,rad-1);round(c,'#e2d5a4',3,2,w-6,h-5,rad-2);round(c,'#7b8758',4,4,w-8,h-8,rad-3);round(c,'#626d48',6,5,w-12,h-10,rad-4);
  r(c,'#c5c69a',3,rad,w>80?2:1,h-rad*2);r(c,'#eddfb1',5,rad,1,h-rad*2);r(c,'#93996c',w-5,rad,2,h-rad*2);r(c,'#eddfb1',w-7,rad+3,1,h-rad*2-7);
- poly(c,'#7b8758',[[7,rad],[w*.43,7],[w*.59,7],[7,h*.32]].map(([x,y])=>[Math.round(x),Math.round(y)]));poly(c,'#65714f',[[w-7,h*.71],[w-7,h*.94],[w*.6,h-7],[w*.38,h-7]].map(([x,y])=>[Math.round(x),Math.round(y)]));
+ round(c,'#72805a',rad-3,7,w-rad*2+6,10,5);r(c,'#7f8a631f',rad+4,8,w-rad*2-8,2);round(c,'#59663f',rad-2,h-18,w-rad*2+4,9,4);line(c,'#78865b',rad+6,h-9,w-rad-6,h-9);
  // Quiet, fine rim glints; no chunky decorative notches.
  line(c,'#d8cda5',rad+5,3,w*.52,3);line(c,'#b3b58a',rad+4,h-4,w*.43,h-4);
  for(const [xx,yy,k] of [[4,h*.29,'#b6bd91'],[w-5,h*.53,'#adb388'],[rad+9,h-5,'#e2d5a4'],[w-rad-9,3,'#a7ad7b']])r(c,k,xx,yy,1,1);
