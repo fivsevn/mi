@@ -58,7 +58,7 @@ function shell(c,w,h,small=false){
  line(c,'#d8cda5',rad+5,3,w*.52,3);line(c,'#b3b58a',rad+4,h-4,w*.43,h-4);
  for(const [xx,yy,k] of [[4,h*.29,'#b6bd91'],[w-5,h*.53,'#c1a78a'],[rad+9,h-5,'#e2d5a4'],[w-rad-9,3,'#a7ad7b']])r(c,k,xx,yy,1,1);
  const sy=small?10:36,sh=h-(small?21:76);r(c,'#65714f',8,sy-1,w-16,sh+2);r(c,'#c5c69a',9,sy,w-18,sh);
- const speaker=small?10:34;round(c,'#65714f',Math.floor(w/2)-speaker/2,small?6:16,speaker,small?2:5,small?1:2);r(c,'#e2d5a4',Math.floor(w/2)-speaker/2+1,small?7:19,speaker-2,1);
+ const speaker=small?10:34;round(c,'#65714f',Math.floor(w/2)-speaker/2,small?6:11,speaker,small?2:5,small?1:2);r(c,'#e2d5a4',Math.floor(w/2)-speaker/2+1,small?7:14,speaker-2,1);
  if(small){c.save();c.translate(10,sy+1);wallpaper(c,w-20,sh-2);for(const [type,x,y]of [['chat',2,14],['notes',13,14],['bag',2,25],['settings',13,25]]){c.save();c.translate(x,y);c.scale(.26,.26);icon(c,type);c.restore();}c.restore();c.save();c.translate(w/2-5,h-11);c.scale(.3,.3);homeKey(c,34,34);c.restore();}
 }
 function patina(c,w,h){
