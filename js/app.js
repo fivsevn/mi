@@ -1,14 +1,14 @@
-import {drawUI} from './ui-art.js?v=atlas-55';
-import {paintSurface} from './scene.js?v=atlas-55';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-55';
-import { drawJourneyMap,drawLocalMap,drawPhoneMap,pinPosition } from './maps.js?v=atlas-55';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-55';
-import { ROUTES } from '../data/routes/index.js?v=atlas-55';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-55';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-55';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-55';
-import * as E from './engine.js?v=atlas-55';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-55';
+import {drawUI} from './ui-art.js?v=atlas-56';
+import {paintSurface} from './scene.js?v=atlas-56';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-56';
+import { drawJourneyMap,drawLocalMap,drawPhoneMap,pinPosition } from './maps.js?v=atlas-56';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-56';
+import { ROUTES } from '../data/routes/index.js?v=atlas-56';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-56';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-56';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-56';
+import * as E from './engine.js?v=atlas-56';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-56';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -56,7 +56,7 @@ function visitedPlaces(){
 }
 function nextPlace(){const r=run();if(!r||['reason','packing'].includes(r.stage))return 'safari';if(r.stage==='ending')return null;return E.segmentFor(r)?.id||'mauritius';}
 function continueJourney(){const r=run();if(!r)startRun();else{if(r.stage==='rest')E.resumeSegment(r);view='play';save();render();}}
-function phoneMapApp(){const visited=visitedPlaces(),next=nextPlace();return `<div class="navigation-app"><div class="navigation-square" style="--map-zoom:${mapZoom}"><canvas id="phone-africa-map" role="img" aria-label="非洲旅行导航地图"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin,384),on=visited.includes(pin.id),ready=next===pin.id;return `<button class="route-pin ${on?'visited':''} ${ready?'ready':''} ${mapFocus===pin.id?'search-match':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/384*100}%" aria-label="${esc(pin.label)}${ready?'，下一站':on?'，已到访':'，尚未到访'}" ${on||ready?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div><div class="map-search-area"><div class="map-search-bar"><button data-action="phone-home" class="map-back" aria-label="返回手机桌面">‹</button><span class="map-search-symbol" aria-hidden="true"></span><input class="map-search-input" type="search" placeholder="搜索地点" aria-label="搜索旅行地点" value="${esc(mapQuery)}" autocomplete="off"><button data-action="map-search-clear" class="map-clear" aria-label="清除搜索">×</button></div><div class="map-search-results" hidden></div></div><div class="map-controls"><button data-action="map-zoom" data-direction="1" aria-label="放大地图">+</button><button data-action="map-zoom" data-direction="-1" aria-label="缩小地图">−</button><button data-action="map-center" aria-label="显示全部旅行地点">⌖</button></div><div class="map-bottom-bar"><span class="map-tab-icon" aria-hidden="true">⌖</span><span>探索</span><button data-action="phone-app" data-app="notes" aria-label="查看旅行记录">记事本</button></div></div>`;}
+function phoneMapApp(){const visited=visitedPlaces(),next=nextPlace();return `<div class="navigation-app"><div class="navigation-square" style="--map-zoom:${mapZoom}"><canvas id="phone-africa-map" role="img" aria-label="非洲旅行导航地图"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin,384),on=visited.includes(pin.id),ready=next===pin.id;return `<button class="route-pin ${on?'visited':''} ${ready?'ready':''} ${mapFocus===pin.id?'search-match':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/384*100}%" aria-label="${esc(pin.label)}${ready?'，下一站':on?'，已到访':'，尚未到访'}" ${on||ready?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div><div class="map-search-area"><div class="map-search-bar"><button data-action="phone-home" class="map-back" aria-label="返回手机桌面">‹</button><span class="map-search-symbol" aria-hidden="true"></span><input class="map-search-input" type="search" placeholder="搜索地点" aria-label="搜索旅行地点" value="${esc(mapQuery)}" autocomplete="off"><button data-action="map-search-clear" class="map-clear" aria-label="清除搜索">×</button></div><div class="map-search-results" hidden></div></div><div class="map-controls"><button data-action="map-zoom" data-direction="1" aria-label="放大地图">+</button><button data-action="map-zoom" data-direction="-1" aria-label="缩小地图">−</button><button data-action="map-center" aria-label="显示全部旅行地点">⌖</button></div><div class="map-bottom-bar"><span class="map-tab-icon" aria-hidden="true">⌖</span><span>探索</span></div></div>`;}
 function resizePhoneMap(){const canvas=$('#phone-africa-map');if(!canvas)return;const square=canvas.parentElement,height=Math.round(384*square.clientHeight/square.clientWidth);canvas.dataset.height=height;drawPhoneMap(canvas,visitedPlaces());square.querySelectorAll('.route-pin').forEach(button=>{const pin=routePins.find(p=>p.id===button.dataset.place),[x,y]=pinPosition(pin,height);button.style.left=x/384*100+'%';button.style.top=y/height*100+'%';});}
 function searchMap(){const box=$('.map-search-results');if(!box)return;const q=mapQuery.trim().toLowerCase();box.hidden=!q;const aliases={safari:'kenya tanzania 肯尼亚 坦桑尼亚 内罗毕 草原',seychelles:'seychelles 马埃 mahe',falls:'victoria falls 津巴布韦 赞比亚',chobe:'chobe 博茨瓦纳',namibia:'namibia 温得和克',cape:'cape town 南非 开普敦',mauritius:'mauritius 毛里求斯'};const matches=routePins.filter(p=>(p.label+' '+aliases[p.id]).toLowerCase().includes(q));box.innerHTML=q?(matches.length?matches.map(p=>`<button data-action="map-focus" data-place="${p.id}"><i aria-hidden="true"></i>${esc(p.label)}</button>`).join(''):'<p role="status">没有匹配地点</p>'):'';}
 function scenePanel(type,overlay=''){

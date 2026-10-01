@@ -30,13 +30,14 @@ function icon(c,type){
   poly(c,'cream',[[5,9],[26,9],[26,21],[14,21],[8,27],[8,21],[5,21]]);r(c,'ochre',8,22,1,5);r(c,'pale',6,9,18,2);hatch(c,'light',6,18,18,3);
   for(let i=0;i<3;i++){r(c,'moss',9+i*5,14,2,2);r(c,'light',10+i*5,14,1,1);}
  }else if(type==='maps'){
- poly(c,'dark',[[3,8],[11,5],[22,8],[31,5],[31,28],[23,31],[12,28],[3,31]]);
- poly(c,'ochre',[[2,6],[11,3],[22,6],[30,3],[30,27],[22,30],[11,27],[2,30]]);
- poly(c,'cream',[[3,7],[10,4],[10,26],[3,29]]);poly(c,'#9eb6a7',[[11,4],[21,7],[21,28],[11,25]]);poly(c,'sage',[[22,7],[29,4],[29,26],[22,29]]);
- r(c,'pale',4,7,5,1);r(c,'light',10,5,1,20);r(c,'moss',21,8,1,19);r(c,'light',22,8,1,17);r(c,'moss',29,6,1,20);
- poly(c,'cream',[[4,17],[11,15],[21,18],[28,16],[28,18],[21,20],[11,17],[4,19]]);
- r(c,'dark',17,9,7,7);r(c,'rose',16,8,7,7);r(c,'pale',17,8,4,1);r(c,'clay',22,10,1,5);r(c,'cream',18,10,3,3);r(c,'rose',18,15,3,3);r(c,'dark',19,18,2,1);
- r(c,'ochre',4,29,7,1);r(c,'moss',22,29,6,1);
+ // A rolled paper atlas: cylindrical ends and a broad face, like the other desk objects.
+ r(c,'dark',6,7,24,23);r(c,'ochre',5,5,23,24);r(c,'cream',7,5,18,23);r(c,'pale',8,6,15,2);
+ poly(c,'sage',[[9,11],[14,9],[19,12],[23,11],[23,23],[17,25],[11,23],[9,18]]);
+ poly(c,'light',[[10,10],[14,10],[17,13],[16,17],[12,19],[10,16]]);
+ line(c,'cream',10,23,19,14);line(c,'cream',19,14,22,15);r(c,'rose',18,13,3,3);r(c,'pale',18,13,1,1);
+ r(c,'dark',4,6,4,23);r(c,'ochre',3,4,4,24);r(c,'pale',4,5,2,20);r(c,'light',6,6,1,18);
+ r(c,'dark',25,8,5,23);r(c,'ochre',24,5,5,24);r(c,'cream',25,6,3,21);r(c,'light',28,7,1,20);
+ r(c,'ink',4,4,2,2);r(c,'cream',4,4,1,1);r(c,'ink',25,5,2,2);r(c,'pale',25,5,1,1);r(c,'light',8,27,15,1);
  }else if(type==='notes'){
   edge(c,'ochre',6,3,23,27);edge(c,'clay',5,2,22,27);r(c,'cream',8,3,17,23);r(c,'pale',9,4,13,2);r(c,'ochre',5,3,3,25);r(c,'ink',5,3,1,24);
   for(let y=6;y<26;y+=5){r(c,'light',4,y,4,1);r(c,'dark',5,y+1,2,1);}labelLines(c,11,10,11);poly(c,'light',[[20,25],[25,20],[25,25]]);r(c,'rose',19,26,3,6);r(c,'pale',9,27,10,1);
@@ -63,14 +64,14 @@ function homeKey(c,w,h){
 }
 function shell(c,w,h,small=false){
  const rad=small?7:30;
- round(c,'#65714f',1,2,w-2,h-3,rad);round(c,'#a18f6d',2,1,w-4,h-3,rad-1);round(c,'#e2d5a4',3,2,w-6,h-5,rad-2);round(c,'#7b8758',4,4,w-8,h-8,rad-3);round(c,'#626d48',6,5,w-12,h-10,rad-4);
- r(c,'#c5c69a',3,rad,w>80?2:1,h-rad*2);r(c,'#eddfb1',5,rad,1,h-rad*2);r(c,'#bb997e',w-5,rad,2,h-rad*2);r(c,'#eddfb1',w-7,rad+3,1,h-rad*2-7);
+ round(c,'#65714f',1,2,w-2,h-3,rad);round(c,'#93996c',2,1,w-4,h-3,rad-1);round(c,'#e2d5a4',3,2,w-6,h-5,rad-2);round(c,'#7b8758',4,4,w-8,h-8,rad-3);round(c,'#626d48',6,5,w-12,h-10,rad-4);
+ r(c,'#c5c69a',3,rad,w>80?2:1,h-rad*2);r(c,'#eddfb1',5,rad,1,h-rad*2);r(c,'#93996c',w-5,rad,2,h-rad*2);r(c,'#eddfb1',w-7,rad+3,1,h-rad*2-7);
  poly(c,'#7b8758',[[7,rad],[w*.43,7],[w*.59,7],[7,h*.32]].map(([x,y])=>[Math.round(x),Math.round(y)]));poly(c,'#65714f',[[w-7,h*.71],[w-7,h*.94],[w*.6,h-7],[w*.38,h-7]].map(([x,y])=>[Math.round(x),Math.round(y)]));
  // Quiet, fine rim glints; no chunky decorative notches.
  line(c,'#d8cda5',rad+5,3,w*.52,3);line(c,'#b3b58a',rad+4,h-4,w*.43,h-4);
- for(const [xx,yy,k] of [[4,h*.29,'#b6bd91'],[w-5,h*.53,'#c1a78a'],[rad+9,h-5,'#e2d5a4'],[w-rad-9,3,'#a7ad7b']])r(c,k,xx,yy,1,1);
+ for(const [xx,yy,k] of [[4,h*.29,'#b6bd91'],[w-5,h*.53,'#adb388'],[rad+9,h-5,'#e2d5a4'],[w-rad-9,3,'#a7ad7b']])r(c,k,xx,yy,1,1);
  // Low-contrast metal facets occupy the rim only, preserving the smooth silhouette.
- for(let i=0;i<12;i++){const yy=rad+9+i*(h-2*rad-18)/12;r(c,i%3?'#b2b58b':'#c8c9a1',3,yy,1,2);r(c,i%3?'#b59d7e':'#ccba98',w-5,yy+3,1,2);}
+ for(let i=0;i<12;i++){const yy=rad+9+i*(h-2*rad-18)/12;r(c,i%3?'#b2b58b':'#c8c9a1',3,yy,1,2);r(c,i%3?'#8d9570':'#b6bd91',w-5,yy+3,1,2);}
  line(c,'#c4be94',rad+2,4,w-rad-3,4);line(c,'#e5d5af',rad+10,3,w*.43,3);
  const sy=small?10:36,sh=h-(small?21:84);round(c,'#65714f',8,sy-1,w-16,sh+2,5);round(c,'#c5c69a',9,sy,w-18,sh,4);
  const speaker=small?10:34;round(c,'#65714f',Math.floor(w/2)-speaker/2,small?6:14,speaker,small?2:5,small?1:2);r(c,'#e2d5a4',Math.floor(w/2)-speaker/2+1,small?7:17,speaker-2,1);
@@ -87,12 +88,12 @@ function patina(c,w,h){
 }
 // Dedicated 32 × 52 locked-device sprite; highlights describe surfaces rather than heavy outlines.
 function miniPhone(c){
- round(c,'#78805a',1,1,30,51,6);round(c,'#b4a578',2,0,28,51,5);round(c,'#c5c69a',3,1,26,49,4);round(c,'#93996c',4,2,24,47,3);
- r(c,'#e2d5a4',7,1,17,1);r(c,'#eddfb1',5,4,1,13);r(c,'#adb388',3,9,1,30);r(c,'#bb997e',28,9,1,31);r(c,'#b4a578',27,32,1,10);
+ round(c,'#78805a',1,1,30,51,6);round(c,'#adb388',2,0,28,51,5);round(c,'#c5c69a',3,1,26,49,4);round(c,'#93996c',4,2,24,47,3);
+ r(c,'#e2d5a4',7,1,17,1);r(c,'#eddfb1',5,4,1,13);r(c,'#adb388',3,9,1,30);r(c,'#93996c',28,9,1,31);r(c,'#adb388',27,32,1,10);
  r(c,'#adb388',6,3,20,4);round(c,'#65714f',12,4,8,2,1);r(c,'#c5c69a',13,6,6,1);
  round(c,'#3b4437',5,8,22,35,2);round(c,'#252e28',6,9,20,33,1);
  poly(c,'#323a30',[[6,10],[17,10],[6,27]]);poly(c,'#3d4334',[[25,25],[25,41],[14,41]]);r(c,'#515a43',6,12,1,24);r(c,'#68704f',7,9,15,1);
- r(c,'#78805a',7,43,18,5);circle(c,'#65714f',16,46,3);r(c,'#c5c69a',15,45,2,2);r(c,'#93996c',16,46,1,1);r(c,'#e2d5a4',9,49,13,1);r(c,'#bb997e',23,48,3,1);
+ r(c,'#78805a',7,43,18,5);circle(c,'#65714f',16,46,3);r(c,'#c5c69a',15,45,2,2);r(c,'#93996c',16,46,1,1);r(c,'#e2d5a4',9,49,13,1);r(c,'#93996c',23,48,3,1);
 }
 function friendIcon(c,id){
  const backgrounds=['#b4b9a3','#afbcb4','#c7baa4','#b7b3bd','#aeb29f','#b7aaa2'];

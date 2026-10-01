@@ -1,4 +1,4 @@
-@font-face{font-family:Pixel;src:url('../assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=atlas-55') format('woff2');font-display:block}
+@font-face{font-family:Pixel;src:url('../assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=atlas-56') format('woff2');font-display:block}
 :root{font-family:Pixel,monospace;font-synthesis:none;color:#435644;--paper:#e4d7aa;--ink:#435644;--line:#9ba17b;--leaf:#aab186;--clay:#b98b78;--deep:#607b65}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}body{position:fixed;inset:0;background:#556b58}#surface{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}.app-shell{position:relative;width:100%;max-width:560px;height:100dvh;margin:auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);overflow:hidden;background:var(--paper)}html:not(.font-ready) .app-shell{visibility:hidden}#app{flex:1;min-height:0;overflow:hidden;outline:none}.topbar{display:none}.footer{position:absolute;bottom:0;left:0;right:0;z-index:15;background:var(--paper);font-size:10px;padding:6px}.footer:has(#save-status:empty){display:none}h1,h2,h3,p{margin:0;font-weight:400}b,strong{font-weight:400}button,a{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button{cursor:pointer;border:0;border-radius:0}button:disabled{opacity:.48;cursor:default}[hidden]{display:none!important}button:focus-visible,a:focus-visible{outline:2px solid #b98b78;outline-offset:3px}a{text-decoration:none}canvas{image-rendering:pixelated}button:active{translate:1px 1px}
 /* The atlas fills the portrait stage. Its sheet can be moved directly. */
@@ -154,3 +154,10 @@ body:has(.phone-scene) #surface{visibility:visible}
 .navigation-app .route-pin.ready .pin-label{display:none}.navigation-app .route-pin.search-match .pin-label,.navigation-app .route-pin:hover .pin-label,.navigation-app .route-pin:focus-visible .pin-label{display:block}
 @media(prefers-reduced-motion:reduce){.navigation-square{transition:none}.navigation-app .route-pin:not(:disabled) i{animation:destination-hop 3s steps(4) infinite}}
 @media(max-height:680px){.navigation-app{padding:0}.map-search-area{top:8px;left:8px;right:8px}.map-search-bar{min-height:38px}.map-bottom-bar{height:38px}.map-controls{bottom:50px}}
+
+.phone-map-open .phone-screen,.navigation-app{background:#929d78}
+.map-search-bar,.map-search-results,.map-controls button,.map-bottom-bar{background:#e2d5a4;color:#65714f}
+.map-search-input,.map-back,.map-clear,.map-search-results button{color:#65714f}.map-search-input::placeholder{color:#93996c}
+.map-search-bar,.map-controls button,.map-search-results{box-shadow:0 2px #65714f55}
+.map-bottom-bar{border-top-color:#b4a578}.navigation-app .pin-label{color:#65714f;text-shadow:1px 1px #eddfb1}
+.pixel-phone:after{content:'';position:absolute;inset:9px -6px -6px 9px;background:#35452e55;z-index:-1;pointer-events:none;clip-path:polygon(10% 0,90% 0,95% 2%,98% 5%,100% 9%,100% 91%,98% 95%,95% 98%,90% 100%,10% 100%,5% 98%,2% 95%,0 91%,0 9%,2% 5%,5% 2%)}
