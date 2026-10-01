@@ -1,14 +1,14 @@
-import {drawUI} from './ui-art.js?v=atlas-50';
-import {paintSurface} from './scene.js?v=atlas-50';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-50';
-import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=atlas-50';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-50';
-import { ROUTES } from '../data/routes/index.js?v=atlas-50';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-50';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-50';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-50';
-import * as E from './engine.js?v=atlas-50';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-50';
+import {drawUI} from './ui-art.js?v=atlas-51';
+import {paintSurface} from './scene.js?v=atlas-51';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-51';
+import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=atlas-51';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-51';
+import { ROUTES } from '../data/routes/index.js?v=atlas-51';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-51';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-51';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-51';
+import * as E from './engine.js?v=atlas-51';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-51';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -26,12 +26,22 @@ const arrow='<i class="px-arrow" aria-hidden="true"></i>';
 function btn(label,action,extra='',kind=''){return `<button class="btn ${kind}" data-action="${action}" ${extra}>${label}${arrow}</button>`;}
 function openModal(title,body,actions=''){modal.classList.toggle('phone-modal',view==='phone');modal.innerHTML=`<div class="modal-head"><h2 id="modal-title">${title}</h2><button class="close-btn" data-action="close" aria-label="关闭">×</button></div><div class="modal-body">${body}</div><div class="modal-actions">${actions}</div>`;if(!modal.open)modal.showModal();drawCanvases();}
 function closeModal(){modal.close();}
+let phoneBackdrop=null;
+function capturePhoneBackdrop(){
+ const layer=document.createElement('div');layer.className='phone-backdrop';layer.inert=true;layer.setAttribute('aria-hidden','true');
+ const source=app.querySelector(':scope > section');if(!source)return;
+ const copy=source.cloneNode(true),originals=source.querySelectorAll('canvas');
+ copy.querySelectorAll('canvas').forEach((canvas,i)=>{const original=originals[i],style=getComputedStyle(original);canvas.width=original.width;canvas.height=original.height;canvas.style.width=style.width;canvas.style.height=style.height;canvas.getContext('2d').drawImage(original,0,0);for(const attr of [...canvas.attributes])if(attr.name.startsWith('data-'))canvas.removeAttribute(attr.name);});
+ copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));layer.append(copy);phoneBackdrop=layer;
+}
 function render({sync=true,keepScroll=false}={}){
  const oldScroll=keepScroll?$('.choice-scroll')?.scrollTop||$('.phone-scroll')?.scrollTop||0:0;
+ if(view==='phone'&&!app.querySelector('.phone-scene'))capturePhoneBackdrop();
  clearTimeout(locationTimer);document.body.dataset.view=view;
  if(view==='play'&&!run())view='map';
  if(sync&&location.hash!==viewHash())history.pushState(null,'',viewHash());
  if(view==='map')renderMap();else if(view==='route-map')renderRouteMap();else if(view==='phone')renderPhone();else renderPlay();
+ if(view==='phone'&&phoneBackdrop)app.prepend(phoneBackdrop);
  if(keepScroll){const scroller=$('.choice-scroll')||$('.phone-scroll');if(scroller)scroller.scrollTop=oldScroll;}
  drawCanvases();startMini();updateSaveStatus();
 }
