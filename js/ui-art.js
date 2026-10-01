@@ -30,17 +30,31 @@ function shell(c,w,h,small=false){
  edge(c,'ink',1,2,w-3,h-4,4);edge(c,'ochre',1,1,w-4,h-5,4);edge(c,'light',2,2,w-6,h-7,3);edge(c,'moss',3,4,w-8,h-10,3);
  r(c,'sage',4,5,2,h-14);r(c,'light',6,5,w-15,1);r(c,'dark',w-8,9,3,h-19);r(c,'ink',w-5,10,1,h-19);
  hatch(c,'sage',6,h-10,w-16,3);for(let y=14;y<h-18;y+=23){r(c,'light',4,y,1,5);r(c,'sage',w-8,y+7,2,4);}
- const sy=small?11:12,sh=h-(small?24:27);
+ if(!small){r(c,'pale',6,7,w-18,1);r(c,'cream',4,10,1,h-29);r(c,'light',w-9,10,1,h-29);poly(c,'light',[[6,h-25],[17,h-25],[6,h-14]]);r(c,'rose',w-12,7,2,2);}
+ const sy=small?11:12,sh=h-(small?24:38);
  edge(c,'ink',inset+3,sy-2,w-2*inset-7,sh+3,1);r(c,'sage',inset+4,sy-1,w-2*inset-9,sh+1);r(c,'light',inset+5,sy,w-2*inset-11,sh-2);
  if(small){r(c,'cream',inset+5,sy,w-2*inset-11,2);hatch(c,'sage',inset+5,sy+sh-9,w-2*inset-11,6);const x=Math.floor(w/2)-7,y=Math.floor(h*.51);for(const [dx,dy] of [[0,0],[9,0],[0,9],[9,9]]){r(c,'ochre',x+dx,y+dy+1,6,6);r(c,'pale',x+dx,y+dy,6,5);r(c,'cream',x+dx,y+dy,6,1);}}
  r(c,'ink',Math.floor(w/2)-7,5,14,2);r(c,'sage',Math.floor(w/2)-6,5,12,1);r(c,'dark',Math.floor(w/2)+10,5,2,2);
+ if(!small)return;
  edge(c,'ink',Math.floor(w/2)-7,h-10,14,5,1);r(c,'sage',Math.floor(w/2)-6,h-10,12,3);r(c,'cream',Math.floor(w/2)-4,h-9,8,1);
 }
 function paper(c,w,h){r(c,'cream',0,0,w,h);r(c,'pale',0,0,w,2);for(let y=7;y<h;y+=17){const x=(Math.floor(y/17)*11)%Math.max(1,w-6);r(c,'#d7cea0',x,y,3,1);r(c,'#ded3a3',x+2,y+1,2,1);}r(c,'light',w-2,0,2,h);hatch(c,'#d5cba0',0,h-4,w,3);}
 function plaque(c,w,h){edge(c,'dark',0,2,w,h-2,2);edge(c,'ochre',0,0,w-1,h-2,2);edge(c,'cream',1,0,w-3,h-4,2);r(c,'pale',3,1,w-8,2);hatch(c,'light',2,h-8,w-5,4);r(c,'clay',3,3,2,2);r(c,'dark',w-6,h-7,2,2);}
+function crystal(c,w,h,mint=false){
+ edge(c,'ink',0,2,w,h-2,3);edge(c,'ochre',0,0,w-1,h-2,3);edge(c,mint?'sage':'light',1,0,w-3,h-4,3);
+ edge(c,mint?'#bfcbaa':'cream',2,1,w-5,h-6,2);
+ r(c,'pale',4,2,w-10,2);r(c,'light',3,4,1,h-10);r(c,mint?'moss':'ochre',w-5,5,2,h-12);
+ poly(c,mint?'#d0d5b2':'#eee0b5',[[4,5],[Math.min(w-8,24),5],[Math.min(w-8,16),10],[4,10]]);
+ poly(c,mint?'#a6b38d':'#ccc494',[[w-4,h-6],[w-19,h-6],[w-4,h-19]]);
+ r(c,'pale',4,h-6,w-24,1);hatch(c,mint?'light':'#d7cfa3',w-18,h-12,10,5);r(c,'rose',w-6,3,2,2);
+}
+function homeKey(c,w,h){
+ edge(c,'ink',1,3,w-2,h-3,4);edge(c,'ochre',1,1,w-3,h-4,4);edge(c,'light',2,1,w-5,h-6,3);edge(c,'cream',3,2,w-7,h-8,2);r(c,'pale',6,3,w-14,2);
+ const x=Math.floor(w/2);poly(c,'dark',[[x-6,9],[x,4],[x+6,9],[x+4,9],[x+4,14],[x-4,14],[x-4,9]]);r(c,'cream',x-1,10,2,4);r(c,'sage',5,h-6,w-13,1);
+}
 export function drawUI(canvas,type){
  const small=type==='small-phone',iconType=type.startsWith('icon-');
  const w=iconType?34:small?48:Math.max(32,Math.round(canvas.clientWidth/2)),h=iconType?34:small?80:Math.max(20,Math.round(canvas.clientHeight/2));
  canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
- if(iconType)icon(c,type.slice(5));else if(small||type==='shell')shell(c,w,h,small);else if(type==='plaque')plaque(c,w,h);else paper(c,w,h);
+ if(iconType)icon(c,type.slice(5));else if(small||type==='shell')shell(c,w,h,small);else if(type==='home-key')homeKey(c,w,h);else if(type.startsWith('crystal'))crystal(c,w,h,type==='crystal-mi');else if(type==='plaque')plaque(c,w,h);else paper(c,w,h);
 }
