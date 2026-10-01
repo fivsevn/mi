@@ -64,7 +64,7 @@ function shell(c,w,h,small=false){
  // Low-contrast metal facets occupy the rim only, preserving the smooth silhouette.
  for(let i=0;i<12;i++){const yy=rad+9+i*(h-2*rad-18)/12;r(c,i%3?'#b2b58b':'#c8c9a1',3,yy,1,2);r(c,i%3?'#b59d7e':'#ccba98',w-5,yy+3,1,2);}
  line(c,'#c4be94',rad+2,4,w-rad-3,4);line(c,'#e5d5af',rad+10,3,w*.43,3);
- const sy=small?10:36,sh=h-(small?21:84);round(c,'#65714f',8,sy-1,w-16,sh+2,3);round(c,'#c5c69a',9,sy,w-18,sh,2);
+ const sy=small?10:36,sh=h-(small?21:84);round(c,'#65714f',8,sy-1,w-16,sh+2,5);round(c,'#c5c69a',9,sy,w-18,sh,4);
  const speaker=small?10:34;round(c,'#65714f',Math.floor(w/2)-speaker/2,small?6:14,speaker,small?2:5,small?1:2);r(c,'#e2d5a4',Math.floor(w/2)-speaker/2+1,small?7:17,speaker-2,1);
  if(small){c.save();c.translate(10,sy+1);wallpaper(c,w-20,sh-2);for(const [type,x,y]of [['chat',2,14],['notes',13,14],['bag',2,25],['settings',13,25]]){c.save();c.translate(x,y);c.scale(.26,.26);icon(c,type);c.restore();}c.restore();c.save();c.translate(w/2-5,h-11);c.scale(.3,.3);homeKey(c,34,34);c.restore();}
 }

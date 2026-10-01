@@ -1,6 +1,6 @@
-import { paintTerrain,coordinate,compass,MAP_INK } from './maps.js?v=atlas-47';
-import { WORLD } from '../assets/world-grid.js?v=atlas-47';
-export {scene,avatar,selfie} from './scene.js?v=atlas-47';
+import { paintTerrain,coordinate,compass,MAP_INK } from './maps.js?v=atlas-48';
+import { WORLD } from '../assets/world-grid.js?v=atlas-48';
+export {scene,avatar,selfie} from './scene.js?v=atlas-48';
 const project=([lon,lat])=>[(lon+180)*3,30+(90-lat)*3];
 function trace(c,rings){c.beginPath();for(const ring of rings){ring.forEach((p,i)=>{const [x,y]=project(p);i?c.lineTo(x,y):c.moveTo(x,y);});c.closePath();}}
 export function drawMap(canvas,visited=[]){
