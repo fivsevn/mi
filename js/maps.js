@@ -1,5 +1,6 @@
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=field-9';
-import { geographyFor,routePins } from '../data/geography.js?v=field-9';
+import { finishPaper } from './paper.js?v=code-11';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=code-11';
+import { geographyFor,routePins } from '../data/geography.js?v=code-11';
 export function projectMap(coord,bounds,width=384,height=420,padding=20){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2;
@@ -12,47 +13,36 @@ function geometry(c,g,project,fill,stroke){
  const paths=g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:g.type==='LineString'?[[g.coordinates]]:g.type==='MultiLineString'?g.coordinates.map(line=>[line]):[];
  for(const polygon of paths){c.beginPath();for(const ring of polygon){ring.forEach((coord,i)=>{const [x,y]=project(coord);i?c.lineTo(x,y):c.moveTo(x,y);});if(fill)c.closePath();}if(fill){c.fillStyle=fill;c.fill('evenodd');}if(stroke){c.strokeStyle=stroke;c.stroke();}}
 }
-export const MAP_INK='#526457',MAP_PAPER='#ddd9bd',MAP_WATER='#91aaa0';
-const ramps={
- sea:['#779a8d','#85a797','#96b3a0','#a8bea4'],
- dry:['#b8ad82','#c7b88a','#d3c296','#ded0a5'],
- green:['#879b75','#9baa80','#b0b78a','#c3c59a'],
- rose:['#b29c80','#c2aa88','#d0b998','#ded0a5'],
- rock:['#7e8d6b','#98a17a','#b0b18a','#c8be96']
-};
-const ranges=[[31,-3,3,14],[37,8,3,12],[19,-31,6,4],[-5,31,10,3],[28,-15,9,5],[78,31,22,3],[-70,-22,3,35],[-113,43,7,18],[144,-24,4,15]];
+export const MAP_INK='#526453',MAP_PAPER='#d9d2ad',MAP_WATER='#9bb8ab';
+const LAND_TONES=['#a4ad91','#b4b79a','#c5c2a2','#d4cbaa','#ddd3b4'];
+const GREEN_TONES=['#829b83','#95a68a','#a7b297','#bcc2a4','#ced0b0'];
+const WATER_TONES=['#839f93','#8ca89b','#9bb8ab','#aec2af'];
+function patch(x,y){const a=Math.floor(x),b=Math.floor(y);return ((a*313+b*199+(a^b)*37)>>>0)%101/100;}
 export function paintTerrain(c,width,height,mask,cell=2,inverse=null){
- const land=(x,y)=>x>=0&&y>=0&&x<width&&y<height&&mask[(Math.floor(y)*width+Math.floor(x))*4]>180;
- c.fillStyle=ramps.sea[0];c.fillRect(0,0,width,height);
+ const isLand=(x,y)=>x>=0&&x<width&&y>=0&&y<height&&mask[(Math.floor(y)*width+Math.floor(x))*4]>180;
  for(let y=0;y<height;y+=cell)for(let x=0;x<width;x+=cell){
-  const coord=inverse?inverse(x,y):[x/width*360-180,90-y/height*180],lon=coord[0],lat=coord[1];
-  const small=Math.sin(lon*2.7+Math.sin(lat*1.9))*Math.cos(lat*3.1-lon*.8);
-  const big=Math.sin(lon*.22+Math.sin(lat*.19))*Math.cos(lat*.27+lon*.12);
-  const n=Math.floor((small*.28+big*.72+1)*1.7);
+  const [lon,lat]=inverse?inverse(x,y):[x/width*360-180,90-y/height*180];
   let color;
-  if(land(x,y)){
-   const dry=(lat>13&&lat<33&&lon>-18&&lon<60)||(lat<-17&&lat>-30&&lon<24&&lon>10)||(lon>112&&lon<140&&lat<-17)||(lon>42&&lon<95&&lat>20&&lat<44);
-   const forest=Math.abs(lat)<11||(lon>90&&lat<22&&lat>-15);
-   const rose=(lat<-21&&lon>10&&lon<23)||(lat>5&&lat<16&&lon<25&&lon>-14);
-   let rock=0;for(const [xx,yy,rx,ry]of ranges)rock=Math.max(rock,Math.max(0,1-((lon-xx)/rx)**2-((lat-yy)/ry)**2));
-   const ramp=rock>.4?ramps.rock:rose?ramps.rose:dry?ramps.dry:forest?ramps.green:ramps.dry;
-   const coast=!land(x-cell,y)||!land(x+cell,y)||!land(x,y-cell)||!land(x,y+cell);
-   const ridge=rock>.4&&Math.sin(lon*4+lat*3+Math.sin(lat*2))>.15;
-   color=coast?'#768c70':ramp[Math.min(3,Math.max(0,n+(ridge?-1:0)))];
-   if(rock>.55&&small>.25)color=ramps.rock[0];
-   // Connected two- and three-pixel clusters define land texture and ridge highlights.
-   if(small>.58&&((Math.floor(x/cell)+Math.floor(y/cell))%4<2))color=ramp[Math.min(3,n+1)];
+  if(isLand(x,y)){
+   const tropical=Math.abs(lat)<14||(lon>80&&lat<30&&lat>-15),palette=tropical?GREEN_TONES:LAND_TONES;
+   const terrain=patch(lon/6,lat/5)*.7+patch(lon/2,lat/2)*.3,index=Math.min(4,Math.floor(terrain*5));
+   const coast=!isLand(x-cell,y)||!isLand(x+cell,y)||!isLand(x,y-cell)||!isLand(x,y+cell);
+   color=coast?palette[1]:palette[index];
+   // Short joined clusters mark terrain changes; no enclosing coastline outline.
+   if(patch(lon*2,lat*2)>.82&&((x+y)/cell)%3===0)color=palette[Math.max(0,index-1)];
+   if(lon>11&&lon<23&&lat<-18&&lat>-30&&index<3)color=['#baa994','#c7b8a0','#d3c3a8'][index];
   }else{
-   const near=land(x-cell*3,y)||land(x+cell*3,y)||land(x,y-cell*3)||land(x,y+cell*3);
-   const mid=land(x-cell*7,y)||land(x+cell*7,y)||land(x,y-cell*7)||land(x,y+cell*7);
-   color=ramps.sea[near?3:mid?2:Math.floor(y/(cell*15))%3===0?1:0];
-   if(Math.sin(x*.09+y*.15)>.94&&Math.floor(y/cell)%5===0)color=ramps.sea[mid?3:2];
+   const close=isLand(x-4*cell,y)||isLand(x+4*cell,y)||isLand(x,y-4*cell)||isLand(x,y+4*cell);
+   const shelf=isLand(x-10*cell,y)||isLand(x+10*cell,y)||isLand(x,y-10*cell)||isLand(x,y+10*cell);
+   color=WATER_TONES[close?3:shelf?2:Math.floor(y/(cell*18))%3===0?1:0];
+   if((Math.floor(y/cell)%11===0)&&(Math.floor(x/cell)%17<4))color=WATER_TONES[close?3:2];
   }
   c.fillStyle=color;c.fillRect(x,y,cell,cell);
  }
- c.strokeStyle='#637d6c38';c.lineWidth=1;const step=width>200?48:24;
- for(let x=0;x<width;x+=step){c.beginPath();c.moveTo(x+.5,0);c.lineTo(x+.5,height);c.stroke();}
- for(let y=0;y<height;y+=step){c.beginPath();c.moveTo(0,y+.5);c.lineTo(width,y+.5);c.stroke();}
+ // Quiet map ruling is interrupted, with the same pixel weight as scene marks.
+ c.fillStyle='#a2b49c';const grid=width>200?48:24;
+ for(let x=grid;x<width;x+=grid)for(let y=4;y<height;y+=8)c.fillRect(x,y,1,3);
+ for(let y=grid;y<height;y+=grid)for(let x=4;x<width;x+=8)c.fillRect(x,y,3,1);
 }
 export function coordinate(c,x,y,size=7,filled=false){
  x=Math.round(x-size/2);y=Math.round(y-size/2);
@@ -60,13 +50,9 @@ export function coordinate(c,x,y,size=7,filled=false){
  c.fillStyle=filled?'#c8bb83':MAP_PAPER;c.fillRect(x+2,y+2,size-4,size-4);
 }
 export function compass(c,x,y,size=16){
- for(let dy=-size;dy<=size;dy++)for(let dx=-size;dx<=size;dx++){
- const rr=dx*dx+dy*dy;if(rr>size*size)continue;
- c.fillStyle=rr>(size-2)**2?'#b6b58b':'#77896c';c.fillRect(x+dx,y+dy,1,1);
- const axis=(Math.abs(dx)<2&&Math.abs(dy)<size-3)||(Math.abs(dy)<2&&Math.abs(dx)<size-3);
- const diagonal=Math.abs(Math.abs(dx)-Math.abs(dy))<2&&Math.abs(dx)<size*.55;
- if(axis||diagonal){c.fillStyle=dx+dy<0?'#ded0a5':'#b9aa7b';c.fillRect(x+dx,y+dy,1,1);}
- }c.fillStyle='#baa28a';c.fillRect(x-2,y-2,5,5);c.fillStyle='#ded0a5';c.fillRect(x,y,1,1);
+ c.fillStyle='#a7b296';for(let dy=-size;dy<=size;dy++){const half=Math.floor(Math.sqrt(size*size-dy*dy));c.fillRect(x-half,y+dy,half*2,1);}
+ c.fillStyle='#d9d2ad';for(let i=0;i<size-2;i++){const width=i<size/2?Math.max(1,Math.floor(i/3)):Math.max(1,Math.floor((size-i)/2));c.fillRect(x-width,y-size+2+i,width*2,1);c.fillRect(x-size+2+i,y-width,1,width*2);}
+ c.fillStyle='#c8bc96';c.fillRect(x-1,y,3,size-2);c.fillRect(x,y-1,size-2,3);c.fillStyle='#baa48b';c.fillRect(x-2,y-2,4,4);
 }
 function baseMap(canvas,map,width,height,{africa=false,padding=0}={}){
  canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
@@ -75,8 +61,8 @@ function baseMap(canvas,map,width,height,{africa=false,padding=0}={}){
  geometry(c,map.land,project,'#fff');geometry(c,map.water,project,'#000');
  const mask=c.getImageData(0,0,width,height).data;const origin=project([map.bounds[0],map.bounds[3]]),scale=(project([map.bounds[2],map.bounds[3]])[0]-origin[0])/(map.bounds[2]-map.bounds[0]);
  paintTerrain(c,width,height,mask,2,(x,y)=>[map.bounds[0]+(x-origin[0])/scale,map.bounds[3]-(y-origin[1])/scale]);
- c.lineWidth=1;geometry(c,map.rivers,project,null,'#819f93');
- c.lineWidth=.6;geometry(c,map.borders,project,null,'#919876');
+ c.lineWidth=1;geometry(c,map.rivers,project,null,'#aec2af');
+ c.lineWidth=.6;geometry(c,map.borders,project,null,'#a4ad91');
  return {c,project};
 }
 export function drawJourneyMap(canvas,visited=[]){
@@ -90,11 +76,11 @@ export function drawJourneyMap(canvas,visited=[]){
  for(const p of routePins.filter(p=>['seychelles','mauritius'].includes(p.id))){const [x,y]=project(p.coord);c.fillStyle='#b79b55';c.fillRect(Math.round(x)-2,Math.round(y)-2,5,5);}
  for(const p of routePins.filter(p=>p.offset)){const a=project(p.coord),b=pinPosition(p);c.strokeStyle='#82906e';c.lineWidth=.7;c.beginPath();c.moveTo(...a);c.lineTo(...b);c.stroke();}
  compass(c,321,369,17);c.fillStyle=MAP_INK;c.font='10px Pixel,monospace';c.fillText('ATLANTIC',19,265);c.fillText('INDIAN OCEAN',254,347);
- canvas.dataset.visited=visited.join(',');
+ finishPaper(canvas);canvas.dataset.visited=visited.join(',');
 }
 export function drawLocalMap(canvas,node){
  const geo=geographyFor(node),map=CONTEXT_MAPS[geo.key];
  const {c,project}=baseMap(canvas,map,96,96);const [x,y]=project(geo.coord);
- coordinate(c,x,y,9,false);
+ coordinate(c,x,y,9,false);finishPaper(canvas,{mini:true});
  canvas.dataset.location=geo.key;canvas.dataset.coordinate=geo.coord.join(',');
 }

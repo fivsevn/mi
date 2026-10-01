@@ -1,12 +1,13 @@
-import { geographyFor,routePins } from '../data/geography.js?v=field-9';
-import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=field-9';
-import { placeFor } from '../data/routes/africa-stories.js?v=field-9';
-import { ROUTES } from '../data/routes/index.js?v=field-9';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=field-9';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=field-9';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=field-9';
-import * as E from './engine.js?v=field-9';
-import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=field-9';
+import {paintSurface} from './scene.js?v=code-11';
+import { geographyFor,routePins } from '../data/geography.js?v=code-11';
+import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=code-11';
+import { placeFor } from '../data/routes/africa-stories.js?v=code-11';
+import { ROUTES } from '../data/routes/index.js?v=code-11';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=code-11';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=code-11';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=code-11';
+import * as E from './engine.js?v=code-11';
+import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=code-11';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -32,7 +33,7 @@ function render({sync=true,keepScroll=false}={}){
  if(keepScroll){const scroller=$('.choice-scroll')||$('.phone-scroll');if(scroller)scroller.scrollTop=oldScroll;}
  drawCanvases();startMini();updateSaveStatus();
 }
-function drawCanvases(){if($('#lock-selfie'))selfie($('#lock-selfie')); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));}
+function drawCanvases(){paintSurface($("#surface"));if($('#lock-selfie'))selfie($('#lock-selfie')); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));}
 function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><button class="desk-phone" data-action="phone" aria-label="拿起手机"><span class="mini-speaker"></span><span class="mini-screen"><span>${clockTime()}</span><i class="tiny-apps" aria-hidden="true"></i></span><span class="mini-home"></span></button><div class="map-paper"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><div class="map-view"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 720 396" preserveAspectRatio="xMidYMid meet"><a href="#route-map" data-action="journey" aria-label="展开非洲地图"><path d="${africaHitPath()}"/><text x="353" y="166">AFRICA</text></a></svg></div></div></section>`;}
 function mapNode(){const r=run();return current()||(r?.stage==='rest'?ROUTES[0].nodes[r.node-1]:r&&['return-pack','reflect'].includes(r.stage)?ROUTES[0].nodes.at(-1):null);}
 function visitedPlaces(){
@@ -157,3 +158,5 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSound()
 document.fonts.load('12px Pixel').then(()=>{document.documentElement.classList.add('font-ready');drawCanvases();}).catch(()=>document.documentElement.classList.add('font-ready'));
 setTimeout(()=>document.documentElement.classList.add('font-ready'),2500);
 readLocation();
+
+window.addEventListener("resize",()=>paintSurface($("#surface")));

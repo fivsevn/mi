@@ -6,15 +6,11 @@
   <meta name="theme-color" content="#cfc69d">
   <meta name="description" content="米的地图 · MI’S MAP">
   <title>米的地图 · MI’S MAP</title>
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="preload" href="assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=field-9" as="font" type="font/woff2" crossorigin fetchpriority="high">
-  <link rel="stylesheet" href="css/style.css?v=field-9">
-  <link rel="stylesheet" href="css/desk.css?v=field-9">
-  <link rel="stylesheet" href="css/handheld.css?v=field-9">
-  <link rel="stylesheet" href="css/pocket.css?v=field-9">
-  <link rel="stylesheet" href="css/field.css?v=field-9">
+  <link rel="preload" href="assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=code-11" as="font" type="font/woff2" crossorigin fetchpriority="high">
+  <link rel="stylesheet" href="css/game.css?v=code-11">
 </head>
 <body>
+  <canvas id="surface" aria-hidden="true"></canvas>
   <div class="app-shell">
     <header class="topbar"><div class="brand"><span class="brand-type">米的地图<small>MI’S MAP</small></span></div></header>
     <main id="app" tabindex="-1" aria-live="polite"><div class="loading">正在展开地图……</div></main>
@@ -23,6 +19,6 @@
   <dialog id="modal" aria-labelledby="modal-title"></dialog>
   <div id="toast" role="status"></div>
   <noscript>请启用 JavaScript，米才能打开她的行李箱。</noscript>
-  <script type="module" src="js/app.js?v=field-9"></script>
+  <script type="module" src="js/app.js?v=code-11"></script>
 </body>
 </html>

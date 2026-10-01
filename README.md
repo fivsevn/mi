@@ -32,7 +32,7 @@ node --test tests/engine.test.js
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs CHROME_PATH=/path/to/chrome node tests/browser.mjs
 ```
 
-浏览器回归在 Chromium 和 WebKit 完整走过 74 个事件和七次段落停顿，包括小游戏、物品变化、手机返回、当前周目隔离、旧书签处理、320×568 到 1440×1000 的固定屏幕，以及不可用存储。截图在 test-results/。
+浏览器回归在 Chromium 和 WebKit 完整走过 74 个事件和七次段落停顿，包括小游戏、物品变化、手机返回、当前周目隔离、旧书签处理、320×568 到 1440×1000 的固定屏幕，以及不可用存储。检查截图在系统临时目录。
 
 GitHub Pages 使用 main 根目录和 CNAME。发布时更新完整模块图和字体的版本标记，防止混用旧缓存。
 
@@ -42,6 +42,4 @@ Fusion Pixel 12px Monospaced 简体中文字体本地托管，按文案裁剪，
 
 Canvas / CSS 场景为本项目绘制。世界地图陆地数据来自公共领域 Natural Earth；局部地图采用 1:10m 数据（[来源](https://www.naturalearthdata.com/downloads/10m-physical-vectors/)），按地点裁剪后随游戏托管，不依赖外部地图服务。地理坐标为剧情地点的近似中心；scripts/build-context-maps.py 可从 Natural Earth GeoJSON 重建底图。动画尊重 reduced-motion；小游戏切到手机、资料弹窗或后台时暂停。
 
-地图视觉采用同一像素绘制方法：灰绿水域、连续纸色陆地、海岸与碎线纹理；世界图、地区图和局部图共用方框坐标。仅显示的位置是灰色空框，可进入的位置填色，悬停或点击时增加外层方框。大纸有四列折面，迷你纸仅保留十字折痕；标题和地点名直接印在地图上。
-
-全游戏画面由 js/illustration.js 统一绘制，涵盖 14 种场景、人物、穿搭与自拍；css/field.css 将选项、行李、手机、聊天、笔记、弹窗和小游戏物件统一到纸色、苔绿、水绿的材质与色阶。assets/materials/ 包含本地像素材质；地图增加海岸分层、地形色阶与簇状纹理。绘制参考 [cure 的 Pixel Art Tutorial](https://pixeljoint.com/forum/forum_posts.asp?TID=11299) 关于像素簇、色阶和色相偏移的讲解。
+视觉完全由代码绘制。js/scene.js 绘制抽象人物、14 种场景、动画和页面背景；js/paper.js 绘制阶梯纸边、折面与实色像素投影；js/maps.js 使用地理数据绘制地图。css/game.css 是唯一游戏样式。仓库不包含图片、SVG、贴图或外部图片请求；检查截图仅保存在系统临时目录。旧视觉样式及图片资源已删除。
