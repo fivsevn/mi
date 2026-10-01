@@ -88,5 +88,28 @@ export function scene(canvas,type='savanna',outfit={},frame=0){
  if(type!=='coach')for(let i=0;i<18;i++){const x=(i*43)%253,y=201+(i*7)%17;block(c,shore?'warm':'shadow',x,y,3,1);if(!shore){block(c,'warm',x+1,y-3,1,3);block(c,'shadow',x+2,y-1,2,1);}}
 }
 export function avatar(canvas,outfit={}){const c=setup(canvas,64,80);block(c,'paper',0,0,64,80);dither(c,'warm',0,59,64,21,.2);person(c,15,12,outfit,0,2);}
-export function selfie(canvas){const c=setup(canvas,128,192);block(c,'sky',0,0,128,192);cloud(c,15,32);block(c,'warm',0,88,128,104);tree(c,21,81,.7);person(c,31,69,{hat:true},0,4);}
+export function selfie(canvas){
+ const c=setup(canvas,192,288);block(c,'sky',0,0,192,288);cloud(c,22,36);cloud(c,139,58);
+ shape(c,'light',[[0,104],[28,88],[65,99],[114,85],[155,98],[192,89],[192,137],[0,137]]);
+ block(c,'warm',0,125,192,163);dither(c,'light',0,116,192,18,.28);grain(c,0,148,192,140,'paper');tree(c,28,126,.9);tree(c,158,115,.65);
+ // A distant giraffe is drawn separately from the portrait silhouette.
+ shape(c,'warm',[[146,156],[166,156],[169,128],[173,127],[175,133],[171,137],[169,163],[147,163]]);
+ block(c,'shadow',148,163,2,17);block(c,'shadow',164,163,2,17);block(c,'clay',169,124,2,5);block(c,'ink',173,129,1,1);
+ for(const [x,y]of [[151,158],[159,160],[167,151],[168,142],[169,134]])block(c,'clay',x,y,2,3);
+ shape(c,'hair',[[65,131],[74,120],[104,121],[119,134],[124,185],[112,208],[64,202],[57,174]]);
+ shape(c,'skin',[[72,138],[105,137],[112,150],[108,178],[98,189],[80,185],[69,170]]);
+ shape(c,'warm',[[70,144],[77,143],[75,167],[86,183],[80,185],[69,170]]);
+ block(c,'paper',80,147,18,2);block(c,'hair',78,155,6,2);block(c,'hair',99,154,5,2);block(c,'ink',82,157,2,2);block(c,'ink',100,156,2,2);
+ block(c,'clay',93,166,3,2);block(c,'clay',87,176,12,2);block(c,'paper',89,175,8,1);block(c,'clay',77,167,5,2);
+ shape(c,'skin',[[83,184],[98,184],[100,201],[85,205],[79,199]]);
+ shape(c,'shirt',[[79,196],[85,202],[96,202],[104,194],[123,205],[139,250],[131,288],[49,288],[45,248],[60,207]]);
+ shape(c,'light',[[60,207],[71,201],[64,237],[68,273],[59,288],[49,288],[45,248]]);
+ shape(c,'warm',[[117,202],[123,205],[139,250],[131,288],[119,288],[124,249]]);
+ shape(c,'skin',[[47,244],[59,246],[62,265],[51,282],[42,282],[39,273]]);shape(c,'skin',[[127,245],[139,249],[149,275],[145,288],[132,288],[131,271]]);
+ line(c,'warm',79,199,87,210);line(c,'warm',104,198,96,211);block(c,'warm',89,217,1,47);for(let y=218;y<265;y+=12)block(c,'clay',92,y,1,2);
+ shape(c,'warm',[[50,138],[56,131],[69,127],[73,112],[103,110],[112,123],[127,130],[134,137],[124,142],[65,146]]);
+ shape(c,'paper',[[54,135],[71,131],[77,114],[101,113],[108,130],[126,135],[119,138],[64,141]]);
+ shape(c,'clay',[[73,126],[107,125],[110,131],[71,133]]);line(c,'shirt',79,115,99,114);
+ for(let x=61;x<126;x+=4){block(c,'light',x,136,2,1);block(c,'warm',x,139,1,1);}dither(c,'light',78,116,22,8,.22);
+}
 export function paintSurface(canvas){const c=setup(canvas,Math.ceil(innerWidth/3),Math.ceil(innerHeight/3));block(c,'shadow',0,0,canvas.width,canvas.height);const stage=Math.max(0,Math.floor((canvas.width-Math.min(innerWidth,560)/3)/2));block(c,'paper',stage,0,Math.min(innerWidth,560)/3,canvas.height);}
