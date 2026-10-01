@@ -107,6 +107,18 @@ function phonePane(c,w,h,type){
  r(c,'#93996c',w-2,4,1,h-8);
  edge(c,mint?'#c5c69a':'#e2d5a4',2,3,w-5,h-6,2);
  r(c,'#eddfb1',3,2,w-8,1);r(c,'#c5c69a',3,h-4,w-8,1);
+ // Interleave neighbouring shades through the frame's thickness: light, half-light, body and reflected shadow.
+ for(let x=4;x<w-5;x++){
+  const a=x%8;r(c,a<3?'#eddfb1':a<6?'#d7d3a4':'#c5c69a',x,1,1,1);
+  r(c,a<2?'#c5c69a':a<5?'#b5bd90':'#adb388',x,h-3,1,1);
+  if(a===3||a===4)r(c,'#93996c',x,h-2,1,1);
+ }
+ for(let y=5;y<h-5;y++){
+  const a=y%7;r(c,a<2?'#d7d3a4':a<5?'#c5c69a':'#adb388',1,y,1,1);
+  r(c,a<2?'#adb388':a<5?'#93996c':'#859064',w-3,y,1,1);
+  if(a===3)r(c,'#78805a',w-2,y,1,1);
+ }
+
  for(let y=h-7;y<h-4;y++)for(let x=3;x<w-4;x++)if((x+y)%4===0)r(c,mint?'#adb388':'#c5c69a',x,y,1,1);
 }
 export function drawUI(canvas,type){
