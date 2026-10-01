@@ -102,24 +102,14 @@ function phonePane(c,w,h,type){
  }
  if(type==='battery'){edge(c,'#586647',0,1,w-2,h-2,1);r(c,'#aab384',1,2,w-4,h-4);for(let x=2;x<6;x+=2)r(c,'#586647',x,3,1,h-6);r(c,'#78805a',w-2,Math.floor(h/2)-1,2,3);r(c,'#d4d0a6',2,1,w-5,1);return;}
  const mint=type==='phone-message-mi';
- // Same thin casing section as the 34px chat sprite; its speech tail is omitted for rectangular controls.
- edge(c,'#65714f',1,2,w-1,h-2,2);edge(c,'#adb388',1,1,w-3,h-3,2);
- r(c,'#93996c',w-2,4,1,h-8);
- edge(c,mint?'#c5c69a':'#e2d5a4',2,3,w-5,h-6,2);
- r(c,'#eddfb1',3,2,w-8,1);r(c,'#c5c69a',3,h-4,w-8,1);
- // Interleave neighbouring shades through the frame's thickness: light, half-light, body and reflected shadow.
- for(let x=4;x<w-5;x++){
-  const a=x%8;r(c,a<3?'#eddfb1':a<6?'#d7d3a4':'#c5c69a',x,1,1,1);
-  r(c,a<2?'#c5c69a':a<5?'#b5bd90':'#adb388',x,h-3,1,1);
-  if(a===3||a===4)r(c,'#93996c',x,h-2,1,1);
- }
- for(let y=5;y<h-5;y++){
-  const a=y%7;r(c,a<2?'#d7d3a4':a<5?'#c5c69a':'#adb388',1,y,1,1);
-  r(c,a<2?'#adb388':a<5?'#93996c':'#859064',w-3,y,1,1);
-  if(a===3)r(c,'#78805a',w-2,y,1,1);
- }
-
- for(let y=h-7;y<h-4;y++)for(let x=3;x<w-4;x++)if((x+y)%4===0)r(c,mint?'#adb388':'#c5c69a',x,y,1,1);
+ // Expand the chat sprite's casing as a nine-slice object: corners retain their authored pixel steps.
+ edge(c,'#65714f',1,3,w-1,h-3,3);edge(c,'#adb388',1,2,w-3,h-5,3);
+ r(c,'#eddfb1',4,2,w-10,2);r(c,'#93996c',w-3,6,2,h-12);
+ edge(c,mint?'#c5c69a':'#e2d5a4',3,6,w-7,h-11,2);
+ r(c,'#eddfb1',4,6,w-10,1);r(c,'#c5c69a',2,6,1,h-13);
+ r(c,'#c5c69a',4,h-6,w-10,1);r(c,'#93996c',w-5,h-7,2,3);
+ // Dither belongs to the inner lower glass transition, never to the casing outline.
+ for(let y=h-9;y<h-6;y++)for(let x=4;x<w-6;x++)if((x+y)%4===0)r(c,mint?'#adb388':'#c5c69a',x,y,1,1);
 }
 export function drawUI(canvas,type){
  const small=type==='small-phone',ico=type.startsWith('icon-'),w=type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
