@@ -18,8 +18,8 @@ function wallpaper(c,w,h){
   r(c,col,x,y,1,1);
  }
  // Large quiet reflections, with a few clustered chips in the aged glass.
- poly(c,'#f1e7db18',[[0,h*.15],[w*.19,0],[w*.4,0],[0,h*.73]].map(([x,y])=>[Math.round(x),Math.round(y)]));
- for(let i=0;i<38;i++){const x=(i*37+i*i*3)%w,y=Math.floor(h*.18)+(i*53)%Math.floor(h*.68);r(c,i%4?'#d2c8bc':'#eee3d8',x,y,1+i%2,1);if(i%5===0){r(c,'#e4d8cb',x+1,y-1,1,3);r(c,'#c0b8ae',x-1,y,3,1);}}
+ poly(c,'#f1e7db24',[[0,h*.15],[w*.19,0],[w*.4,0],[0,h*.73]].map(([x,y])=>[Math.round(x),Math.round(y)]));
+ for(let i=0;i<25;i++){const x=(i*37+i*i*3)%w,y=Math.floor(h*.18)+(i*53)%Math.floor(h*.68);r(c,i%4?'#d2c8bc':'#eee3d8',x,y,1+i%2,1);if(i%5===0){r(c,'#e4d8cb',x+1,y-1,1,3);r(c,'#c0b8ae',x-1,y,3,1);}}
 }
 
 function icon(c,type){
@@ -44,14 +44,20 @@ function shell(c,w,h,small=false){
  r(c,'#a99888',3,rad,w>80?2:1,h-rad*2);r(c,'#e0cbb8',5,rad,1,h-rad*2);r(c,'#9b6c48',w-5,rad,2,h-rad*2);r(c,'#f0d6ac',w-7,rad+3,1,h-rad*2-7);
  poly(c,'#45352b',[[7,rad],[w*.43,7],[w*.59,7],[7,h*.32]].map(([x,y])=>[Math.round(x),Math.round(y)]));poly(c,'#30332e',[[w-7,h*.71],[w-7,h*.94],[w*.6,h-7],[w*.38,h-7]].map(([x,y])=>[Math.round(x),Math.round(y)]));
  for(let i=0;i<12;i++){const x=rad+(i*23)%(Math.max(1,w-2*rad));r(c,i%2?'#6b503d':'#c3ac90',x,3,2+i%3,1);r(c,i%3?'#b3a69b':'#e7d6c5',x,h-5,3+i%4,1);}
+ // Broken silver highlights and warm oxidation give the casing its physical depth.
+ for(let i=0;i<17;i++){const yy=rad+7+(i*31)%(h-rad*2-14);r(c,i%3?'#65574c':'#e1d5c9',3,yy,2,2+i%4);if(i%4===0)r(c,'#b18a60',w-6,yy+6,2,4);}
+ line(c,'#c4b5a3',rad,5,w*.48,5);line(c,'#e7d8c5',rad+4,h-4,w*.43,h-4);line(c,'#5d493a',w*.6,h-4,w-rad,h-4);
  const sy=small?10:36,sh=h-(small?21:76);r(c,'#70685c',8,sy-1,w-16,sh+2);r(c,'#1f241f',9,sy,w-18,sh);
  const speaker=small?10:34;round(c,'#483b31',Math.floor(w/2)-speaker/2,small?6:22,speaker,small?2:5,small?1:2);r(c,'#bbb2a6',Math.floor(w/2)-speaker/2+1,small?7:25,speaker-2,1);
  if(small){c.save();c.translate(10,sy+1);wallpaper(c,w-20,sh-2);for(const [type,x,y]of [['chat',2,14],['notes',13,14],['bag',2,25],['settings',13,25]]){c.save();c.translate(x,y);c.scale(.26,.26);icon(c,type);c.restore();}c.restore();c.save();c.translate(w/2-5,h-11);c.scale(.3,.3);homeKey(c,34,34);c.restore();}
 }
 function patina(c,w,h){
  const small=w<80,s=small?.38:1,x=w-(small?11:23);c.save();c.translate(x,small?1:3);c.scale(s,s);
- line(c,'#51472a',0,0,-4,28);line(c,'#77633a',-4,28,8,68);line(c,'#433b21',5,10,-8,45);
- for(let i=0;i<11;i++){const yy=4+i*6,xx=i%2?-3:5;poly(c,i%3?'#5b5f38':'#87804b',[[xx,yy],[xx-4,yy-4],[xx-7,yy-2],[xx-6,yy+3],[xx-2,yy+6],[xx+1,yy+3]]);r(c,'#a89454',xx-4,yy-1,2,2);r(c,'#383d27',xx-2,yy+3,2,2);}
+ // Uneven stems and overlapping leaves follow the worn rim, rather than a repeated fern.
+ for(const [a,b,d,e] of [[-17,0,-6,13],[-6,13,-3,34],[-3,34,9,67],[2,7,-8,40],[9,24,5,54]]){line(c,'#302d1d',a+1,b+1,d+1,e+1);line(c,'#76613b',a,b,d,e);}
+ const leaves=[[-17,2,7,5],[-8,7,5,8],[1,4,6,4],[-5,17,7,6],[3,22,5,8],[-10,27,5,7],[-2,34,6,5],[5,41,4,7],[2,50,5,6],[9,59,4,6],[-8,12,4,5]];
+ leaves.forEach(([xx,yy,ww,hh],i)=>{poly(c,'#302f21',[[xx-ww,yy],[xx-ww+2,yy-hh],[xx,yy-hh-1],[xx+2,yy],[xx,yy+hh],[xx-ww+1,yy+2]]);poly(c,i%3?'#626443':'#85805a',[[xx-ww+1,yy-1],[xx-ww+3,yy-hh+1],[xx,yy-hh],[xx+1,yy],[xx-1,yy+hh-2]]);line(c,'#a28d59',xx-ww+3,yy-hh+2,xx-1,yy+2);r(c,'#45492e',xx-1,yy+2,2,3);});
+ for(let i=0;i<9;i++){const yy=12+i*5,xx=10-Math.floor(i/3);round(c,'#b18b52',xx,yy,3,4,1);r(c,'#3c3021',xx+1,yy+1,1,2);}
  c.restore();
 }
 function paper(c,w,h){r(c,'cream',0,0,w,h);}
