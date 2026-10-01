@@ -1,13 +1,13 @@
-import {paintSurface} from './scene.js?v=code-11';
-import { geographyFor,routePins } from '../data/geography.js?v=code-11';
-import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=code-11';
-import { placeFor } from '../data/routes/africa-stories.js?v=code-11';
-import { ROUTES } from '../data/routes/index.js?v=code-11';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=code-11';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=code-11';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=code-11';
-import * as E from './engine.js?v=code-11';
-import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=code-11';
+import {paintSurface} from './scene.js?v=atlas-12';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-12';
+import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=atlas-12';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-12';
+import { ROUTES } from '../data/routes/index.js?v=atlas-12';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-12';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-12';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-12';
+import * as E from './engine.js?v=atlas-12';
+import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=atlas-12';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -153,7 +153,7 @@ function updateMini(){const r=run(),n=r&&E.currentNode(r),el=document.querySelec
 function startMini(){clearInterval(miniTimer);stopSound();document.body.classList.remove('soaked');const r=run(),n=view==='play'&&r?.stage==='event'?E.currentNode(r):null;if(!n?.mini)return;updateMini();if(n.mini==='falls')return;
  miniTimer=setInterval(()=>{if(document.hidden||modal.open)return;const m=r.mini[n.id];if(m.done)return;m.elapsed+=.5;if(m.elapsed>=(n.mini==='glasses'?12:22)){m.done=true;clearInterval(miniTimer);}save();updateMini();},500);
 }
-setInterval(()=>{if(document.hidden||matchMedia('(prefers-reduced-motion: reduce)').matches)return;animFrame=(animFrame+1)%4;document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles},animFrame));},650);
+setInterval(()=>{if(document.hidden)return;animFrame=(animFrame+1)%4;document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles},animFrame));},650);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSound();});
 document.fonts.load('12px Pixel').then(()=>{document.documentElement.classList.add('font-ready');drawCanvases();}).catch(()=>document.documentElement.classList.add('font-ready'));
 setTimeout(()=>document.documentElement.classList.add('font-ready'),2500);
