@@ -1,4 +1,4 @@
-@font-face{font-family:Pixel;src:url('../assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=atlas-51') format('woff2');font-display:block}
+@font-face{font-family:Pixel;src:url('../assets/fonts/fusion-pixel-12px-monospaced-zh_hans.woff2?v=atlas-52') format('woff2');font-display:block}
 :root{font-family:Pixel,monospace;font-synthesis:none;color:#435644;--paper:#e4d7aa;--ink:#435644;--line:#9ba17b;--leaf:#aab186;--clay:#b98b78;--deep:#607b65}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}body{position:fixed;inset:0;background:#556b58}#surface{position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}.app-shell{position:relative;width:100%;max-width:560px;height:100dvh;margin:auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);overflow:hidden;background:var(--paper)}html:not(.font-ready) .app-shell{visibility:hidden}#app{flex:1;min-height:0;overflow:hidden;outline:none}.topbar{display:none}.footer{position:absolute;bottom:0;left:0;right:0;z-index:15;background:var(--paper);font-size:10px;padding:6px}.footer:has(#save-status:empty){display:none}h1,h2,h3,p{margin:0;font-weight:400}b,strong{font-weight:400}button,a{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button{cursor:pointer;border:0;border-radius:0}button:disabled{opacity:.48;cursor:default}[hidden]{display:none!important}button:focus-visible,a:focus-visible{outline:2px solid #b98b78;outline-offset:3px}a{text-decoration:none}canvas{image-rendering:pixelated}button:active{translate:1px 1px}
 /* The atlas fills the portrait stage. Its sheet can be moved directly. */
@@ -96,3 +96,19 @@ body:has(.phone-scene) #surface{visibility:visible}
 .phone-scene{position:relative;z-index:1;background:transparent}
 .phone-backdrop{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .phone-backdrop .desk-phone,.phone-backdrop .pocket-phone{visibility:hidden}
+
+/* Paper labels and restrained cartographic markers. */
+.paper-title,.route-map-view .paper-title{background:none;box-shadow:none;padding:9px 14px 10px;font-size:22px}
+.paper-title:hover{background:none}.paper-title small{font-size:9px;margin-top:6px}
+.pin-label{background:none!important;border:0;box-shadow:none;padding:0;text-shadow:1px 1px #ecebdf,2px 2px #676f6555}
+.pin-label>.control-paper{display:none}
+.route-pin i,.route-pin:disabled i{width:6px;height:6px;left:12px;top:12px;border:0;background:#69736b;box-shadow:2px 3px #3c494466}
+.route-pin.ready i{background:#a86d5e;box-shadow:2px 3px #3c494466}
+.route-pin.visited i{background:#43594d;box-shadow:2px 3px #3c494466}
+.route-pin:hover i,.route-pin:focus-visible i{outline:1px solid #f0eee1;outline-offset:2px}
+.route-map-screen{background:#969c98}
+.map-hit text{text-shadow:1px 1px #e6dbb3;stroke:none}
+.map-hit a:hover path,.map-hit a:focus-visible path{fill:#eddda017;stroke:#8e685e;stroke-width:1;stroke-linejoin:round}
+.desk-phone{width:54px;height:88px;isolation:isolate}
+.desk-phone:before{content:'';position:absolute;inset:5px -3px -3px 5px;background:#354b4666;z-index:-1;clip-path:polygon(8% 0,90% 0,100% 8%,100% 91%,90% 100%,8% 100%,0 90%,0 8%)}
+@media(max-height:680px){.desk-phone{width:54px;height:88px}}
