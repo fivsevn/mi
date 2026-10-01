@@ -1,13 +1,15 @@
-import { elevation } from '../assets/relief-grid.js?v=atlas-52';
-import { finishPaper } from './paper.js?v=atlas-52';
-import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-52';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-52';
+import { WORLD } from '../assets/world-grid.js?v=atlas-53';
+import { elevation } from '../assets/relief-grid.js?v=atlas-53';
+import { finishPaper } from './paper.js?v=atlas-53';
+import { CONTEXT_MAPS } from '../assets/context-maps.js?v=atlas-53';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-53';
 export function projectMap(coord,bounds,width=384,height=420,padding=20,verticalBias=0){
  const scale=Math.min((width-2*padding)/(bounds[2]-bounds[0]),(height-2*padding)/(bounds[3]-bounds[1]));
  const ox=(width-(bounds[2]-bounds[0])*scale)/2,oy=(height-(bounds[3]-bounds[1])*scale)/2+verticalBias;
  return [ox+(coord[0]-bounds[0])*scale,oy+(bounds[3]-coord[1])*scale];
 }
-export const pinPosition=(pin,height=420)=>{const [x,y]=projectMap(pin.coord,CONTEXT_MAPS.africa.bounds,384,height,20,-Math.max(0,height-500)*.26);return [x+(pin.offset?.[0]||0),y+(pin.offset?.[1]||0)];};
+const JOURNEY_BOUNDS=[9,-41,64,14];
+export const pinPosition=(pin,height=384)=>{const [x,y]=projectMap(pin.coord,JOURNEY_BOUNDS,384,384,18);return [x+(pin.offset?.[0]||0),y+(pin.offset?.[1]||0)];};
 function geometry(c,g,project,fill,stroke){
  if(!g)return;
  if(g.type==='GeometryCollection'){g.geometries.forEach(child=>geometry(c,child,project,fill,stroke));return;}
@@ -75,7 +77,7 @@ export function paintTerrain(c,width,height,mask,cell=2,inverse=null){
  for(let y=grid;y<height;y+=grid)c.fillRect(0,y,width,1);
  c.globalAlpha=1;
 }
-export function coordinate(c,x,y,size=7,filled=false){x=Math.round(x-size/2);y=Math.round(y-size/2);const edge=Math.max(3,size-2);c.fillStyle='#3f514b88';c.fillRect(x+2,y+3,edge,edge);c.fillStyle=filled?'#a87061':'#586d5a';c.fillRect(x,y,edge,edge);}
+export function coordinate(c,x,y,size=7){const edge=Math.max(3,size-3);c.fillStyle='#b16c89';c.fillRect(Math.round(x-edge/2),Math.round(y-edge/2),edge,edge);}
 function chartText(c,text,x,y){const ink=c.fillStyle;c.fillStyle='#e2e2d4';c.fillText(text,x+1,y+1);c.fillStyle=ink;c.fillText(text,x,y);}
 function baseMap(canvas,map,width,height,{africa=false,padding=0}={}){
  canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
@@ -89,8 +91,9 @@ function baseMap(canvas,map,width,height,{africa=false,padding=0}={}){
  return {c,project};
 }
 export function drawJourneyMap(canvas,visited=[]){
- const height=Number(canvas.dataset.height)||420;
- const {c,project}=baseMap(canvas,CONTEXT_MAPS.africa,384,height,{africa:true,padding:20});
+ const height=384;
+ const map={bounds:JOURNEY_BOUNDS,land:{type:'MultiPolygon',coordinates:WORLD},water:CONTEXT_MAPS.africa.water,borders:CONTEXT_MAPS.africa.borders};
+ const {c,project}=baseMap(canvas,map,384,384,{padding:18});
  const pixels=c.getImageData(0,0,384,height);for(let i=0;i<pixels.data.length;i+=4){const g=Math.round(pixels.data[i]*.3+pixels.data[i+1]*.59+pixels.data[i+2]*.11);pixels.data[i]=g;pixels.data[i+1]=g+1;pixels.data[i+2]=g;}c.putImageData(pixels,0,0);
  c.setLineDash([3,6]);
  for(let i=1;i<routePins.length;i++){
@@ -100,7 +103,7 @@ export function drawJourneyMap(canvas,visited=[]){
  // Tiny Indian Ocean islands are too small for this continental scale.
  for(const p of routePins.filter(p=>['seychelles','mauritius'].includes(p.id))){const [x,y]=project(p.coord);c.fillStyle='#aaaead';c.fillRect(Math.round(x)-2,Math.round(y)-2,5,5);}
  for(const p of routePins.filter(p=>p.offset)){const a=project(p.coord),b=pinPosition(p,height);c.strokeStyle='#82906e';c.lineWidth=.7;c.beginPath();c.moveTo(...a);c.lineTo(...b);c.stroke();}
- c.fillStyle=MAP_INK;c.font='10px Pixel,monospace';chartText(c,'ATLANTIC',19,height*.26);chartText(c,'INDIAN OCEAN',226,height-235);c.font='18px Pixel,monospace';chartText(c,'AFRICA',23,height-132);c.font='9px Pixel,monospace';chartText(c,'0°     20° E     40° E',24,height-103);
+ c.fillStyle=MAP_INK;c.font='10px Pixel,monospace';chartText(c,'ATLANTIC',8,150);chartText(c,'INDIAN OCEAN',238,281);c.font='18px Pixel,monospace';chartText(c,'AFRICA',21,358);c.font='9px Pixel,monospace';chartText(c,'20° E     40° E     60° E',24,376);
  canvas.dataset.visited=visited.join(',');
 }
 export function drawLocalMap(canvas,node){

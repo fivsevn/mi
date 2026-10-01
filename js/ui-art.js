@@ -120,5 +120,17 @@ function phonePane(c,w,h,type){
 }
 export function drawUI(canvas,type){
  const small=type==='small-phone',friend=type.startsWith('friend-'),ico=type.startsWith('icon-'),w=friend?24:type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=friend?24:type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
- if(friend)friendIcon(c,Number(type.slice(7)));else if(ico)icon(c,type.slice(5));else if(small)miniPhone(c);else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='title-strip'){for(let y=1;y<h-2;y++){const left=y%7<3?1:0,right=y%9<4?2:0;r(c,'#e5dbb8',left,y,w-left-right,1);}r(c,'#efe5c5',3,1,w-7,1);r(c,'#b8b398',2,h-2,w-4,1);r(c,'#d0c6a2',4,h-3,w-9,1);}else if(type==='plaque')plaque(c,w,h);else paper(c,w,h);
+ if(friend)friendIcon(c,Number(type.slice(7)));else if(ico)icon(c,type.slice(5));else if(small)miniPhone(c);else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='title-strip'){
+ // Uneven torn fibres, a gently bowed lower edge, and a single creased corner.
+ for(let x=1;x<w-1;x++){
+  const tear=(x*17+x*x*3)%19,top=tear<2?2:tear<6?1:0;
+  const bottom=h-3-Math.round(Math.sin(x/w*Math.PI)*1.2)-(tear>16?1:0);
+  const start=x<3?3+(x%2):top;
+  r(c,'#e4d9b6',x,start,1,bottom-start);
+  if(x%13===4)r(c,'#daceaa',x,bottom-1,1,1);
+  r(c,'#8a8c7066',x+1,bottom+1,1,1);
+ }
+ r(c,'#eee2c1',4,2,w-12,1);r(c,'#cbbf9b',w-7,2,4,1);r(c,'#f3e8ca',w-6,3,3,2);
+ r(c,'#d2c5a1',w-4,5,1,5);r(c,'#d9cead',4,h-7,w-14,1);
+ }else if(type==='plaque')plaque(c,w,h);else paper(c,w,h);
 }

@@ -1,14 +1,14 @@
-import {drawUI} from './ui-art.js?v=atlas-52';
-import {paintSurface} from './scene.js?v=atlas-52';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-52';
-import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=atlas-52';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-52';
-import { ROUTES } from '../data/routes/index.js?v=atlas-52';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-52';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-52';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-52';
-import * as E from './engine.js?v=atlas-52';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-52';
+import {drawUI} from './ui-art.js?v=atlas-53';
+import {paintSurface} from './scene.js?v=atlas-53';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-53';
+import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=atlas-53';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-53';
+import { ROUTES } from '../data/routes/index.js?v=atlas-53';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-53';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-53';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-53';
+import * as E from './engine.js?v=atlas-53';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-53';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -55,7 +55,7 @@ function visitedPlaces(){
 }
 function nextPlace(){const r=run();if(!r||['reason','packing'].includes(r.stage))return 'safari';if(r.stage==='ending')return null;return E.segmentFor(r)?.id||'mauritius';}
 function continueJourney(){const r=run();if(!r)startRun();else{if(r.stage==='rest')E.resumeSegment(r);view='play';save();render();}}
-function renderRouteMap(){const visited=visitedPlaces(),next=nextPlace(),height=Math.round(384*(app.clientHeight-24)/(app.clientWidth-24));app.innerHTML=`<section class="route-map-screen"><div class="route-paper"><div class="route-map-view"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><canvas id="africa-map" data-height="${height}" role="img" aria-label="非洲行程地图，浅色虚线为尚未走过的路线"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin,height),on=visited.includes(pin.id),ready=next===pin.id;return `<button class="route-pin ${on?'visited':''} ${ready?'ready':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/height*100}%" aria-label="${esc(pin.label)}${ready?'，下一步':on?'，已到访':'，尚未到访'}" ${on||ready?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div></div></section>`;}
+function renderRouteMap(){const visited=visitedPlaces(),next=nextPlace(),height=384;app.innerHTML=`<section class="route-map-screen"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><div class="route-paper"><div class="route-map-view"><canvas id="africa-map" data-height="${height}" role="img" aria-label="非洲行程地图，浅色虚线为尚未走过的路线"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin,height),on=visited.includes(pin.id),ready=next===pin.id;return `<button class="route-pin ${on?'visited':''} ${ready?'ready':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/height*100}%" aria-label="${esc(pin.label)}${ready?'，下一步':on?'，已到访':'，尚未到访'}" ${on||ready?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div></div></section>`;}
 function scenePanel(type,overlay=''){
  const place=geographyFor(mapNode()).label;
  return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="small-phone" aria-hidden="true"></canvas></button><button class="location-whisper" data-action="hide-location" hidden>${esc(place)}</button><button class="pocket-map map-paper" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
