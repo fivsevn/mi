@@ -59,7 +59,6 @@ function shell(c,w,h,small=false){
  round(c,'#65714f',1,2,w-2,h-3,rad);round(c,'#93996c',2,1,w-4,h-3,rad-1);round(c,'#e2d5a4',3,2,w-6,h-5,rad-2);round(c,'#7b8758',4,4,w-8,h-8,rad-3);round(c,'#626d48',6,5,w-12,h-10,rad-4);
  r(c,'#c5c69a',3,rad,w>80?2:1,h-rad*2);r(c,'#eddfb1',5,rad,1,h-rad*2);r(c,'#93996c',w-5,rad,2,h-rad*2);r(c,'#eddfb1',w-7,rad+3,1,h-rad*2-7);
  
- poly(c,'#7b8758',[[7,rad],[w*.43,7],[w*.59,7],[7,h*.32]].map(([x,y])=>[Math.round(x),Math.round(y)]));
  // Quiet, fine rim glints; no chunky decorative notches.
  line(c,'#d8cda5',rad+5,3,w*.52,3);line(c,'#b3b58a',rad+4,h-4,w*.43,h-4);
  for(const [xx,yy,k] of [[4,h*.29,'#b6bd91'],[w-5,h*.53,'#adb388'],[rad+9,h-5,'#e2d5a4'],[w-rad-9,3,'#a7ad7b']])r(c,k,xx,yy,1,1);
@@ -67,7 +66,7 @@ function shell(c,w,h,small=false){
  for(let i=0;i<12;i++){const yy=rad+9+i*(h-2*rad-18)/12;r(c,i%3?'#b2b58b':'#c8c9a1',3,yy,1,2);r(c,i%3?'#8d9570':'#b6bd91',w-5,yy+3,1,2);}
  line(c,'#c4be94',rad+2,4,w-rad-3,4);line(c,'#e5d5af',rad+10,3,w*.43,3);
  const sy=small?10:36,sh=h-(small?21:84);round(c,'#65714f',8,sy-1,w-16,sh+2,5);round(c,'#c5c69a',9,sy,w-18,sh,4);
- const speaker=small?10:34;round(c,'#65714f',Math.floor(w/2)-speaker/2,small?6:14,speaker,small?2:5,small?1:2);r(c,'#e2d5a4',Math.floor(w/2)-speaker/2+1,small?7:17,speaker-2,1);
+ const speaker=small?10:34;round(c,'#65714f',Math.floor(w/2)-speaker/2,small?6:18,speaker,small?2:5,small?1:2);r(c,'#e2d5a4',Math.floor(w/2)-speaker/2+1,small?7:21,speaker-2,1);
  if(small){c.save();c.translate(10,sy+1);wallpaper(c,w-20,sh-2);for(const [type,x,y]of [['chat',2,14],['notes',13,14],['bag',2,25],['settings',13,25]]){c.save();c.translate(x,y);c.scale(.26,.26);icon(c,type);c.restore();}c.restore();c.save();c.translate(w/2-5,h-11);c.scale(.3,.3);homeKey(c,34,34);c.restore();}
 }
 function patina(c,w,h){
