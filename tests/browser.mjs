@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir,readFile} from 'node:fs/promises';
 import {africa} from '../data/routes/africa-001.js';
+import {geographyFor} from '../data/geography.js';
 import {places} from '../data/routes/africa-stories.js';
 const {chromium,webkit}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const origin=process.env.MI_TEST_URL||'http://127.0.0.1:4173';
@@ -17,12 +18,12 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  const fit=async()=>{const sizes=await page.evaluate(()=>({width:innerWidth,height:innerHeight,sw:document.documentElement.scrollWidth,sh:document.documentElement.scrollHeight,body:document.body.scrollHeight,shell:document.querySelector('.app-shell').getBoundingClientRect().width}));assert.ok(sizes.sw<=sizes.width,'horizontal page overflow');assert.ok(sizes.sh<=sizes.height&&sizes.body<=sizes.height,'vertical page overflow');assert.ok(sizes.shell<=440);if(await page.locator('.story-copy').count())assert.ok(await page.locator('.story-copy').evaluate(e=>e.scrollHeight<=e.clientHeight+1),'clipped story');};
  const phone=async(app)=>{await click('phone');await click('unlock');await click('phone-app',`[data-app="${app}"]`);};
  await page.goto(origin);await page.waitForSelector('.font-ready');assert.ok(await page.evaluate(()=>document.fonts.check('12px Pixel')));await fit();
- assert.equal(await page.locator('.desk-journal,.memory-strip,.map-entry,[data-action=atlas],[data-action=archive]').count(),0);
+ assert.equal(await page.locator('.desk-journey,.desk-journal,.memory-strip,.map-entry,[data-action=atlas],[data-action=archive]').count(),0);
  await page.screenshot({path:`test-results/${name}-pocket-map.png`});
  await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('phone-home');await page.screenshot({path:`test-results/${name}-pocket-apps.png`});await click('close-phone');
  // Old bookmark URLs cannot recover cross-run records or background pages.
  await page.goto(origin+'/#record/previous-run');await page.reload();await click('unlock');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');
- await click('journey');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');
+ await click('journey');assert.equal(await page.locator('.route-pin:disabled').count(),7);await page.screenshot({path:`test-results/${name}-africa-unvisited.png`});await click('map-continue');await click('reason');await click('open-case');await click('preset');await click('item','[data-id="coat"]');await click('tab','[data-tab="随身物"]');await click('item','[data-id="adapter"]');await click('tab','[data-tab="日用"]');await click('item','[data-id="airfryer"]');
  await fit();assert.ok(await page.locator('.choice-scroll').evaluate(e=>e.scrollHeight>e.clientHeight));assert.equal(await page.evaluate(()=>scrollY),0);assert.doesNotMatch(await page.locator('#app').innerText(),/\d+\.\d+ kg/);await page.screenshot({path:`test-results/${name}-pocket-packing.png`});
  await phone('notes');assert.equal(await page.locator('.phone-note').count(),0);await click('close-phone');await click('depart');
  // Reproduce the old populated save before the first choice, not just a clean browser.
@@ -35,6 +36,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  while((await state()).run.stage!=='return-pack'){
   assert.ok(++count<240);const before=await state(),r=before.run;await fit();
   if(r.stage==='event'){
+   assert.equal(await page.locator('[data-minimap]').getAttribute('data-location'),geographyFor(africa.nodes[r.node]).key);
    if(await page.locator('.mini-game').count()){
     miniCount++;const n=africa.nodes[r.node],kind=n.mini;
     if(kind==='falls'){for(let i=0;i<3;i++)await click('mini-tap');assert.ok(await page.locator('body.soaked').count());}
@@ -54,8 +56,11 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
    await click('next');
   }else if(r.stage==='social'){await click('unlock');await click('send','[data-contact="qi"]');}else if(r.stage==='chat')await click('close-phone');else if(r.stage==='rest'){
    rests++;const snapshot=await state();await page.screenshot({path:`test-results/${name}-rest-${rests}.png`});
-   await click('map');assert.match(await page.locator('.desk-journey').innerText(),new RegExp(`${rests} / 7`));await page.reload();assert.deepEqual(await state(),snapshot);
-   await click('journey');assert.equal(await page.locator('.journey-stop').count(),7);await fit();await page.screenshot({path:`test-results/${name}-journey-${rests}.png`});await click('resume-segment');assert.equal((await state()).run.id,snapshot.run.id);
+   await click('map');assert.equal(await page.locator('.desk-journey').count(),0);await page.reload();assert.deepEqual(await state(),snapshot);
+   await click('journey');assert.equal(await page.locator('.route-pin').count(),7);assert.equal(await page.locator('.route-pin.visited').count(),rests);assert.equal(await page.locator('.journey-stops').count(),0);await fit();
+   await page.screenshot({path:`test-results/${name}-journey-${rests}.png`});
+   const visited=await page.locator('.route-pin.visited').first().getAttribute('data-place');await click('visit-place',`[data-place="${visited}"]`);assert.ok(await page.locator('.phone-note').count());assert.deepEqual(await state(),snapshot);await page.reload();await click('unlock');assert.ok(await page.locator('.phone-note').count());await click('close-phone');
+   await click('map-continue');assert.equal((await state()).run.id,snapshot.run.id);
   }else throw Error(r.stage);
  }
  assert.equal(rests,7);assert.equal(miniCount,3);const r=(await state()).run;assert.ok(r.flags.goggles);assert.equal(r.used.airfryer,1);assert.ok(r.bag.includes('broken-adapter'));assert.ok(!r.bag.includes('adapter'));
@@ -66,10 +71,10 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  for(const [width,height] of [[320,568],[360,640],[390,844],[440,956],[768,900],[1440,1000]]){await page.setViewportSize({width,height});await fit();const h=await page.locator('.scene-panel').evaluate(e=>e.getBoundingClientRect().height);assert.ok(h>height*.35);await phone('bag');await fit();await click('close-phone');await fit();}
  await page.screenshot({path:`test-results/${name}-pocket-desktop.png`});
  await page.evaluate(()=>localStorage.setItem('mi-v01','untouched'));await page.goto(origin+'/legacy/');await page.waitForSelector('#world-map');assert.equal(await page.evaluate(()=>localStorage.getItem('mi-v01')),'untouched');
- const blocked=await browser.newContext({viewport:{width:320,height:568}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
+ const blocked=await browser.newContext({viewport:{width:320,height:568}});await blocked.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('denied')};Storage.prototype.setItem=()=>{throw Error('denied')};});const bp=await blocked.newPage();await bp.goto(origin);await bp.locator('[data-action=journey]').click();await bp.locator('[data-action=map-continue]').click();await bp.locator('[data-action=reason]').first().click();await bp.locator('[data-action=depart]').click();assert.match(await bp.locator('#save-status').innerText(),/无法存档/);
  const migratedCtx=await browser.newContext({viewport:{width:320,height:568}}),mp=await migratedCtx.newPage();await mp.goto(origin);
  const oldSave=await mp.evaluate(async()=>{
-  const E=await import('/js/engine.js?v=journey-4'),{africa}=await import('/data/routes/africa-001.js?v=journey-4');
+  const E=await import('/js/engine.js?v=maps-5'),{africa}=await import('/data/routes/africa-001.js?v=maps-5');
   const p=E.freshProfile();p.run=E.createRun();p.run.stage='packing';E.preset(p.run);E.depart(p.run);E.choose(p.run,0);
   p.run.node=africa.previousNodeIds.indexOf('cape-sea');p.run.revision=3;p.run.stage='event';p.run.pending=null;delete p.run.completedSegments;
   localStorage.setItem('mi-v02',JSON.stringify(p));return p;
@@ -77,5 +82,5 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  await mp.goto(origin+'/#play');await mp.reload();assert.match(await mp.locator('.story-copy h1').innerText(),/海在这里/);
  await mp.locator('[data-action=choose]').first().click();const migratedSave=await mp.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
  assert.equal(migratedSave.run.id,oldSave.run.id);assert.deepEqual(migratedSave.run.bag,oldSave.run.bag);assert.equal(migratedSave.run.notes[0].nodeId,'flight-out');assert.equal(migratedSave.run.completedSegments.length,5);await migratedCtx.close();
- assert.deepEqual(errors,[]);console.log(`PASS ${name}: complete 74 events and seven segment pauses; all minigames; no pre-run or cross-run notes; no archives; phone apps; fixed scene, internal menu scroll; 320x568–1440x1000; reload, old routes, legacy and denied storage.`);await browser.close();
+ assert.deepEqual(errors,[]);console.log(`PASS ${name}: complete 74 events, geographic maps and seven segment pauses; all minigames; no pre-run or cross-run notes; no archives; phone apps; fixed scene, internal menu scroll; 320x568–1440x1000; reload, old routes, legacy and denied storage.`);await browser.close();
 }

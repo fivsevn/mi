@@ -7,7 +7,7 @@ for(const name of ['chromium','webkit']){
   await page.setViewportSize({width,height});await page.goto(process.env.MI_TEST_URL||'http://127.0.0.1:4173');await page.waitForSelector('.font-ready');
   assert.equal(await page.locator('#world-map').evaluate(c=>getComputedStyle(c).objectFit),'contain');assert.equal(await page.locator('.map-hit').getAttribute('preserveAspectRatio'),'xMidYMid meet');
   await page.screenshot({path:`/tmp/mi-${name}-${width}-map.png`});
-  await page.locator('[data-action=journey]').click();await page.locator('[data-action=phone]').click();
+  await page.locator('[data-action=journey]').click();await page.locator('[data-action=map-continue]').click();await page.locator('[data-action=phone]').click();
   await page.locator('#lock-selfie').waitFor();assert.ok(await page.locator('#lock-selfie').evaluate(c=>new Set(c.getContext('2d').getImageData(0,0,c.width,c.height).data).size>25));
   assert.ok(await page.locator('.unlock').isVisible());await page.screenshot({path:`/tmp/mi-${name}-${width}-selfie.png`});await page.locator('.unlock').click();await page.locator('[data-app=notes]').click();assert.equal(await page.locator('.phone-note').count(),0);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight));
