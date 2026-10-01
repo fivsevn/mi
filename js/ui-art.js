@@ -25,7 +25,12 @@ function wallpaper(c,w,h){
 function labelLines(c,x,y,w=14){for(let i=0;i<3;i++){r(c,'ochre',x,y+i*4,w-i%2*3,1);r(c,'light',x+w-3,y+i*4+1,2,1);}}
 function icon(c,type){
  r(c,'moss',5,29,25,2);r(c,'sage',8,31,19,1);
- if(type==='chat'){
+ if(type==='mi'){
+  edge(c,'ink',4,5,27,25,3);edge(c,'ochre',3,3,27,25,3);edge(c,'sage',4,3,25,23,2);r(c,'light',6,4,20,2);r(c,'moss',6,7,21,18);r(c,'dark',28,8,1,17);r(c,'cream',4,7,1,15);
+  const letters=[['10001','11011','10101','10101','10001','10001','10001'],['111','010','010','010','010','010','111']];
+  for(let g=0;g<2;g++)for(let y=0;y<7;y++)for(let x=0;x<letters[g][y].length;x++)if(letters[g][y][x]==='1'){r(c,'dark',8+g*12+x*2,10+y*2,2,2);r(c,'pale',7+g*12+x*2,9+y*2,2,2);}
+  r(c,'light',6,26,20,1);
+ }else if(type==='chat'){
   edge(c,'ink',3,6,27,20,2);edge(c,'sage',4,5,25,18,2);r(c,'pale',6,6,19,2);r(c,'moss',27,9,2,12);
   poly(c,'cream',[[5,9],[26,9],[26,21],[14,21],[8,27],[8,21],[5,21]]);r(c,'ochre',8,22,1,5);r(c,'pale',6,9,18,2);hatch(c,'light',6,18,18,3);
   for(let i=0;i<3;i++){r(c,'moss',9+i*5,14,2,2);r(c,'light',10+i*5,14,1,1);}
