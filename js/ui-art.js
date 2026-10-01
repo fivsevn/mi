@@ -71,16 +71,14 @@ function patina(c,w,h){
  for(let i=0;i<9;i++){const yy=12+i*5,xx=10-Math.floor(i/3);round(c,'#b18b52',xx,yy,3,4,1);r(c,'#3c3021',xx+1,yy+1,1,2);}
  c.restore();
 }
-// A dedicated 24 × 48 sprite: selected silhouette and features are redrawn at this grid.
+// Dedicated 32 × 52 locked-device sprite; highlights describe surfaces rather than heavy outlines.
 function miniPhone(c){
- round(c,'#65714f',0,1,24,47,4);round(c,'#b4a578',1,0,22,47,4);round(c,'#eddfb1',2,1,20,45,3);round(c,'#78805a',3,2,18,43,2);
- r(c,'#93996c',4,3,16,4);r(c,'#65714f',9,4,6,1);r(c,'#c5c69a',9,5,6,1);
- r(c,'#65714f',3,8,18,31);r(c,'#e2d5a4',4,9,16,29);r(c,'#c5c69a',4,9,16,3);
- poly(c,'#c5c69a',[[12,17],[18,15],[20,20],[20,30],[13,33],[9,28],[9,22]]);poly(c,'#eddfb1',[[4,15],[7,13],[10,17],[5,24],[4,24]]);
- // Four readable, chunky marks replace subpixel versions of the full icons.
- r(c,'#78805a',6,14,4,4);r(c,'#eddfb1',7,15,2,2);r(c,'#bb997e',14,14,4,4);r(c,'#eddfb1',15,15,2,1);
- r(c,'#78805a',6,32,4,3);r(c,'#eddfb1',7,33,2,1);r(c,'#bb997e',14,31,4,4);r(c,'#eddfb1',15,32,2,2);
- circle(c,'#65714f',12,42,2);r(c,'#eddfb1',11,41,2,2);r(c,'#93996c',12,42,1,1);r(c,'#bb997e',21,13,1,17);r(c,'#c5c69a',2,9,1,26);
+ round(c,'#78805a',1,1,30,51,6);round(c,'#b4a578',2,0,28,51,5);round(c,'#c5c69a',3,1,26,49,4);round(c,'#93996c',4,2,24,47,3);
+ r(c,'#e2d5a4',7,1,17,1);r(c,'#eddfb1',5,4,1,13);r(c,'#adb388',3,9,1,30);r(c,'#bb997e',28,9,1,31);r(c,'#b4a578',27,32,1,10);
+ r(c,'#adb388',6,3,20,4);round(c,'#65714f',12,4,8,2,1);r(c,'#c5c69a',13,6,6,1);
+ round(c,'#3b4437',5,8,22,35,2);round(c,'#252e28',6,9,20,33,1);
+ poly(c,'#323a30',[[6,10],[17,10],[6,27]]);poly(c,'#3d4334',[[25,25],[25,41],[14,41]]);r(c,'#515a43',6,12,1,24);r(c,'#68704f',7,9,15,1);
+ r(c,'#78805a',7,43,18,5);circle(c,'#65714f',16,46,3);r(c,'#c5c69a',15,45,2,2);r(c,'#93996c',16,46,1,1);r(c,'#e2d5a4',9,49,13,1);r(c,'#bb997e',23,48,3,1);
 }
 function paper(c,w,h){r(c,'cream',0,0,w,h);}
 function plaque(c,w,h){edge(c,'dark',0,2,w,h-2,2);edge(c,'ochre',0,0,w-1,h-2,2);edge(c,'cream',1,0,w-3,h-4,2);r(c,'pale',3,1,w-8,2);hatch(c,'light',2,h-8,w-5,4);r(c,'clay',3,3,2,2);r(c,'dark',w-6,h-7,2,2);}
@@ -91,6 +89,6 @@ function phonePane(c,w,h,type){
  const mint=type==='phone-message-mi';round(c,mint?'#93996c':'#b4a578',0,0,w,h,4);round(c,mint?'#c5c69aee':'#eddfb1ee',1,1,w-2,h-2,3);r(c,'#f4e7c488',4,1,w-9,1);
 }
 export function drawUI(canvas,type){
- const small=type==='small-phone',ico=type.startsWith('icon-'),w=ico?34:small?24:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=ico?34:small?48:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
+ const small=type==='small-phone',ico=type.startsWith('icon-'),w=ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
  if(ico)icon(c,type.slice(5));else if(small)miniPhone(c);else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='plaque')plaque(c,w,h);else paper(c,w,h);
 }
