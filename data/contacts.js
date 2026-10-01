@@ -1,11 +1,11 @@
 export const SOCIAL_PROMPT='不知道为什么，突然想发给TA。';
 export const CONTACTS=[
- {id:'he',name:'阿禾',detail:'先问吃了什么',color:'#dba675',mark:'禾',thought:'看到一个地方，先看看它的菜单。'},
- {id:'lan',name:'小岚',detail:'喜欢没有人的风景',color:'#93b9b1',mark:'岚',thought:'这个颜色，小岚大概会喜欢。'},
- {id:'you',name:'阿游',detail:'动物比人话少',color:'#b7bd81',mark:'游',thought:'阿游说，动物也在看我们。'},
- {id:'qi',name:'七七',detail:'负责问多少钱',color:'#c3aac6',mark:'七',thought:'还没感叹，就先把汇率算好了。'},
- {id:'wu',name:'老吴',detail:'奇怪的东西请发来',color:'#9ba8c4',mark:'吴',thought:'正常的东西也开始看起来有点奇怪。'},
- {id:'blank',name:'……',detail:'上次聊天是上次',color:'#c6be9d',mark:'·',thought:'有些话还没说，就已经想好了收件人。'}
+ {id:'he',name:'阿禾',detail:'先问吃了什么',color:'#ba9f81',mark:'禾',thought:'看到一个地方，先看看它的菜单。'},
+ {id:'lan',name:'小岚',detail:'喜欢没有人的风景',color:'#89a798',mark:'岚',thought:'这个颜色，小岚大概会喜欢。'},
+ {id:'you',name:'阿游',detail:'动物比人话少',color:'#aab18b',mark:'游',thought:'阿游说，动物也在看我们。'},
+ {id:'qi',name:'七七',detail:'负责问多少钱',color:'#b6a18b',mark:'七',thought:'还没感叹，就先把汇率算好了。'},
+ {id:'wu',name:'老吴',detail:'奇怪的东西请发来',color:'#8faaa0',mark:'吴',thought:'正常的东西也开始看起来有点奇怪。'},
+ {id:'blank',name:'……',detail:'上次聊天是上次',color:'#c1b689',mark:'·',thought:'有些话还没说，就已经想好了收件人。'}
 ];
 const replies={
  safari:{he:['车开了一上午。','所以你吃饭了吗','……还没有。'],lan:['[车窗外的草地]','风大吗','照片没告诉你，但我的头发告诉我了。'],you:['还在找豹子。','它知道你来了吗','应该没收到行程表。'],qi:['今天在车上坐了一天。','按小时算是不是便宜一点','你这个算法让我好多了。'],wu:['[一块写着请勿下车的牌子]','那动物可以上车吗','你不要问。'],blank:['这里很大。','嗯','只是想跟你说一下。']},

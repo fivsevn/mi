@@ -1,3 +1,3 @@
-import { africa } from './africa-001.js?v=atlas-8';
+import { africa } from './africa-001.js?v=field-9';
 export const ROUTES=[africa];
 export const routeById=Object.fromEntries(ROUTES.map(r=>[r.id,r]));

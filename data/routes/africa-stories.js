@@ -1,5 +1,5 @@
-import { arrangeJourney } from './africa-journey.js?v=atlas-8';
-import { ITEMS } from '../items.js?v=atlas-8';
+import { arrangeJourney } from './africa-journey.js?v=field-9';
+import { ITEMS } from '../items.js?v=field-9';
 const c=(label,result,extra={})=>({label,result,...extra});
 const has=(r,id)=>r.bag.includes(id);
 const n=(id,day,scene,title,text,choices,extra={})=>({id,day,scene,title,text,choices,eyebrow:'',...extra});

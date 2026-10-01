@@ -43,3 +43,5 @@ Fusion Pixel 12px Monospaced 简体中文字体本地托管，按文案裁剪，
 Canvas / CSS 场景为本项目绘制。世界地图陆地数据来自公共领域 Natural Earth；局部地图采用 1:10m 数据（[来源](https://www.naturalearthdata.com/downloads/10m-physical-vectors/)），按地点裁剪后随游戏托管，不依赖外部地图服务。地理坐标为剧情地点的近似中心；scripts/build-context-maps.py 可从 Natural Earth GeoJSON 重建底图。动画尊重 reduced-motion；小游戏切到手机、资料弹窗或后台时暂停。
 
 地图视觉采用同一像素绘制方法：灰绿水域、连续纸色陆地、海岸与碎线纹理；世界图、地区图和局部图共用方框坐标。仅显示的位置是灰色空框，可进入的位置填色，悬停或点击时增加外层方框。大纸有四列折面，迷你纸仅保留十字折痕；标题和地点名直接印在地图上。
+
+全游戏画面由 js/illustration.js 统一绘制，涵盖 14 种场景、人物、穿搭与自拍；css/field.css 将选项、行李、手机、聊天、笔记、弹窗和小游戏物件统一到纸色、苔绿、水绿的材质与色阶。assets/materials/ 包含本地像素材质；地图增加海岸分层、地形色阶与簇状纹理。绘制参考 [cure 的 Pixel Art Tutorial](https://pixeljoint.com/forum/forum_posts.asp?TID=11299) 关于像素簇、色阶和色相偏移的讲解。
