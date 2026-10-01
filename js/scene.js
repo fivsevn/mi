@@ -1,23 +1,66 @@
 // Integer scanline artwork. A shared twelve-colour ramp and selective ordered dithering.
-export const P={ink:'#465846',shadow:'#727e58',leaf:'#929c68',light:'#bdc094',paper:'#dfd2a2',warm:'#c2b17d',clay:'#ae886a',water:'#8db29e',deep:'#688f80',sky:'#b7c7ac',skin:'#d3af85',hair:'#666a4a',shirt:'#eee0b4'};
+export const P={ink:'#435644',shadow:'#788562',leaf:'#a1ad7c',light:'#c4c79a',paper:'#e4d7aa',warm:'#c6b681',clay:'#b98b78',water:'#99b9a3',deep:'#6f9584',sky:'#c0cbae',skin:'#d3af85',hair:'#666a4a',shirt:'#eee0b4'};
 export const block=(c,k,x,y,w,h)=>{c.fillStyle=P[k]||k;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
 const B=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
 function setup(canvas,w=256,h=160){if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);return c;}
 function shape(c,col,p){for(let y=Math.floor(Math.min(...p.map(a=>a[1])));y<Math.max(...p.map(a=>a[1]));y++){const xs=[];for(let i=0,j=p.length-1;i<p.length;j=i++){const a=p[i],b=p[j];if((a[1]>y)!==(b[1]>y))xs.push(Math.round(a[0]+(y-a[1])*(b[0]-a[0])/(b[1]-a[1])));}xs.sort((a,b)=>a-b);for(let i=0;i<xs.length;i+=2)block(c,col,xs[i],y,xs[i+1]-xs[i],1);}}
 function dither(c,col,x,y,w,h,density=.3){for(let yy=y;yy<y+h;yy++)for(let xx=x;xx<x+w;xx++)if(B[(yy%4)*4+xx%4]<density*16)block(c,col,xx,yy,1,1);}
 export function grain(c,x,y,w,h,col='light',density=55){for(let yy=y;yy<y+h;yy+=7)for(let xx=x+(yy%3)*3;xx<x+w-5;xx+=17){block(c,col,xx,yy,4,1);if((xx+yy)%3===0)block(c,col,xx+2,yy+1,2,1);}}
+function line(c,col,x,y,xx,yy){const steps=Math.max(Math.abs(xx-x),Math.abs(yy-y));for(let i=0;i<=steps;i++)block(c,col,x+(xx-x)*i/steps,y+(yy-y)*i/steps,1,1);}
+function iso(c,x,y,w,d,h,col){const top=[[x,y],[x+w,y+w/2],[x+w-d,y+(w+d)/2],[x-d,y+d/2]];shape(c,'shadow',[top[2],top[3],[top[3][0],top[3][1]+h],[top[2][0],top[2][1]+h]]);shape(c,col,[top[1],top[2],[top[2][0],top[2][1]+h],[top[1][0],top[1][1]+h]]);shape(c,col,top);line(c,'#e8dcad',x,y,x+w,y+w/2);}
 function tree(c,x,y,s=1,palm=false){c.save();c.translate(x,y);c.scale(s,s);shape(c,'shadow',[[0,0],[4,0],[3,33],[-1,33]]);block(c,'warm',1,3,1,29);if(palm){for(const [dx,dy]of [[-25,8],[-22,-8],[-10,-17],[9,-16],[24,-8],[28,8]]){shape(c,'shadow',[[1,0],[dx,dy],[dx+3,dy+5],[4,3]]);shape(c,'leaf',[[2,0],[dx,dy],[dx+3,dy+2]]);}}else{shape(c,'shadow',[[1,14],[-13,-3],[-9,-3],[3,10],[15,-7],[18,-6],[3,18]]);shape(c,'shadow',[[-29,0],[-26,-6],[-15,-8],[-10,-13],[11,-14],[17,-9],[26,-8],[32,-1],[28,4],[-20,4]]);shape(c,'leaf',[[-25,-4],[-17,-7],[-10,-11],[11,-11],[18,-7],[27,-5],[24,0],[-19,0]]);block(c,'light',-13,-10,20,2);dither(c,'shadow',-18,-3,36,4,.35);}c.restore();}
 function cloud(c,x,y){block(c,'paper',x,y,29,2);block(c,'shirt',x+6,y-2,16,2);block(c,'light',x+10,y+2,23,1);}
 export function person(c,x,y,outfit={},frame=0,s=1){c.save();c.translate(x,y);c.scale(s,s);block(c,'shadow',-3,28,24,2);shape(c,'hair',[[3,1],[6,-1],[13,0],[16,4],[16,18],[13,19],[12,8],[5,8],[4,18],[1,17],[1,5]]);block(c,'skin',5,5,8,9);block(c,'warm',5,11,2,3);block(c,'ink',11,7,1,2);block(c,'skin',7,14,3,2);const top=outfit.top==='linen'?'water':outfit.top==='stripe'?'clay':'shirt';shape(c,top,[[4,15],[12,15],[15,19],[14,24],[3,24],[1,19]]);block(c,'light',4,15,2,8);if(outfit.top==='stripe')for(let y=18;y<24;y+=3)block(c,'paper',5,y,8,1);if(outfit.outer){block(c,outfit.outer==='coat'?'clay':'leaf',2,16,4,9);block(c,'shadow',11,16,4,9);}block(c,'skin',1,22,3,4);block(c,'skin',14,22,3,4);block(c,'shadow',4,24,5,4);block(c,'hair',10,24,4,4);block(c,outfit.shoes==='boots'?'ink':'paper',3,28+frame%2,6,2);block(c,'warm',10,28-frame%2,6,2);if(outfit.hat){block(c,'warm',-1,3,20,2);block(c,'paper',4,-2,11,5);block(c,'clay',4,2,11,1);}if(outfit.goggles){block(c,'deep',4,7,10,3);block(c,'water',5,7,3,1);block(c,'water',10,7,3,1);}c.restore();}
 function caseArt(c,x,y,open=false){block(c,'shadow',x-1,y+2,25,19);block(c,'warm',x,y,23,18);block(c,'paper',x+2,y+1,18,2);block(c,'clay',x+5,y+3,2,15);block(c,'shadow',x+17,y+3,2,15);block(c,'ink',x+8,y-3,9,3);block(c,'paper',x+10,y+7,6,5);if(open){block(c,'shadow',x-22,y,21,18);block(c,'leaf',x-20,y+2,17,13);block(c,'shirt',x-18,y+4,12,8);}}
 function vehicle(c,x,y,bus=false){block(c,'ink',x+4,y+20,9,8);block(c,'ink',x+43,y+20,9,8);block(c,'shadow',x,y+8,58,17);block(c,'leaf',x+1,y+6,56,13);block(c,'light',x+7,y-5,40,13);block(c,'deep',x+10,y-3,15,10);block(c,'water',x+28,y-3,16,10);block(c,'paper',x+3,y+12,6,3);block(c,'warm',x+50,y+12,5,3);block(c,'light',x+12,y+9,24,2);if(bus){block(c,'leaf',x,y-12,58,32);for(let i=0;i<5;i++)block(c,'water',x+4+i*10,y-9,8,12);block(c,'paper',x,y-13,57,2);}}
 function base(c,frame,sea=false){block(c,'sky',0,0,256,160);dither(c,'light',0,52,256,24,.2);cloud(c,22+frame,22);cloud(c,173-frame,35);block(c,'paper',219,18,13,12);shape(c,'light',[[0,80],[27,65],[53,67],[79,57],[113,76],[151,62],[180,74],[216,60],[256,72],[256,111],[0,111]]);shape(c,'leaf',[[0,94],[39,86],[77,94],[126,82],[172,95],[213,84],[256,94],[256,116],[0,116]]);block(c,sea?'water':'warm',0,104,256,56);dither(c,sea?'deep':'leaf',0,105,256,12,.2);grain(c,0,119,256,41,sea?'paper':'light');}
-function paintScene(canvas,type='savanna',outfit={},frame=0){const c=setup(canvas);
- if(['room','home','route'].includes(type)){
-  block(c,'paper',0,0,256,116);dither(c,'warm',0,90,256,26,.2);block(c,'warm',0,116,256,44);for(let y=124;y<160;y+=12){block(c,'clay',0,y,256,1);for(let x=(y%24)*3;x<256;x+=48)block(c,'clay',x,y,1,12);}
-  block(c,'shadow',159,14,78,68);block(c,'shirt',162,16,72,63);block(c,'water',166,20,64,55);cloud(c,171+frame,32);shape(c,'leaf',[[166,65],[184,49],[202,63],[218,50],[230,56],[230,75],[166,75]]);block(c,'paper',195,20,3,55);block(c,'paper',166,44,64,3);block(c,'shirt',153,12,6,74);block(c,'shirt',237,12,6,74);
-  block(c,'shadow',12,88,89,40);block(c,'light',15,85,82,35);block(c,'shirt',17,88,22,20);block(c,'leaf',41,88,54,31);dither(c,'shadow',42,106,52,13,.25);block(c,'warm',13,120,88,5);block(c,'ink',16,125,4,7);block(c,'ink',93,125,4,7);
-  block(c,'clay',194,98,48,4);block(c,'shadow',197,102,3,28);block(c,'shadow',236,102,3,28);block(c,'warm',211,87,14,11);tree(c,218,65,.35,true);block(c,'shadow',19,22,53,34);block(c,'shirt',21,23,49,29);shape(c,'leaf',[[24,48],[38,31],[48,43],[65,32],[65,49]]);block(c,'light',106,141,48,12);grain(c,107,142,46,10,'paper');person(c,120,105,outfit,frame);caseArt(c,157,137,type==='home');return;
+function paintScene(canvas,type='savanna',outfit={},frame=0){const indoor=['room','home','route'].includes(type),c=setup(canvas,256,indoor?220:160);
+ if(indoor){
+  block(c,'light',0,0,256,220);
+  shape(c,'paper',[[12,43],[132,3],[132,76],[12,121]]);
+  shape(c,'warm',[[132,3],[246,44],[246,120],[132,76]]);
+  shape(c,'shirt',[[12,40],[132,0],[246,41],[246,45],[132,5],[12,45]]);
+  shape(c,'warm',[[12,121],[132,76],[246,120],[128,213]]);
+  shape(c,'shadow',[[12,121],[128,210],[246,117],[246,123],[128,218],[12,126]]);
+  for(let i=1;i<8;i++){
+   const t=i/8;line(c,'#b6a87d',12+(132-12)*t,121+(76-121)*t,128+(246-128)*t,213+(120-213)*t);
+   line(c,'#b6a87d',132+(246-132)*t,76+(120-76)*t,12+(128-12)*t,121+(213-121)*t);
+  }
+  // The open window follows the wall perspective; its planes catch the daylight.
+  shape(c,'shadow',[[155,28],[223,52],[223,101],[155,78]]);
+  shape(c,'shirt',[[157,29],[221,53],[221,98],[157,76]]);
+  shape(c,'water',[[162,35],[216,55],[216,93],[162,73]]);
+  shape(c,'leaf',[[162,65],[180,57],[191,74],[205,65],[216,75],[216,93],[162,73]]);
+  shape(c,'paper',[[186,43],[189,44],[189,83],[186,82]]);
+  shape(c,'paper',[[162,53],[216,74],[216,77],[162,56]]);
+  shape(c,'shirt',[[149,26],[156,29],[156,84],[149,82]]);
+  shape(c,'paper',[[224,52],[231,55],[231,106],[224,104]]);
+  block(c,'paper',201+frame,62,7,2);
+  // A small atlas and a shelf on the near wall.
+  shape(c,'shadow',[[35,55],[80,40],[80,77],[35,92]]);
+  shape(c,'shirt',[[38,57],[77,44],[77,75],[38,88]]);
+  shape(c,'deep',[[41,60],[74,49],[74,72],[41,83]]);
+  shape(c,'light',[[45,62],[52,57],[57,61],[65,54],[69,61],[63,70],[50,75]]);
+  line(c,'#c3c393',55,55,55,76);
+  iso(c,89,55,34,10,4,'clay');
+  for(let i=0;i<5;i++){block(c,i%2?'leaf':'shirt',94+i*4,44+i,3,12);block(c,'warm',95+i*4,46+i,1,2);}
+  // Layered cloth, short structural shadows and distinct lit furniture surfaces.
+  iso(c,61,112,66,34,14,'light');
+  shape(c,'shirt',[[61,111],[84,123],[50,140],[27,129]]);
+  shape(c,'leaf',[[85,124],[126,145],[93,163],[51,140]]);
+  shape(c,'shadow',[[51,140],[93,163],[93,174],[51,151]]);
+  for(let i=0;i<4;i++)line(c,'#b9c08c',62+i*9,139+i*4,95+i*6,156+i*3);
+  iso(c,144,99,41,19,4,'clay');
+  block(c,'shadow',128,113,3,25);block(c,'shadow',179,119,3,23);
+  iso(c,147,101,15,9,2,'shirt');line(c,'#a7aa80',146,106,155,110);
+  iso(c,176,101,8,6,9,'warm');tree(c,177,96,.32,true);
+  iso(c,207,107,21,14,44,'leaf');
+  line(c,'#c4c79a',210,119,210,158);block(c,'warm',211,138,2,3);
+  shape(c,'light',[[106,155],[132,142],[176,165],[148,184]]);
+  for(let i=0;i<4;i++)line(c,'#929c72',111+i*8,155+i*4,133+i*8,145+i*4);
+  person(c,123,145,outfit,frame,1.2);caseArt(c,157,177,type==='home');
+  iso(c,24,148,12,10,13,'clay');tree(c,27,143,.65,true);
+  return;
  }
  if(type==='airport'){base(c,frame);block(c,'paper',0,0,256,14);block(c,'shirt',0,98,256,62);block(c,'warm',0,125,256,35);for(let x=8;x<256;x+=60)block(c,'shadow',x,14,3,89);block(c,'shadow',0,100,256,3);block(c,'light',0,144,256,1);shape(c,'shirt',[[129+frame,56],[145+frame,54],[151+frame,42],[155+frame,42],[154+frame,54],[187+frame,56],[174+frame,60],[157+frame,60],[145+frame,69],[140+frame,69],[145+frame,59],[129+frame,59]]);block(c,'shadow',18,112,66,8);block(c,'leaf',18,106,66,7);block(c,'ink',23,120,3,14);block(c,'ink',76,120,3,14);person(c,117,105,outfit,frame);caseArt(c,155,139);return;}
  const sea=['island','river','cape','busstop','falls'].includes(type);base(c,frame,sea);
@@ -36,15 +79,13 @@ const sceneBuffers=new WeakMap();
 export function scene(canvas,type='savanna',outfit={},frame=0){
  let buffer=sceneBuffers.get(canvas);if(!buffer){buffer=document.createElement('canvas');sceneBuffers.set(canvas,buffer);}paintScene(buffer,type,outfit,frame);
  const c=setup(canvas,256,220),indoor=['room','home','route'].includes(type);
- block(c,indoor?'paper':type==='coach'?'shadow':'sky',0,0,256,220);
- if(indoor){block(c,'shirt',0,8,256,2);block(c,'warm',0,11,256,1);
- block(c,'clay',82,45,65,3);block(c,'shadow',86,48,3,5);block(c,'shadow',140,48,3,5);
- for(let i=0;i<6;i++){block(c,i%2?'leaf':'warm',86+i*5,31+i%3*2,4,14-i%3*2);block(c,'paper',87+i*5,34+i%3*2,2,1);}
- block(c,'clay',129,36,10,9);tree(c,134,25,.27,true);
- block(c,'shadow',214,27,17,20);block(c,'paper',216,29,13,16);block(c,'ink',222,32,1,6);block(c,'ink',222,37,4,1);
- }
- else if(type!=='coach'){cloud(c,47+frame,27);cloud(c,183-frame,41);}
- c.drawImage(buffer,0,60);
+ if(indoor){c.drawImage(buffer,0,0);return;}
+ block(c,type==='coach'?'shadow':'sky',0,0,256,220);
+ if(type!=='coach'){cloud(c,47+frame,14);cloud(c,183-frame,27);}
+ c.drawImage(buffer,0,40);
+ const shore=['island','river','cape','busstop','falls'].includes(type);
+ block(c,shore?'paper':type==='coach'?'shadow':type==='desert'?'warm':'leaf',0,200,256,20);
+ if(type!=='coach')for(let i=0;i<18;i++){const x=(i*43)%253,y=201+(i*7)%17;block(c,shore?'warm':'shadow',x,y,3,1);if(!shore){block(c,'warm',x+1,y-3,1,3);block(c,'shadow',x+2,y-1,2,1);}}
 }
 export function avatar(canvas,outfit={}){const c=setup(canvas,64,80);block(c,'paper',0,0,64,80);dither(c,'warm',0,59,64,21,.2);person(c,15,12,outfit,0,2);}
 export function selfie(canvas){const c=setup(canvas,128,192);block(c,'sky',0,0,128,192);cloud(c,15,32);block(c,'warm',0,88,128,104);tree(c,21,81,.7);person(c,31,69,{hat:true},0,4);}

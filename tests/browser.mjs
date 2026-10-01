@@ -17,7 +17,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
  const fit=async()=>{const sizes=await page.evaluate(()=>({width:innerWidth,height:innerHeight,sw:document.documentElement.scrollWidth,sh:document.documentElement.scrollHeight,body:document.body.scrollHeight,shell:document.querySelector('.app-shell').getBoundingClientRect().width}));assert.ok(sizes.sw<=sizes.width,'horizontal page overflow');assert.ok(sizes.sh<=sizes.height&&sizes.body<=sizes.height,'vertical page overflow');assert.ok(sizes.shell<=560);if(await page.locator('.story-copy').count())assert.ok(await page.locator('.story-copy').evaluate(e=>e.scrollHeight<=e.clientHeight+1),'clipped story');};
  const mapFit=async()=>{
-  const size=await page.locator('#africa-map').evaluate(c=>({w:c.clientWidth,h:c.clientHeight}));assert.ok(Math.abs(size.w/size.h-384/420)<.01,'distorted geographic map');
+  const size=await page.locator('#africa-map').evaluate(c=>({w:c.clientWidth,h:c.clientHeight,ratio:c.width/c.height}));assert.ok(Math.abs(size.w/size.h-size.ratio)<.01,'distorted geographic map');
   const rects=await page.locator('.route-pin').evaluateAll(pins=>pins.map(p=>{const r=p.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};}));
   for(let i=0;i<rects.length;i++)for(let j=i+1;j<rects.length;j++){const a=rects[i],b=rects[j];assert.ok(Math.min(a.right,b.right)<=Math.max(a.x,b.x)||Math.min(a.bottom,b.bottom)<=Math.max(a.y,b.y),'overlapping map targets');}
  };

@@ -1,18 +1,16 @@
-import { finishPaper } from './paper.js?v=atlas-12';
-import { paintTerrain,coordinate,compass,MAP_INK } from './maps.js?v=atlas-12';
-import { LAND, AFRICA } from '../assets/world-grid.js?v=atlas-12';
-export {scene,avatar,selfie} from './scene.js?v=atlas-12';
-function context(canvas,w,h){canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;return c;}
-function rect(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
+import { paintTerrain,coordinate,compass,MAP_INK } from './maps.js?v=atlas-13';
+import { WORLD } from '../assets/world-grid.js?v=atlas-13';
+export {scene,avatar,selfie} from './scene.js?v=atlas-13';
+const project=([lon,lat])=>[(lon+180)*3,30+(90-lat)*3];
+function trace(c,rings){c.beginPath();for(const ring of rings){ring.forEach((p,i)=>{const [x,y]=project(p);i?c.lineTo(x,y):c.moveTo(x,y);});c.closePath();}}
 export function drawMap(canvas,visited=[]){
- const c=context(canvas,720,396);rect(c,'#000',0,0,720,396);
- for(let i=0;i<LAND.length;i+=2)rect(c,'#fff',54+LAND[i]*3.4,36+LAND[i+1]*3.4,4,4);
- [[47,-20],[55,-5],[58,-20]].forEach(([lon,lat])=>rect(c,'#fff',54+(lon+180)/2*3.4,36+(90-lat)/2*3.4,4,5));
- paintTerrain(c,720,396,c.getImageData(0,0,720,396).data,3,(x,y)=>[(x-54)/3.4*2-180,90-(y-36)/3.4*2]);
- const stops=[['safari',35,-3],['seychelles',55,-5],['falls',26,-18],['chobe',25,-18],['namibia',17,-23],['cape',18,-34],['mauritius',58,-20]];
- const pts=stops.map(([id,lon,lat])=>[54+(lon+180)/2*3.4-(id==='chobe'?7:0),36+(90-lat)/2*3.4]);
- pts.forEach(([x,y],i)=>coordinate(c,x,y,7,visited.includes(stops[i][0])));compass(c,616,275,23);
- c.font='12px Pixel, monospace';c.fillStyle=MAP_INK;c.fillText('90° N',12,44);c.fillText('0°',18,197);c.fillText('90° S',12,344);c.fillText('180° W',48,369);c.fillText('0°',354,369);c.fillText('180° E',623,369);
- c.fillStyle=MAP_INK;c.font='12px Pixel, monospace';c.fillText('PACIFIC OCEAN',61,239);c.fillText('ATLANTIC',272,213);c.fillText('INDIAN OCEAN',470,278);finishPaper(canvas);
+ canvas.width=1080;canvas.height=600;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#000';c.fillRect(0,0,1080,600);
+ for(const p of WORLD){trace(c,p);c.fillStyle='#fff';c.fill('evenodd');}
+ paintTerrain(c,1080,600,c.getImageData(0,0,1080,600).data,2,(x,y)=>[x/3-180,90-(y-30)/3]);
+ const stops=[['safari',35.1,-1.45],['seychelles',55.46,-4.67],['falls',25.86,-17.925],['chobe',25.15,-17.82],['namibia',17.08,-22.57],['cape',18.42,-33.93],['mauritius',57.55,-20.2]];
+ for(const [id,lon,lat] of stops){const [x,y]=project([lon,lat]);coordinate(c,x,y,7,visited.includes(id));}
+ compass(c,project([91,-35])[0],project([91,-35])[1],37);
+ c.fillStyle=MAP_INK;c.font='12px Pixel,monospace';c.fillText('ATLANTIC',421,368);c.fillText('PACIFIC OCEAN',120,355);c.fillText('INDIAN OCEAN',728,349);c.fillText('AUSTRALIA',910,370);c.fillText('ASIA',819,151);c.fillText('EUROPE',590,145);
+ c.fillStyle='#c5bb87';c.font='10px Pixel,monospace';for(let x=30;x<1080;x+=90)c.fillText(String(x/3-180)+'°',x,590);
 }
-export function africaHitPath(){return [...AFRICA].map(v=>{const x=54+(v%180)*3.4,y=36+Math.floor(v/180)*3.4;return `M${x} ${y}h3.4v3.4h-3.4z`;}).join('');}
+export function africaHitPath(){return 'M 479 199 L 513 178 L 550 176 L 569 190 L 589 188 L 635 223 L 665 259 L 697 263 L 680 289 L 660 299 L 652 327 L 635 345 L 625 395 L 607 414 L 594 400 L 579 374 L 575 348 L 553 324 L 549 286 L 519 275 L 499 254 L 479 225 Z';}

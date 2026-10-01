@@ -1,16 +1,17 @@
-import {paintSurface} from './scene.js?v=atlas-12';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-12';
-import { drawJourneyMap,drawLocalMap,pinPosition } from './maps.js?v=atlas-12';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-12';
-import { ROUTES } from '../data/routes/index.js?v=atlas-12';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-12';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-12';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-12';
-import * as E from './engine.js?v=atlas-12';
-import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=atlas-12';
+import {paintSurface} from './scene.js?v=atlas-13';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-13';
+import { drawJourneyMap,drawLocalMap,pinPosition,compass } from './maps.js?v=atlas-13';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-13';
+import { ROUTES } from '../data/routes/index.js?v=atlas-13';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-13';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-13';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-13';
+import * as E from './engine.js?v=atlas-13';
+import { drawMap,africaHitPath,scene,avatar,selfie } from './art.js?v=atlas-13';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
+let atlasPan=0,atlasDrag=null,suppressAtlasClick=false;
 let storageOK=true,view='map',phoneApp='home',phoneUnlocked=false,phoneReturn='map',selectedContact=null,caseOpen=false,tab='衣服',notesRegion=null,toastTimer,locationTimer;
 function readProfile(){try{const raw=localStorage.getItem(E.SAVE_KEY);return raw?E.parseSave(raw)||E.freshProfile():E.freshProfile();}catch{storageOK=false;return E.freshProfile();}}
 let profile=readProfile();
@@ -33,8 +34,8 @@ function render({sync=true,keepScroll=false}={}){
  if(keepScroll){const scroller=$('.choice-scroll')||$('.phone-scroll');if(scroller)scroller.scrollTop=oldScroll;}
  drawCanvases();startMini();updateSaveStatus();
 }
-function drawCanvases(){paintSurface($("#surface"));if($('#lock-selfie'))selfie($('#lock-selfie')); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));}
-function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><button class="desk-phone" data-action="phone" aria-label="拿起手机"><span class="mini-speaker"></span><span class="mini-screen"><span>${clockTime()}</span><i class="tiny-apps" aria-hidden="true"></i></span><span class="mini-home"></span></button><div class="map-paper"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><div class="map-view"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 720 396" preserveAspectRatio="xMidYMid meet"><a href="#route-map" data-action="journey" aria-label="展开非洲地图"><path d="${africaHitPath()}"/><text x="353" y="166">AFRICA</text></a></svg></div></div></section>`;}
+function drawCanvases(){if($('#atlas-rose')){const rose=$('#atlas-rose');rose.width=96;rose.height=96;compass(rose.getContext('2d'),48,46,32);}paintSurface($("#surface"));if($('#lock-selfie'))selfie($('#lock-selfie')); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));}
+function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><canvas id="atlas-rose" class="atlas-rose" aria-hidden="true"></canvas><span class="atlas-hint">拖动地图</span><button class="desk-phone" data-action="phone" aria-label="拿起手机"><span class="mini-speaker"></span><span class="mini-screen"><span>${clockTime()}</span><i class="tiny-apps" aria-hidden="true"></i></span><span class="mini-home"></span></button><div class="map-paper"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><div class="map-view" style="--pan-x:${atlasPan}px"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 1080 600" preserveAspectRatio="xMidYMid meet"><a href="#route-map" data-action="journey" aria-label="展开非洲地图"><path d="${africaHitPath()}"/><text x="592" y="258">AFRICA</text></a></svg></div></div></section>`;}
 function mapNode(){const r=run();return current()||(r?.stage==='rest'?ROUTES[0].nodes[r.node-1]:r&&['return-pack','reflect'].includes(r.stage)?ROUTES[0].nodes.at(-1):null);}
 function visitedPlaces(){
  const r=run();if(!r)return [];
@@ -43,7 +44,7 @@ function visitedPlaces(){
 }
 function nextPlace(){const r=run();if(!r||['reason','packing'].includes(r.stage))return 'safari';if(r.stage==='ending')return null;return E.segmentFor(r)?.id||'mauritius';}
 function continueJourney(){const r=run();if(!r)startRun();else{if(r.stage==='rest')E.resumeSegment(r);view='play';save();render();}}
-function renderRouteMap(){const visited=visitedPlaces(),next=nextPlace();app.innerHTML=`<section class="route-map-screen"><div class="route-paper"><div class="route-map-view"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><canvas id="africa-map" role="img" aria-label="非洲行程地图，浅色虚线为尚未走过的路线"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin),on=visited.includes(pin.id),ready=next===pin.id;return `<button class="route-pin ${on?'visited':''} ${ready?'ready':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/420*100}%" aria-label="${esc(pin.label)}${ready?'，下一步':on?'，已到访':'，尚未到访'}" ${on||ready?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div></div></section>`;}
+function renderRouteMap(){const visited=visitedPlaces(),next=nextPlace(),height=Math.round(384*(app.clientHeight-24)/(app.clientWidth-24));app.innerHTML=`<section class="route-map-screen"><div class="route-paper"><div class="route-map-view"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><canvas id="africa-map" data-height="${height}" role="img" aria-label="非洲行程地图，浅色虚线为尚未走过的路线"></canvas>${routePins.map(pin=>{const [x,y]=pinPosition(pin,height),on=visited.includes(pin.id),ready=next===pin.id;return `<button class="route-pin ${on?'visited':''} ${ready?'ready':''}" data-action="visit-place" data-place="${pin.id}" style="left:${x/384*100}%;top:${y/height*100}%" aria-label="${esc(pin.label)}${ready?'，下一步':on?'，已到访':'，尚未到访'}" ${on||ready?'':'disabled'}><i aria-hidden="true"></i><span class="pin-label">${esc(pin.label)}</span></button>`;}).join('')}</div></div></section>`;}
 function scenePanel(type,overlay=''){
  const place=geographyFor(mapNode()).label;
  return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><span>${clockTime()}</span><i aria-hidden="true"></i></button><button class="location-whisper" data-action="hide-location" hidden>${esc(place)}</button><button class="pocket-map map-paper" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
@@ -159,4 +160,13 @@ document.fonts.load('12px Pixel').then(()=>{document.documentElement.classList.a
 setTimeout(()=>document.documentElement.classList.add('font-ready'),2500);
 readLocation();
 
-window.addEventListener("resize",()=>paintSurface($("#surface")));
+window.addEventListener("resize",()=>{if(view==='route-map')render({sync:false});else paintSurface($("#surface"));});
+
+// Directly move the atlas sheet. Only a real drag suppresses the map link.
+
+document.addEventListener('pointerdown',e=>{const sheet=e.target.closest('.desk .map-view');if(!sheet||e.button!==0)return;atlasDrag={id:e.pointerId,x:e.clientX,start:atlasPan,sheet,moved:false};});
+document.addEventListener('pointermove',e=>{if(!atlasDrag||e.pointerId!==atlasDrag.id)return;const a=atlasDrag,dx=e.clientX-a.x;if(Math.abs(dx)<5&&!a.moved)return;a.moved=true;a.sheet.classList.add('dragging');const width=a.sheet.offsetWidth,stage=a.sheet.parentElement.clientWidth,base=stage/2-width*.55;atlasPan=Math.max(stage-width-base,Math.min(-base,a.start+dx));a.sheet.style.setProperty('--pan-x',atlasPan+'px');});
+function finishAtlasDrag(){if(!atlasDrag)return;if(atlasDrag.moved){suppressAtlasClick=true;setTimeout(()=>suppressAtlasClick=false,350);}atlasDrag.sheet.classList.remove('dragging');atlasDrag=null;}
+document.addEventListener('pointerup',finishAtlasDrag);document.addEventListener('pointercancel',finishAtlasDrag);
+document.addEventListener('click',e=>{if(suppressAtlasClick&&e.target.closest('.desk .map-view')){e.preventDefault();e.stopImmediatePropagation();suppressAtlasClick=false;}},true);
+document.addEventListener('dragstart',e=>{if(e.target.closest('.desk .map-view'))e.preventDefault();});
