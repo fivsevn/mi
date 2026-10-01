@@ -97,8 +97,13 @@ function phonePane(c,w,h,type){
  return;
  }
  if(type==='battery'){edge(c,'#586647',0,1,w-2,h-2,1);r(c,'#aab384',1,2,w-4,h-4);for(let x=2;x<6;x+=2)r(c,'#586647',x,3,1,h-6);r(c,'#78805a',w-2,Math.floor(h/2)-1,2,3);r(c,'#d4d0a6',2,1,w-5,1);return;}
- if(type==='phone-seal'){round(c,'#93996c',0,0,w,h,4);round(c,'#c5c69a',1,1,w-2,h-2,3);r(c,'#eddfb1',4,2,w-9,1);r(c,'#bb997e',2,h-5,2,2);return;}
- const mint=type==='phone-message-mi';round(c,mint?'#93996c':'#b4a578',0,0,w,h,4);round(c,mint?'#c5c69aee':'#eddfb1ee',1,1,w-2,h-2,3);r(c,'#f4e7c488',4,1,w-9,1);
+ const mint=type==='phone-message-mi',inset=type==='phone-seal'?2:3;
+ // Match the chat object's layered olive casing and ivory glass, without its speech tail.
+ edge(c,'#65714f',0,2,w,h-2,3);edge(c,'#adb388',0,0,w-2,h-3,3);
+ r(c,'#93996c',w-3,5,2,h-10);r(c,'#78805a',4,h-2,w-8,2);
+ edge(c,mint?'#c5c69a':'#e2d5a4',inset,inset,w-inset*2-2,h-inset*2-2,2);
+ r(c,'#eddfb1',inset+1,inset,w-inset*2-6,1);
+ r(c,mint?'#adb388':'#c5c69a',inset,h-inset-4,w-inset*2-4,1);
 }
 export function drawUI(canvas,type){
  const small=type==='small-phone',ico=type.startsWith('icon-'),w=type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
