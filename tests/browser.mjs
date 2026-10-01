@@ -13,7 +13,7 @@ for(const name of (process.env.MI_BROWSER||'chromium,webkit').split(',')){
  const browser=await (name==='webkit'?webkit:chromium).launch({headless:true,...(name==='chromium'&&process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{})});
  const ctx=await browser.newContext({viewport:name==='webkit'?{width:320,height:568}:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
  const page=await ctx.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
- const click=async(a,extra='')=>page.locator(`[data-action="${a}"]${extra}`).first().click();
+ const click=async(a,extra='')=>{if(a==='unlock'){const k=await page.locator('.unlock-arrow').boundingBox(),t=await page.locator('.unlock').boundingBox();await page.mouse.move(k.x+k.width/2,k.y+k.height/2);await page.mouse.down();await page.mouse.move(t.x+t.width-15,k.y+k.height/2,{steps:10});await page.mouse.up();return;}await page.locator(`[data-action="${a}"]${extra}`).first().click();};
  const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('mi-v02')));
  const fit=async()=>{const sizes=await page.evaluate(()=>({width:innerWidth,height:innerHeight,sw:document.documentElement.scrollWidth,sh:document.documentElement.scrollHeight,body:document.body.scrollHeight,shell:document.querySelector('.app-shell').getBoundingClientRect().width}));assert.ok(sizes.sw<=sizes.width,'horizontal page overflow');assert.ok(sizes.sh<=sizes.height&&sizes.body<=sizes.height,'vertical page overflow');assert.ok(sizes.shell<=560);if(await page.locator('.story-copy').count())assert.ok(await page.locator('.story-copy').evaluate(e=>e.scrollHeight<=e.clientHeight+1),'clipped story');};
  const mapFit=async()=>{
