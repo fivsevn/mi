@@ -1,14 +1,14 @@
-import {drawUI} from './ui-art.js?v=atlas-61';
-import {paintSurface} from './scene.js?v=atlas-61';
-import { geographyFor,routePins } from '../data/geography.js?v=atlas-61';
-import { drawJourneyMap,drawLocalMap,drawPhoneMap,pinPosition } from './maps.js?v=atlas-61';
-import { placeFor } from '../data/routes/africa-stories.js?v=atlas-61';
-import { ROUTES } from '../data/routes/index.js?v=atlas-61';
-import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-61';
-import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-61';
-import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-61';
-import * as E from './engine.js?v=atlas-61';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-61';
+import {drawUI} from './ui-art.js?v=atlas-62';
+import {paintSurface} from './scene.js?v=atlas-62';
+import { geographyFor,routePins } from '../data/geography.js?v=atlas-62';
+import { drawJourneyMap,drawLocalMap,drawPhoneMap,pinPosition } from './maps.js?v=atlas-62';
+import { placeFor } from '../data/routes/africa-stories.js?v=atlas-62';
+import { ROUTES } from '../data/routes/index.js?v=atlas-62';
+import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-62';
+import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-62';
+import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-62';
+import * as E from './engine.js?v=atlas-62';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-62';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -103,7 +103,7 @@ function dispatch(action,b){const r=run();
  if(miniAction(action,b))return;
  if(action==='map-zoom'){mapZoom=Math.max(1,Math.min(2.2,mapZoom+Number(b.dataset.direction)*.3));$('.navigation-square').style.setProperty('--map-zoom',mapZoom);return;}
  if(action==='map-center'){mapZoom=1;mapFocus='';mapQuery='';$('.navigation-square').style.setProperty('--map-zoom',1);$('.map-search-input').value='';document.querySelectorAll('.search-match').forEach(e=>e.classList.remove('search-match'));searchMap();return;}
- if(action==='map-search-clear'){mapQuery='';$('.map-search-input').value='';searchMap();return;}
+ if(action==='map-search-clear'){mapQuery='';$('.map-search-input').value='';$('.map-search-input').blur();searchMap();return;}
  if(action==='map-focus'){mapFocus=b.dataset.place;mapZoom=1;mapQuery=routePins.find(p=>p.id===mapFocus).label;$('.map-search-input').value=mapQuery;$('.map-search-input').blur();$('.map-search-results').hidden=true;$('.navigation-square').style.setProperty('--map-zoom',1);document.querySelectorAll('.navigation-app .route-pin').forEach(e=>e.classList.toggle('search-match',e.dataset.place===mapFocus));return;}
  if(action==='journey'){africaSelected=true;phoneAwake=true;const phone=$('.desk-phone');if(phone){phone.classList.add('phone-alert');phone.setAttribute('aria-label','手机亮了，打开非洲地图');phone.querySelector('canvas').dataset.ui='small-phone-lit';drawUI(phone.querySelector('canvas'),'small-phone-lit');phone.classList.remove('phone-buzz');void phone.offsetWidth;phone.classList.add('phone-buzz');clearTimeout(phoneSignal);phoneSignal=setTimeout(()=>phone.classList.remove('phone-buzz'),1700);}return;}
  if(action==='visit-place'){
@@ -150,6 +150,12 @@ function viewHash(){return view==='phone'?`#phone/${phoneApp}/${phoneReturn}${no
 function readLocation(){const [v,a,b,c]=location.hash.slice(1).split('/');view=v==='route-map'?'route-map':v==='play'&&run()?'play':v==='phone'||['journal','records','record'].includes(v)?'phone':'map';if(view==='phone'){phoneApp=['home','chat','notes','bag','settings','maps'].includes(a)?a:['journal','records','record'].includes(v)?'notes':'home';phoneReturn=b==='play'&&run()?'play':'map';selectedContact=CONTACTS.some(x=>x.id===c)?c:null;notesRegion=phoneApp==='notes'&&routePins.some(p=>p.id===c)?c:null;}if(v==='route-map'){view='phone';phoneReturn='map';phoneApp='maps';}if(phoneApp==='maps')africaSelected=true;closeModal();render({sync:false});}
 function dimDeskPhone(){phoneAwake=false;const phone=$('.desk-phone');if(!phone)return;phone.classList.remove('phone-alert','phone-buzz');phone.setAttribute('aria-label','拿起手机');const canvas=phone.querySelector('canvas');canvas.dataset.ui='small-phone';drawUI(canvas,'small-phone');clearTimeout(phoneSignal);}
 document.addEventListener('click',e=>{if(view==='map'&&!e.target.closest('[data-action=journey],.desk-phone'))dimDeskPhone();},true);
+// Leave iOS focus scrolling behind when the keyboard closes; keep map zoom independent.
+function restoreSearchPosition(){requestAnimationFrame(()=>{if(!document.activeElement?.matches('.map-search-input')&&(window.visualViewport?.scale||1)<=1.01){window.scrollTo(0,0);resizePhoneMap();}});}
+document.addEventListener('focusout',e=>{if(e.target.matches('.map-search-input')){restoreSearchPosition();setTimeout(restoreSearchPosition,350);}});
+document.addEventListener('keydown',e=>{if(e.target.matches('.map-search-input')&&e.key==='Enter'&&!e.isComposing){e.preventDefault();e.target.blur();}});
+document.addEventListener('pointerdown',e=>{const input=document.activeElement;if(input?.matches('.map-search-input')&&!e.target.closest('.map-search-area'))input.blur();});
+window.visualViewport?.addEventListener('resize',()=>{if(!document.activeElement?.matches('.map-search-input'))restoreSearchPosition();});
 document.addEventListener('input',e=>{if(e.target.matches('.map-search-input')){mapQuery=e.target.value;searchMap();}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;e.preventDefault();dispatch(b.dataset.action,b);});
 // The title is a title, not a second navigation menu.
