@@ -88,7 +88,7 @@ function phonePane(c,w,h,type){
  if(type==='phone-row'){r(c,'#b4a57877',25,h-1,w-25,1);return;}
  if(type==='phone-bar'||type==='phone-dock'){
  const matrix=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5],dock=type==='phone-dock';
- const base=dock?'#a6af81':'#65754f',shade=dock?'#98a375':'#596948',light=dock?'#b6bd8e':'#7d8a60';
+ const base='#65754f',shade='#596948',light='#7d8a60';
  r(c,base,0,0,w,h);
  // Only a narrow material-light transition uses mixed pixels; the reading area stays quiet.
  const band=dock?6:3;
