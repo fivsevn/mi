@@ -164,3 +164,52 @@ body:has(.phone-scene) #surface{visibility:visible}
 
 .map-controls{bottom:14px}
 @media(max-height:680px){.map-controls{bottom:12px}}
+
+/* One enclosed travel panel: scene, narrative, then decisions. */
+.app-shell:has(.play-screen){background:#78805f}
+.play-screen{display:block;padding:16px 12px 20px;background:#78805f}
+.travel-frame{height:100%;min-height:0;display:grid;grid-template-rows:minmax(0,48%) auto minmax(0,1fr);gap:0;padding:8px;background:#b9bc91;box-shadow:inset 0 4px #d2d3a8,inset 4px 0 #c7c99f,inset -4px 0 #939d77,inset 0 -6px #87936d;clip-path:polygon(0 8px,4px 8px,4px 4px,8px 4px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 4px,calc(100% - 4px) 4px,calc(100% - 4px) 8px,100% 8px,100% calc(100% - 8px),calc(100% - 4px) calc(100% - 8px),calc(100% - 4px) calc(100% - 4px),calc(100% - 8px) calc(100% - 4px),calc(100% - 8px) 100%,8px 100%,8px calc(100% - 4px),4px calc(100% - 4px),4px calc(100% - 8px),0 calc(100% - 8px));overflow:hidden}
+.travel-frame>.scene-panel{border:0;box-shadow:none;background:#a8b18a;isolation:isolate}
+.travel-frame>.story-copy{position:relative;background:#e7dbaf;box-shadow:inset 0 4px #c7bd94,inset 0 7px #f0e5bb;padding:18px 18px 16px;max-height:min(210px,28dvh);scrollbar-color:#a4aa80 #e7dbaf}
+.travel-frame>.story-copy:before{content:'';position:absolute;left:18px;top:0;width:24px;height:3px;background:#b6b990;box-shadow:28px 0 #ccd0a5}
+.travel-frame>.story-copy h1{font-size:18px;line-height:1.5;margin-bottom:8px}
+.travel-frame>.choice-scroll{background:#d5cba0;box-shadow:inset 0 4px #bab68c,inset 0 7px #ccc69a;padding:14px 14px 18px;gap:8px;scrollbar-color:#939c76 #d5cba0}
+.travel-frame .choice,.travel-frame .btn,.travel-frame .item,.travel-frame .tabs button,.travel-frame .item-actions button{position:relative;isolation:isolate;background:#e8ddb3;border:0;box-shadow:0 3px #b1b28a;min-height:48px;padding:12px 14px;clip-path:polygon(4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px),0 4px,4px 4px);color:#435644;translate:none}
+.travel-frame .choice:before,.travel-frame .btn:before,.travel-frame .item:before{content:'';position:absolute;left:4px;right:4px;bottom:0;height:4px;background:#acb38a;box-shadow:0 -3px #ccd0a3;pointer-events:none}
+.travel-frame .choice:hover,.travel-frame .btn:hover,.travel-frame .item:hover,.travel-frame .tabs button:hover,.travel-frame .item-actions button:hover{background:#f2e8c3;color:#86685e;translate:none}
+.travel-frame .choice:active,.travel-frame .btn:active{background:#bbc399;translate:0 2px}
+.travel-frame button:focus-visible{outline:0;background:#f4e8bc;box-shadow:inset 4px 0 #a87876}
+.travel-frame .choice:disabled,.travel-frame .btn:disabled{opacity:.5;translate:none}
+.travel-frame .choice{grid-template-columns:22px minmax(0,1fr) auto;gap:10px}
+.travel-frame .choice-number{border:0;padding:0;color:#8b9573}
+.travel-frame .choice small{color:#778267;margin-top:6px}
+.travel-frame .price{align-self:start;padding-top:2px;white-space:nowrap}
+.travel-frame .control-paper{display:none}
+.travel-frame .mini-controls{gap:8px}
+.travel-frame .item.selected,.travel-frame .tabs button[aria-pressed=true]{background:#b6c197;color:#435644}
+.travel-frame .case-items{background:none;padding:0}
+@media(max-height:680px){
+ .play-screen{padding:8px 8px 12px}
+ .travel-frame{padding:6px;grid-template-rows:minmax(0,40%) auto minmax(0,1fr)}
+ .travel-frame>.story-copy{padding:12px 12px 10px;max-height:28dvh}
+ .travel-frame>.story-copy:before{left:12px}
+ .travel-frame>.story-copy h1{font-size:14px;margin-bottom:5px}
+ .travel-frame>.choice-scroll{padding:10px 10px 14px;gap:6px}
+ .travel-frame .choice,.travel-frame .btn{padding:10px 12px;min-height:44px}
+}
+@media(min-width:700px) and (min-height:700px){.play-screen{padding:24px 16px 28px}}
+
+/* Broad pixel-lit surfaces add depth without tracing the silhouettes. */
+.travel-frame>.scene-panel:after{content:'';position:absolute;inset:0;z-index:6;pointer-events:none;box-shadow:inset 0 4px #65714f44,inset 4px 0 #65714f22,inset -3px 0 #65714f22,inset 0 -4px #87936d55}
+.travel-frame .choice:after,.travel-frame .btn:after,.travel-frame .item:after{content:'';position:absolute;top:0;left:4px;right:4px;height:3px;background:#f4eac6;pointer-events:none}
+.travel-frame .choice:hover:before,.travel-frame .btn:hover:before{background:#b5b58a;box-shadow:0 -3px #d6d4a6}
+.travel-frame .choice:active:before,.travel-frame .btn:active:before{height:2px;box-shadow:none}
+.travel-frame .choice-number{background:#d0d1a5;align-self:start;display:grid;place-items:center;min-height:20px;margin-top:1px;font-size:9px;color:#778363}
+
+/* The pocket chart is folded paper, without a square backing plate. */
+.travel-frame .pocket-map{width:72px;height:57px;padding:0;background:none;border:0;outline:0;box-shadow:none;flex-shrink:0}
+.travel-frame .pocket-map:before,.travel-frame .pocket-map:after{display:none}
+.travel-frame .pocket-map:hover{background:none;outline:0;translate:0 -2px}
+.travel-frame .pocket-map:focus-visible{background:none;box-shadow:none;outline:0;filter:brightness(1.12)}
+.travel-frame .location-whisper{right:86px;max-width:calc(100% - 128px)}
+@media(max-height:680px){.travel-frame .pocket-map{width:60px;height:48px}.travel-frame .location-whisper{right:74px}}

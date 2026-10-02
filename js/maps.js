@@ -1,3 +1,4 @@
+import {pocketFrameRows} from './pocket-frame.js?v=atlas-82';
 import { WORLD } from '../assets/world-grid.js?v=atlas-64';
 import { elevation } from '../assets/relief-grid.js?v=atlas-64';
 import { finishPaper } from './paper.js?v=atlas-64';
@@ -79,13 +80,18 @@ export function paintTerrain(c,width,height,mask,cell=2,inverse=null){
 }
 export function coordinate(c,x,y,size=7){const edge=Math.max(3,size-3);c.fillStyle='#b16c89';c.fillRect(Math.round(x-edge/2),Math.round(y-edge/2),edge,edge);}
 function chartText(c,text,x,y){const ink=c.fillStyle;c.fillStyle='#e2e2d4';c.fillText(text,x+1,y+1);c.fillStyle=ink;c.fillText(text,x,y);}
-function baseMap(canvas,map,width,height,{africa=false,padding=0}={}){
+function baseMap(canvas,map,width,height,{africa=false,padding=0,fit='contain',terrainCell=2}={}){
  canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
  c.fillStyle='#000';c.fillRect(0,0,width,height);
- const project=coord=>projectMap(coord,map.bounds,width,height,padding,africa?-Math.max(0,height-500)*.26:0);
+ // Cover keeps geographic proportions while cropping the square source to the paper.
+ const coverScale=Math.max((width-2*padding)/(map.bounds[2]-map.bounds[0]),(height-2*padding)/(map.bounds[3]-map.bounds[1]));
+ const project=fit==='cover'?coord=>[
+  width/2+(coord[0]-(map.bounds[0]+map.bounds[2])/2)*coverScale,
+  height/2- (coord[1]-(map.bounds[1]+map.bounds[3])/2)*coverScale
+ ]:coord=>projectMap(coord,map.bounds,width,height,padding,africa?-Math.max(0,height-500)*.26:0);
  geometry(c,map.land,project,'#fff');geometry(c,map.water,project,'#000');
  const mask=c.getImageData(0,0,width,height).data;const origin=project([map.bounds[0],map.bounds[3]]),scale=(project([map.bounds[2],map.bounds[3]])[0]-origin[0])/(map.bounds[2]-map.bounds[0]);
- paintTerrain(c,width,height,mask,2,(x,y)=>[map.bounds[0]+(x-origin[0])/scale,map.bounds[3]-(y-origin[1])/scale]);
+ paintTerrain(c,width,height,mask,terrainCell,(x,y)=>[map.bounds[0]+(x-origin[0])/scale,map.bounds[3]-(y-origin[1])/scale]);
  c.lineWidth=1;geometry(c,map.rivers,project,null,'#aec2af');
  c.lineWidth=.6;geometry(c,map.borders,project,null,'#a4ad91');
  return {c,project};
@@ -108,9 +114,22 @@ export function drawJourneyMap(canvas,visited=[]){
 }
 export function drawLocalMap(canvas,node){
  const geo=geographyFor(node),map=CONTEXT_MAPS[geo.key];
- const {c,project}=baseMap(canvas,map,96,96);const [x,y]=project(geo.coord);
- coordinate(c,x,y,9,true);finishPaper(canvas,{mini:true});
- canvas.dataset.location=geo.key;canvas.dataset.coordinate=geo.coord.join(',');
+ const width=83,height=65,chart=document.createElement('canvas');
+ const {project}=baseMap(chart,map,width,height,{fit:'cover',terrainCell:2});
+ canvas.width=width*2;canvas.height=height*2;
+ const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.scale(2,2);
+ const shape=()=>{c.beginPath();pocketFrameRows.forEach((runs,y)=>runs.forEach(([x,w])=>c.rect(x,y,w,1)));};
+ c.save();c.translate(1,1);shape();c.fillStyle='#65714f33';c.fill();c.restore();
+ c.save();shape();c.clip();c.drawImage(chart,0,0);
+ c.fillStyle='#43564418';c.fillRect(30,7,24,55);
+ c.fillStyle='#eddfb114';c.fillRect(54,2,25,58);
+ for(const x of [30,54]){c.fillStyle='#65714f44';c.fillRect(x,5,1,56);c.fillStyle='#eddfb166';c.fillRect(x+1,5,1,56);}
+ for(const y of [21,42]){c.fillStyle='#65714f33';c.fillRect(5,y,73,1);}
+ const [x,y]=project(geo.coord);coordinate(c,x,y,6);
+ // Actual perimeter and edge facets from the reference, recolored to the game palette.
+ const colors={1:'#eddfb1',2:'#788664',3:'#a0ad82',4:'#c4cfa7'};
+ pocketFrameRows.forEach((runs,y)=>runs.forEach(([x,w,type])=>{if(colors[type]){c.fillStyle=colors[type];c.fillRect(x,y,w,1);}}));
+ c.restore();canvas.dataset.location=geo.key;canvas.dataset.coordinate=geo.coord.join(',');
 }
 
 // A quiet navigation basemap, independent of the printed terrain atlas.
