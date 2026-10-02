@@ -218,3 +218,7 @@ body:has(.phone-scene) #surface{visibility:visible}
 /* Open the atlas with the Safari marker at the viewport centre. */
 .desk{container-type:size}
 .desk .map-view{top:50%;height:102%;width:183.6cqh;transform:translate(calc(-1 * var(--focus-x,59.75%) + var(--pan-x,0px)),calc(-1 * var(--focus-y,50.725%)))}
+
+/* One page colour, including the margins and phone safe-area space. */
+:root{--page-background:#8a9070}
+html,body,body:has(.phone-scene),.app-shell,.play-screen,.desk,.route-map-screen,.footer{background:var(--page-background)}

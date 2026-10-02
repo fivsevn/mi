@@ -1,7 +1,7 @@
 import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
 import {paintStoryPapers} from './paper-art.js?v=paper-study-25';
 import {drawUI} from './ui-art.js?v=paper-study-31';
-import {paintSurface} from './scene.js?v=atlas-64';
+import {paintSurface} from './scene.js?v=paper-study-32';
 import { geographyFor,routePins } from '../data/geography.js?v=atlas-64';
 import { drawJourneyMap,drawLocalMap,drawPhoneMap,pinPosition } from './maps.js?v=paper-study-30';
 import { placeFor } from '../data/routes/africa-stories.js?v=atlas-64';

@@ -158,4 +158,4 @@ export function selfie(canvas){
  shape(c,'clay',[[73,126],[107,125],[110,131],[71,133]]);line(c,'shirt',79,115,99,114);
  for(let x=61;x<126;x+=4){block(c,'light',x,136,2,1);block(c,'warm',x,139,1,1);}dither(c,'light',78,116,22,8,.22);
 }
-export function paintSurface(canvas){const c=setup(canvas,Math.ceil(innerWidth/3),Math.ceil(innerHeight/3));block(c,'shadow',0,0,canvas.width,canvas.height);const stage=Math.max(0,Math.floor((canvas.width-Math.min(innerWidth,560)/3)/2));block(c,'paper',stage,0,Math.min(innerWidth,560)/3,canvas.height);}
+export function paintSurface(canvas){const c=setup(canvas,Math.ceil(innerWidth/3),Math.ceil(innerHeight/3));const background=getComputedStyle(document.documentElement).getPropertyValue('--page-background').trim()||'#8a9070';block(c,background,0,0,canvas.width,canvas.height);}
