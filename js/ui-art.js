@@ -1,3 +1,4 @@
+import {tiltSprite} from './pixel-object.js?v=paper-study-25';
 // Authored integer-grid phone art. Static glass and metal are code, never downloaded bitmaps.
 const C={moss:'#93996c',sage:'#adb388',rose:'#ad8490',sea:'#8fac97',ink:'#65714f',dark:'#78805a',light:'#c5c69a',cream:'#e2d5a4',pale:'#eddfb1',ochre:'#b4a578',clay:'#bb997e'};
 function r(c,k,x,y,w,h){c.fillStyle=C[k]||k;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
@@ -91,14 +92,39 @@ function patina(c,w,h){
  for(let i=0;i<9;i++){const yy=12+i*5,xx=10-Math.floor(i/3);round(c,'#b18b52',xx,yy,3,4,1);r(c,'#3c3021',xx+1,yy+1,1,2);}
  c.restore();
 }
-// Dedicated 32 × 52 locked-device sprite; highlights describe surfaces rather than heavy outlines.
-function miniPhone(c){
- round(c,'#78805a',1,1,30,51,6);round(c,'#adb388',2,0,28,51,5);round(c,'#c5c69a',3,1,26,49,4);round(c,'#93996c',4,2,24,47,3);
- r(c,'#e2d5a4',7,1,17,1);r(c,'#eddfb1',5,4,1,13);r(c,'#adb388',3,9,1,30);r(c,'#93996c',28,9,1,31);r(c,'#adb388',27,32,1,10);
- r(c,'#adb388',6,3,20,4);round(c,'#65714f',12,4,8,2,1);r(c,'#c5c69a',13,6,6,1);
- round(c,'#3b4437',5,8,22,35,2);round(c,'#252e28',6,9,20,33,1);
- poly(c,'#323a30',[[6,10],[17,10],[6,27]]);poly(c,'#3d4334',[[25,25],[25,41],[14,41]]);r(c,'#515a43',6,12,1,24);r(c,'#68704f',7,9,15,1);
- r(c,'#78805a',7,43,18,5);circle(c,'#65714f',16,46,3);r(c,'#c5c69a',15,45,2,2);r(c,'#93996c',16,46,1,1);r(c,'#e2d5a4',9,49,13,1);r(c,'#93996c',23,48,3,1);
+// Shared 64 x 104 device drawing. Fine contour steps and one-pixel metal
+// transitions are authored here, rather than enlarging the coarse old sprite.
+function miniPhone(c,lit=false){
+ round(c,'#78805a',2,2,60,102,12);round(c,'#adb388',4,0,56,102,10);
+ round(c,'#c5c69a',5,1,54,99,9);round(c,'#93996c',7,3,50,96,7);
+ r(c,'#e2d5a4',14,2,34,1);r(c,'#eddfb1',11,7,1,29);
+ r(c,'#adb388',6,19,1,59);r(c,'#78805a',57,20,1,60);
+ r(c,'#adb388',55,64,1,18);r(c,'#c5c69a',54,82,1,8);
+ // Short broken highlights and fine mixed metal tones, away from the glass.
+ for(let y=13;y<89;y++){
+  if(y%5===1)r(c,'#e2d5a4',8,y,1,2);
+  if(y%4===0)r(c,'#adb388',9,y,1,1);
+  if(y%7===2)r(c,'#c5c69a',56,y,1,1);
+ }
+ r(c,'#adb388',12,6,40,8);round(c,'#65714f',24,8,16,4,2);
+ r(c,'#78805a',26,9,12,1);r(c,'#c5c69a',25,12,14,1);
+ round(c,'#3b4437',10,16,44,70,4);round(c,'#252e28',12,18,40,66,2);
+ poly(c,'#323a30',[[12,20],[35,20],[12,55]]);
+ poly(c,'#3d4334',[[51,49],[51,83],[28,83]]);
+ r(c,'#515a43',12,25,1,46);r(c,'#68704f',14,18,31,1);
+ r(c,'#78805a',14,86,36,10);circle(c,'#65714f',32,92,5);
+ line(c,'#93996c',29,88,34,88);r(c,'#c5c69a',30,90,4,3);
+ r(c,'#adb388',31,91,2,2);r(c,'#e2d5a4',18,98,26,1);
+ for(let x=16;x<49;x++)if(x%4===1)r(c,'#c5c69a',x,97,1,1);
+ r(c,'#93996c',46,96,6,1);
+ if(lit){
+  round(c,'#a6b594',12,18,40,66,2);
+  poly(c,'#bcc49e',[[14,20],[50,20],[50,56],[38,50],[24,58],[14,42]]);
+  poly(c,'#8d9e7b',[[14,64],[28,48],[50,52],[50,82],[14,82]]);
+  for(const x of [20,34]){r(c,'#e9dfba',x,28,8,12);r(c,'#a6b594',x+2,30,4,8);}
+  r(c,'#e9dfba',30,32,2,2);r(c,'#e9dfba',30,36,2,2);
+  r(c,'#dce0b5',22,44,20,1);r(c,'#e4d9b6',26,74,12,2);
+ }
 }
 function friendIcon(c,id){
  const backgrounds=['#b4b9a3','#afbcb4','#c7baa4','#b7b3bd','#aeb29f','#b7aaa2'];
@@ -133,8 +159,13 @@ function phonePane(c,w,h,type){
  for(let x=4;x<w-4;x++)if(x%4===0)r(c,mint?'#adb388':'#c5c69a',x,h-5,1,1);
 }
 export function drawUI(canvas,type){
- const small=type==='small-phone'||type==='small-phone-lit',friend=type.startsWith('friend-'),ico=type.startsWith('icon-'),w=friend?24:type==='battery'?18:ico?34:small?32:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=friend?24:type==='battery'?10:ico?34:small?52:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
- if(friend)friendIcon(c,Number(type.slice(7)));else if(ico)icon(c,type.slice(5));else if(small){miniPhone(c);if(type==='small-phone-lit'){round(c,'#a6b594',6,9,20,33,1);poly(c,'#bcc49e',[[7,10],[25,10],[25,28],[19,25],[12,29],[7,21]]);poly(c,'#8d9e7b',[[7,32],[14,24],[25,26],[25,41],[7,41]]);r(c,'#e9dfba',10,14,4,6);r(c,'#a6b594',11,15,2,4);r(c,'#e9dfba',17,14,4,6);r(c,'#a6b594',18,15,2,4);r(c,'#e9dfba',15,16,1,1);r(c,'#e9dfba',15,18,1,1);r(c,'#dce0b5',11,22,10,1);r(c,'#e4d9b6',13,37,6,1);}}else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='title-strip'){
+ if(['scrap-phone','small-phone','small-phone-lit'].includes(type)){
+  const source=document.createElement('canvas');source.width=64;source.height=104;
+  miniPhone(source.getContext('2d'),type==='small-phone-lit');
+  tiltSprite(canvas,source,128,164,-13,1.25,2);return;
+ }
+ const friend=type.startsWith('friend-'),ico=type.startsWith('icon-'),w=friend?24:type==='battery'?18:ico?34:Math.max(type==='phone-seal'?16:32,Math.round(canvas.clientWidth/2)),h=friend?24:type==='battery'?10:ico?34:Math.max(20,Math.round(canvas.clientHeight/2));canvas.width=w;canvas.height=h;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.clearRect(0,0,w,h);
+ if(friend)friendIcon(c,Number(type.slice(7)));else if(ico)icon(c,type.slice(5));else if(type==='shell')shell(c,w,h);else if(type==='patina')patina(c,w,h);else if(type==='home-key')homeKey(c,w,h);else if(type==='glass-wallpaper')wallpaper(c,w,h);else if(type==='battery')phonePane(c,w,h,type);else if(type.startsWith('phone-')||type==='crystal')phonePane(c,w,h,type);else if(type==='title-strip'){
  // Uneven torn fibres, a gently bowed lower edge, and a single creased corner.
  for(let x=1;x<w-1;x++){
   const tear=(x*17+x*x*3)%19,top=tear<2?2:tear<6?1:0;

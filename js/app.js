@@ -1,18 +1,21 @@
-import {drawUI} from './ui-art.js?v=atlas-64';
+import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
+import {paintStoryPapers} from './paper-art.js?v=paper-study-25';
+import {drawUI} from './ui-art.js?v=paper-study-31';
 import {paintSurface} from './scene.js?v=atlas-64';
 import { geographyFor,routePins } from '../data/geography.js?v=atlas-64';
-import { drawJourneyMap,drawLocalMap,drawPhoneMap,pinPosition } from './maps.js?v=atlas-82';
+import { drawJourneyMap,drawLocalMap,drawPhoneMap,pinPosition } from './maps.js?v=paper-study-30';
 import { placeFor } from '../data/routes/africa-stories.js?v=atlas-64';
 import { ROUTES } from '../data/routes/index.js?v=atlas-64';
 import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-64';
 import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-64';
 import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-64';
 import * as E from './engine.js?v=atlas-64';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=atlas-64';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=story-light-1';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
 let africaSelected=false,phoneAwake=false,phoneSignal=0,mapZoom=1,mapQuery='',mapFocus='';
+const atlasFocus=routePins.find(p=>p.id==='safari').coord,atlasAnchorX=(atlasFocus[0]+180)/360,atlasAnchorY=(30+(90-atlasFocus[1])*3)/600;
 let atlasPan=0,atlasDrag=null,suppressAtlasClick=false;
 let storageOK=true,view='map',phoneApp='home',phoneUnlocked=false,phoneReturn='map',selectedContact=null,caseOpen=false,tab='衣服',notesRegion=null,toastTimer,locationTimer;
 function readProfile(){try{const raw=localStorage.getItem(E.SAVE_KEY);return raw?E.parseSave(raw)||E.freshProfile():E.freshProfile();}catch{storageOK=false;return E.freshProfile();}}
@@ -33,21 +36,22 @@ function capturePhoneBackdrop(){
  const source=app.querySelector(':scope > section');if(!source)return;
  const copy=source.cloneNode(true),originals=source.querySelectorAll('canvas');
  copy.querySelectorAll('canvas').forEach((canvas,i)=>{const original=originals[i],style=getComputedStyle(original);canvas.width=original.width;canvas.height=original.height;canvas.style.width=style.width;canvas.style.height=style.height;canvas.getContext('2d').drawImage(original,0,0);for(const attr of [...canvas.attributes])if(attr.name.startsWith('data-'))canvas.removeAttribute(attr.name);});
- copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));layer.append(copy);phoneBackdrop=layer;
+ copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));layer.dataset.scroll=source.querySelector('.paper-stack')?.scrollTop||source.scrollTop;layer.append(copy);phoneBackdrop=layer;
 }
+function activeScroller(){return app.querySelector(':scope > .play-screen > .paper-stack, :scope > .phone-scene .phone-scroll');}
 function render({sync=true,keepScroll=false}={}){
- const oldScroll=keepScroll?$('.choice-scroll')?.scrollTop||$('.phone-scroll')?.scrollTop||0:0;
+ const oldScroll=keepScroll?activeScroller()?.scrollTop||0:0;
  if(view==='phone'&&!app.querySelector('.phone-scene')){if(!app.querySelector(':scope > section'))renderMap();capturePhoneBackdrop();}
  clearTimeout(locationTimer);document.body.dataset.view=view;
  if(view==='play'&&!run())view='map';
  if(sync&&location.hash!==viewHash())history.pushState(null,'',viewHash());
  if(view==='map')renderMap();else if(view==='route-map'){phoneReturn='map';phoneApp='maps';phoneUnlocked=false;view='phone';renderPhone();}else if(view==='phone')renderPhone();else renderPlay();
- if(view==='phone'&&phoneBackdrop)app.prepend(phoneBackdrop);
- if(keepScroll){const scroller=$('.choice-scroll')||$('.phone-scroll');if(scroller)scroller.scrollTop=oldScroll;}
+ if(view==='phone'&&phoneBackdrop){app.prepend(phoneBackdrop);const paperScroll=phoneBackdrop.querySelector('.paper-stack')||phoneBackdrop.firstElementChild;paperScroll.scrollTop=Number(phoneBackdrop.dataset.scroll||0);}
+ if(keepScroll){const scroller=activeScroller();if(scroller)scroller.scrollTop=oldScroll;}
  drawCanvases();startMini();updateSaveStatus();
 }
-function drawCanvases(){document.querySelectorAll('.paper-title').forEach(el=>{if(!el.querySelector('canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=control-paper data-ui="${el.classList.contains('paper-title')?'title-strip':'plaque'}" aria-hidden=true></canvas>`);});document.querySelectorAll('.phone-screen .btn,.phone-screen .contact,.phone-screen .bubble,.phone-screen .outfit-btn,.phone-screen .phone-note,.phone-screen .contact-avatar,.phone-screen .chat-bar,.phone-screen .phone-status,.phone-screen .avatar-row,.phone-modal,.phone-modal .btn,.phone-modal .close-btn').forEach(el=>{if(!el.querySelector(':scope > canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=crystal-surface data-ui="${el.classList.contains('contact')?'phone-row':el.classList.contains('contact-avatar')?'phone-seal':el.classList.contains('bubble')?(el.classList.contains('mi')?'phone-message-mi':'phone-message'):el.classList.contains('phone-note')?'phone-note':el.classList.contains('chat-bar')||el.classList.contains('phone-status')?'phone-bar':'phone-control'}" aria-hidden=true></canvas>`);});document.querySelectorAll('canvas[data-ui]').forEach(c=>drawUI(c,c.dataset.ui));paintSurface($("#surface")); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles}));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());if($('#phone-africa-map'))drawPhoneMap($('#phone-africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));resizePhoneMap();}
-function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><canvas id="atlas-rose" class="atlas-rose" aria-hidden="true"></canvas><button class="desk-phone ${phoneAwake?'phone-alert':''}" data-action="phone" aria-label="${phoneAwake?'手机亮了，打开非洲地图':'拿起手机'}"><canvas data-ui="${phoneAwake?'small-phone-lit':'small-phone'}" aria-hidden="true"></canvas><span class="mini-clock-face" data-clock>${clockTime()}</span></button><div class="map-paper"><a class="paper-title" href="#map" data-action="map">米的地图<small>MI’S MAP</small></a><div class="map-view" style="--pan-x:${atlasPan}px"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 1080 600" preserveAspectRatio="xMidYMid meet"><a href="#map" data-action="journey" aria-label="在手机上查看非洲地图"><path d="${africaHitPath()}"/><text x="592" y="258">AFRICA</text></a></svg></div></div></section>`;}
+function drawCanvases(){document.querySelectorAll('.choice,.mini-controls .btn,.paper-title:not(.folded-title)').forEach(el=>{if(!el.querySelector('canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=control-paper data-ui="${el.classList.contains('paper-title')?'title-strip':'plaque'}" aria-hidden=true></canvas>`);});document.querySelectorAll('.phone-screen .btn,.phone-screen .contact,.phone-screen .bubble,.phone-screen .outfit-btn,.phone-screen .phone-note,.phone-screen .contact-avatar,.phone-screen .chat-bar,.phone-screen .phone-status,.phone-screen .avatar-row,.phone-modal,.phone-modal .btn,.phone-modal .close-btn').forEach(el=>{if(!el.querySelector(':scope > canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=crystal-surface data-ui="${el.classList.contains('contact')?'phone-row':el.classList.contains('contact-avatar')?'phone-seal':el.classList.contains('bubble')?(el.classList.contains('mi')?'phone-message-mi':'phone-message'):el.classList.contains('phone-note')?'phone-note':el.classList.contains('chat-bar')||el.classList.contains('phone-status')?'phone-bar':'phone-control'}" aria-hidden=true></canvas>`);});document.querySelectorAll('canvas[data-ui]').forEach(c=>drawUI(c,c.dataset.ui));paintSurface($("#surface")); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles},0,c.dataset.story));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());if($('#phone-africa-map'))drawPhoneMap($('#phone-africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));document.querySelectorAll('canvas[data-folded-title]').forEach(drawFoldedTitle);resizePhoneMap();paintStoryPapers();}
+function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><canvas id="atlas-rose" class="atlas-rose" aria-hidden="true"></canvas><button class="desk-phone ${phoneAwake?'phone-alert':''}" data-action="phone" aria-label="${phoneAwake?'手机亮了，打开非洲地图':'拿起手机'}"><canvas data-ui="${phoneAwake?'small-phone-lit':'small-phone'}" aria-hidden="true"></canvas><span class="mini-clock-face" data-clock>${clockTime()}</span></button><div class="map-paper"><a class="paper-title folded-title" href="#map" data-action="map" aria-label="米的地图 MI’S MAP"><canvas data-folded-title aria-hidden="true"></canvas></a><div class="map-view" style="--pan-x:${atlasPan}px;--focus-x:${atlasAnchorX*100}%;--focus-y:${atlasAnchorY*100}%"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 1080 600" preserveAspectRatio="xMidYMid meet"><a href="#map" data-action="journey" aria-label="在手机上查看非洲地图"><path d="${africaHitPath()}"/><text x="592" y="258">AFRICA</text></a></svg></div></div></section>`;}
 function mapNode(){const r=run();return current()||(r?.stage==='rest'?ROUTES[0].nodes[r.node-1]:r&&['return-pack','reflect'].includes(r.stage)?ROUTES[0].nodes.at(-1):null);}
 function visitedPlaces(){
  const r=run();if(!r)return [];
@@ -61,9 +65,9 @@ function resizePhoneMap(){const canvas=$('#phone-africa-map');if(!canvas)return;
 function searchMap(){const box=$('.map-search-results');if(!box)return;const q=mapQuery.trim().toLowerCase();box.hidden=!q;const aliases={safari:'kenya tanzania 肯尼亚 坦桑尼亚 内罗毕 草原',seychelles:'seychelles 马埃 mahe',falls:'victoria falls 津巴布韦 赞比亚',chobe:'chobe 博茨瓦纳',namibia:'namibia 温得和克',cape:'cape town 南非 开普敦',mauritius:'mauritius 毛里求斯'};const matches=routePins.filter(p=>(p.label+' '+aliases[p.id]).toLowerCase().includes(q));box.innerHTML=q?(matches.length?matches.map(p=>`<button data-action="map-focus" data-place="${p.id}"><i aria-hidden="true"></i>${esc(p.label)}</button>`).join(''):'<p role="status">没有匹配地点</p>'):'';}
 function scenePanel(type,overlay=''){
  const place=geographyFor(mapNode()).label;
- return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="small-phone" aria-hidden="true"></canvas></button><button class="location-whisper" data-action="hide-location" hidden>${esc(place)}</button><button class="pocket-map map-paper" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
+ return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" data-story="${esc(mapNode()?.id||run()?.stage||type)}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="scrap-phone" aria-hidden="true"></canvas></button><button class="location-whisper" data-action="hide-location" hidden>${esc(place)}</button><button class="pocket-map map-paper" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
 }
-function gameScreen(type,title,text,choices,{overlay='',className='',extra=''}={}){return `<section class="play-screen ${className}"><div class="travel-frame">${scenePanel(type,overlay)}<div class="story-copy"><h1>${esc(title)}</h1><p class="prose ${className?'mini-text':''}">${esc(text)}</p>${extra}</div><div class="choice-scroll" tabindex="0" aria-label="选项">${choices}</div></div></section>`;}
+function gameScreen(type,title,text,choices,{overlay='',className='',extra=''}={}){return `<section class="play-screen ${className}">${scenePanel(type,overlay)}<div class="paper-stack" tabindex="0" aria-label="故事纸条"><div class="story-copy"><h1>${esc(title)}</h1><p class="prose ${className?'mini-text':''}">${esc(text)}</p>${extra}</div><div class="choice-scroll" tabindex="0" aria-label="选项">${choices}</div></div></section>`;}
 function choiceButtons(n){const r=run();return n.choices.map((c,i)=>{if(c.requires&&!r.bag.includes(c.requires)||c.condition&&!c.condition(r))return '';const cost=E.choiceCost(r,c);return `<button class="choice" data-action="choose" data-index="${i}" ${E.canAfford(r,cost)?'':'disabled'}><span class="choice-number">${String(i+1).padStart(2,'0')}</span><span><b>${esc(c.label)}</b>${c.detail?`<small>${esc(c.detail)}</small>`:''}</span><span class="price">${cost?money(cost):arrow}</span></button>`;}).join('');}
 function renderPlay(){const r=run();
  if(r.stage==='rest'){const s=E.completedSegment(r),next=E.segmentFor(r);app.innerHTML=gameScreen(s.scene,'这一段先到这里。',s.closing,`${btn('回到桌上，下次再走','map')}${btn(next?'接着走':'收拾回家的箱子','resume-segment')}`);return;}
@@ -98,7 +102,7 @@ function renderPhone(){const labels={home:'',chat:'消息',notes:'笔记',bag:'�
 }
 function startRun(){profile.run=E.createRun();profile.contacts={};profile.messages=[];phoneApp='home';selectedContact=null;caseOpen=false;view='play';closeModal();save();render();}
 function openPhone(){phoneAwake=false;notesRegion=null;phoneReturn=view==='play'?'play':view==='route-map'?'route-map':'map';phoneApp=phoneReturn==='map'&&africaSelected?'maps':'home';phoneUnlocked=false;selectedContact=null;view='phone';render();}
-function closePhone(){if(phoneReturn==='play'&&['social','chat'].includes(run()?.stage)){E.advance(run());save();}view=phoneReturn;render();}
+function closePhone(){const advance=phoneReturn==='play'&&['social','chat'].includes(run()?.stage),paperScroll=Number(phoneBackdrop?.dataset.scroll||0);if(advance){E.advance(run());save();}view=phoneReturn;render();if(view==='play'&&!advance&&activeScroller())activeScroller().scrollTop=paperScroll;}
 function dispatch(action,b){const r=run();
  if(miniAction(action,b))return;
  if(action==='map-zoom'){mapZoom=Math.max(1,Math.min(2.2,mapZoom+Number(b.dataset.direction)*.3));$('.navigation-square').style.setProperty('--map-zoom',mapZoom);return;}
@@ -182,7 +186,7 @@ function updateMini(){const r=run(),n=r&&E.currentNode(r),el=document.querySelec
 function startMini(){clearInterval(miniTimer);stopSound();document.body.classList.remove('soaked');const r=run(),n=view==='play'&&r?.stage==='event'?E.currentNode(r):null;if(!n?.mini)return;updateMini();if(n.mini==='falls')return;
  miniTimer=setInterval(()=>{if(document.hidden||modal.open)return;const m=r.mini[n.id];if(m.done)return;m.elapsed+=.5;if(m.elapsed>=(n.mini==='glasses'?12:22)){m.done=true;clearInterval(miniTimer);}save();updateMini();},500);
 }
-setInterval(()=>{if(document.hidden)return;animFrame=(animFrame+1)%4;document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles},animFrame));},650);
+setInterval(()=>{if(document.hidden)return;animFrame=(animFrame+1)%4;document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles},animFrame,c.dataset.story));},650);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSound();});
 document.fonts.load('12px Pixel').then(()=>{document.documentElement.classList.add('font-ready');drawCanvases();}).catch(()=>document.documentElement.classList.add('font-ready'));
 setTimeout(()=>document.documentElement.classList.add('font-ready'),2500);
@@ -193,7 +197,7 @@ window.addEventListener("resize",()=>{if(view==='route-map')render({sync:false})
 // Directly move the atlas sheet. Only a real drag suppresses the map link.
 
 document.addEventListener('pointerdown',e=>{const sheet=e.target.closest('.desk .map-view');if(!sheet||e.button!==0)return;atlasDrag={id:e.pointerId,x:e.clientX,start:atlasPan,sheet,moved:false};});
-document.addEventListener('pointermove',e=>{if(!atlasDrag||e.pointerId!==atlasDrag.id)return;const a=atlasDrag,dx=e.clientX-a.x;if(Math.abs(dx)<5&&!a.moved)return;a.moved=true;a.sheet.classList.add('dragging');const width=a.sheet.offsetWidth,stage=a.sheet.parentElement.clientWidth,base=stage/2-width*.55;atlasPan=Math.max(stage-width-base,Math.min(-base,a.start+dx));a.sheet.style.setProperty('--pan-x',atlasPan+'px');});
+document.addEventListener('pointermove',e=>{if(!atlasDrag||e.pointerId!==atlasDrag.id)return;const a=atlasDrag,dx=e.clientX-a.x;if(Math.abs(dx)<5&&!a.moved)return;a.moved=true;a.sheet.classList.add('dragging');const width=a.sheet.offsetWidth,stage=a.sheet.parentElement.clientWidth,base=stage/2-width*atlasAnchorX;atlasPan=Math.max(stage-width-base,Math.min(-base,a.start+dx));a.sheet.style.setProperty('--pan-x',atlasPan+'px');});
 function finishAtlasDrag(){if(!atlasDrag)return;if(atlasDrag.moved){suppressAtlasClick=true;setTimeout(()=>suppressAtlasClick=false,350);}atlasDrag.sheet.classList.remove('dragging');atlasDrag=null;}
 document.addEventListener('pointerup',finishAtlasDrag);document.addEventListener('pointercancel',finishAtlasDrag);
 document.addEventListener('click',e=>{if(suppressAtlasClick&&e.target.closest('.desk .map-view')){e.preventDefault();e.stopImmediatePropagation();suppressAtlasClick=false;}},true);

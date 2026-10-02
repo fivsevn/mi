@@ -12,7 +12,8 @@
 | `js/engine.js` | 行李、选择效果、旅行状态、存档校验及迁移 |
 | `js/art.js` | 世界地图绘制与点击地理范围；转出场景绘制接口 |
 | `js/maps.js` | 地形色阶、世界/地区/局部地图共用绘制规则与坐标 |
-| `js/scene.js` | 米的人物、14 种场景、动画和页面背景 |
+| `js/scene.js` | 保留米的人物、头像、自拍与页面背景绘制 |
+| `js/story-art.js` | 选项上方的故事动画；14 类构图、74 个故事细节、整数扫描线材质与逐帧动画 |
 | `js/ui-art.js` | 手机外壳、锁屏壁纸、App 图标、头像、内部边框及小手机 |
 | `js/paper.js` | 地图纸张边缘处理 |
 | `data/routes/africa-001.js` | 非洲路线定义 |
@@ -54,3 +55,17 @@ GitHub Pages 使用 `main` 根目录与 `CNAME`，域名为 `mi.fivsevn.com`。�
 前端资源变更时，同步更新入口、模块引用和字体/样式的缓存版本标记，避免混用版本。仅修改 Markdown 文档时不改缓存标记、不改前端文件。发布成功不等于画面验收；有前端变化时需确认线上模块版本并实际操作相关页面。
 
 截至本轮文档整理，前端缓存标记保留 `atlas-48`。本文不将此前检查结果视作未来改动自动通过的证明。
+
+### Paper study (2026-10-03)
+- `paper-art.js` draws the instant sheet on a fixed 224 × 272 design grid and paper slips on a one-CSS-pixel grid, using the phone-icon palette. No reference photographs become runtime assets.
+- Instant frame uses Polaroid's documented 88.47 × 107.52 mm outer dimensions and 78.94 × 76.801 mm image area. Horizontal margins follow those measurements; the top margin is visually matched at approximately 5.2 mm, not a manufacturer-specified measurement. The frame keeps its aspect ratio in a height-constrained scene row.
+- Reference: https://support.polaroid.com/hc/en-us/articles/115012363647-What-are-Polaroid-photo-dimensions
+- Paper contours/core fibres, exposed backing pieces and lined fragments were studied from the real collage and monthly-planner photographs in https://www.archerandolive.com/blogs/news/6-ways-to-use-notepads . Each choice uses an independently cut contour; reading and hit areas remain upright.
+
+Paper slips use flat face colours, local feathered tears and a thin cast shadow underneath the bottom edge. Do not apply a perimeter light/shadow ramp: it creates a bevelled button instead of thin paper. Pixel rotation can disable its default object shadow for these sheets; the approved phone/map keep their existing shading.
+
+The instant sheet is outside `.paper-stack`, which is the only game-story scroller. Its proportions remain unchanged; short viewports constrain its footprint to reserve space for the paper pile. Inventory edits and phone return preserve the active paper scroll position. The miniature map uses a proportional cover crop across its rectangular sheet rather than a square contain projection.
+
+The instant frame and its aperture share proportional positioning from one canonical drawing; the aperture width uses matching parity so left/right paper margins remain identical. Narrative and option slips share a width bound inside that frame. Desktop and instant-sheet phone objects share a newly authored 64 × 104 device, a 128 × 164 output canvas, and one responsive display-size rule. Rotation changes its footprint, not the device scale.
+
+The homepage title and geographic miniature share `folded-paper.js`: identical cut stock, edge wear, creases and sampled 11° tilt. The title uses paper colours and its lettering is drawn before rotation, with a larger shadow beneath it. Its width is bounded to 172px and it sits 10px further left than the earlier placement. Homepage and story phones use the same −13° sampled sprite, dimensions and object shadow, including the lit homepage variant. The opened phone has a fixed 20:39 aspect ratio, a bounded centered footprint, and an independently scrollable launcher grid. The atlas initially centres the Safari coordinate, retaining horizontal dragging.
