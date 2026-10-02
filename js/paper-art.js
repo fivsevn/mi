@@ -144,7 +144,7 @@ export function drawPaper(canvas){
   const material=source.getContext('2d');loosePaper(material,w,paperH,v);paperMaterial(material,w,paperH,v);
   // Slightly translucent stock; preserve the separately painted cast-shadow alpha.
   const pixels=material.getImageData(0,0,w,paperH);
-  for(let i=3;i<pixels.data.length;i+=4)if(pixels.data[i]===255)pixels.data[i]=240;
+  for(let i=3;i<pixels.data.length;i+=4)if(pixels.data[i]===255)pixels.data[i]=230;
   material.putImageData(pixels,0,0);
   tiltSprite(canvas,source,w,targetH,angle,1,0);
  }
@@ -154,7 +154,7 @@ function layoutPaperLayer(screen){
  const scene=screen.querySelector(':scope > .scene-panel'),stack=screen.querySelector(':scope > .paper-stack'),pile=stack?.querySelector(':scope > .paper-pile');
  if(!scene||!stack||!pile)return;
  // Reserve the photograph only at the beginning of the scrollable paper layer.
- const values={'--photo-space':scene.offsetTop+scene.offsetHeight,'--stack-viewport':stack.clientHeight,'--pile-height':pile.offsetHeight};
+ const values={'--photo-space':scene.offsetTop+scene.offsetHeight};
  for(const [name,value]of Object.entries(values)){const px=`${value}px`;if(screen.style.getPropertyValue(name)!==px)screen.style.setProperty(name,px);}
 }
 export function paintStoryPapers(){

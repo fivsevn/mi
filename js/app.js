@@ -1,5 +1,5 @@
 import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
-import {paintStoryPapers} from './paper-art.js?v=paper-layer-2';
+import {paintStoryPapers} from './paper-art.js?v=paper-layer-4';
 import {drawUI} from './ui-art.js?v=paper-study-31';
 import {paintSurface} from './scene.js?v=paper-study-32';
 import { geographyFor,routePins } from '../data/geography.js?v=atlas-64';
