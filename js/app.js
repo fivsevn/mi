@@ -1,5 +1,5 @@
 import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
-import {paintStoryPapers} from './paper-art.js?v=paper-study-25';
+import {paintStoryPapers} from './paper-art.js?v=paper-layer-2';
 import {drawUI} from './ui-art.js?v=paper-study-31';
 import {paintSurface} from './scene.js?v=paper-study-32';
 import { geographyFor,routePins } from '../data/geography.js?v=atlas-64';
@@ -67,7 +67,7 @@ function scenePanel(type,overlay=''){
  const place=geographyFor(mapNode()).label;
  return `<div class="scene-panel"><div class="scene-view"><canvas data-scene="${type}" data-story="${esc(mapNode()?.id||run()?.stage||type)}" role="img" aria-label="米的像素场景"></canvas>${overlay}</div><div class="scene-dock"><button class="pocket-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="scrap-phone" aria-hidden="true"></canvas></button><button class="location-whisper" data-action="hide-location" hidden>${esc(place)}</button><button class="pocket-map map-paper" data-action="location" aria-label="查看当前位置" aria-expanded="false"><canvas data-minimap aria-hidden="true"></canvas></button></div></div>`;
 }
-function gameScreen(type,title,text,choices,{overlay='',className='',extra=''}={}){return `<section class="play-screen ${className}">${scenePanel(type,overlay)}<div class="paper-stack" tabindex="0" aria-label="故事纸条"><div class="story-copy"><h1>${esc(title)}</h1><p class="prose ${className?'mini-text':''}">${esc(text)}</p>${extra}</div><div class="choice-scroll" tabindex="0" aria-label="选项">${choices}</div></div></section>`;}
+function gameScreen(type,title,text,choices,{overlay='',className='',extra=''}={}){return `<section class="play-screen ${className}">${scenePanel(type,overlay)}<div class="paper-stack" tabindex="0" aria-label="故事纸条"><div class="paper-pile"><div class="story-copy"><h1>${esc(title)}</h1><p class="prose ${className?'mini-text':''}">${esc(text)}</p>${extra}</div><div class="choice-scroll" tabindex="0" aria-label="选项">${choices}</div></div></div></section>`;}
 function choiceButtons(n){const r=run();return n.choices.map((c,i)=>{if(c.requires&&!r.bag.includes(c.requires)||c.condition&&!c.condition(r))return '';const cost=E.choiceCost(r,c);return `<button class="choice" data-action="choose" data-index="${i}" ${E.canAfford(r,cost)?'':'disabled'}><span class="choice-number">${String(i+1).padStart(2,'0')}</span><span><b>${esc(c.label)}</b>${c.detail?`<small>${esc(c.detail)}</small>`:''}</span><span class="price">${cost?money(cost):arrow}</span></button>`;}).join('');}
 function renderPlay(){const r=run();
  if(r.stage==='rest'){const s=E.completedSegment(r),next=E.segmentFor(r);app.innerHTML=gameScreen(s.scene,'这一段先到这里。',s.closing,`${btn('回到桌上，下次再走','map')}${btn(next?'接着走':'收拾回家的箱子','resume-segment')}`);return;}

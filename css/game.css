@@ -228,3 +228,12 @@ html,body,body:has(.phone-scene),.app-shell,.play-screen,.desk,.route-map-screen
  .play-screen .scene-panel{width:100%}
  .play-screen .paper-stack{width:95%}
 }
+/* Loose papers scroll across the entire photograph, above the phone and map. */
+.play-screen{position:relative}
+.play-screen .scene-panel{z-index:0}
+.play-screen .paper-stack{position:absolute;inset:0 auto 0 50%;transform:translateX(-50%);z-index:10;flex:none;margin:0;pointer-events:none;padding:0;scrollbar-width:none;-ms-overflow-style:none}
+.play-screen .paper-stack::before{content:'';display:block;height:var(--photo-space,460px)}
+.play-screen .paper-stack::after{content:'';display:block;height:max(8px,calc(var(--stack-viewport,100cqh) - var(--pile-height,238px) - 12px))}
+.play-screen .paper-stack::-webkit-scrollbar{display:none;width:0;height:0}
+.play-screen .paper-pile{display:flow-root;pointer-events:none}
+.play-screen .story-copy,.play-screen .choice-scroll{pointer-events:auto}
