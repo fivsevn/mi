@@ -2,7 +2,7 @@ import { AFRICA_OUTLINE } from '../assets/africa-outline.js?v=atlas-64';
 import { paintTerrain,coordinate,MAP_INK } from './maps.js?v=atlas-64';
 import { WORLD } from '../assets/world-grid.js?v=atlas-64';
 export {avatar,selfie} from './scene.js?v=atlas-64';
-export {storyScene as scene} from './story-art.js?v=story-light-1';
+export {storyScene as scene} from './story-art.js?v=story-pixel-6';
 const project=([lon,lat])=>[(lon+180)*3,30+(90-lat)*3];
 function trace(c,rings){c.beginPath();for(const ring of rings){ring.forEach((p,i)=>{const [x,y]=project(p);i?c.lineTo(x,y):c.moveTo(x,y);});c.closePath();}}
 function label(c,text,x,y){const ink=c.fillStyle;c.fillStyle='#e5d9ad';c.fillText(text,x+1,y+1);c.fillStyle=ink;c.fillText(text,x,y);}

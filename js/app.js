@@ -10,7 +10,7 @@ import { ITEMS,itemById,BAG_LIMIT,HAND_LIMIT } from '../data/items.js?v=atlas-64
 import { CONTACTS,SOCIAL_PROMPT } from '../data/contacts.js?v=atlas-64';
 import { ENDINGS,returnQuestions } from '../data/endings.js?v=atlas-64';
 import * as E from './engine.js?v=atlas-64';
-import { drawMap,africaHitPath,scene,avatar } from './art.js?v=story-light-1';
+import { drawMap,africaHitPath,scene,avatar } from './art.js?v=story-pixel-6';
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).toFixed(1);
@@ -186,7 +186,7 @@ function updateMini(){const r=run(),n=r&&E.currentNode(r),el=document.querySelec
 function startMini(){clearInterval(miniTimer);stopSound();document.body.classList.remove('soaked');const r=run(),n=view==='play'&&r?.stage==='event'?E.currentNode(r):null;if(!n?.mini)return;updateMini();if(n.mini==='falls')return;
  miniTimer=setInterval(()=>{if(document.hidden||modal.open)return;const m=r.mini[n.id];if(m.done)return;m.elapsed+=.5;if(m.elapsed>=(n.mini==='glasses'?12:22)){m.done=true;clearInterval(miniTimer);}save();updateMini();},500);
 }
-setInterval(()=>{if(document.hidden)return;animFrame=(animFrame+1)%4;document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles},animFrame,c.dataset.story));},650);
+setInterval(()=>{if(document.hidden)return;animFrame=(animFrame+1)%128;document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,c.dataset.recordOutfit?JSON.parse(c.dataset.recordOutfit):{...run()?.outfit,goggles:run()?.flags.goggles},animFrame,c.dataset.story));},240);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSound();});
 document.fonts.load('12px Pixel').then(()=>{document.documentElement.classList.add('font-ready');drawCanvases();}).catch(()=>document.documentElement.classList.add('font-ready'));
 setTimeout(()=>document.documentElement.classList.add('font-ready'),2500);

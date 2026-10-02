@@ -222,3 +222,9 @@ body:has(.phone-scene) #surface{visibility:visible}
 /* One page colour, including the margins and phone safe-area space. */
 :root{--page-background:#8a9070}
 html,body,body:has(.phone-scene),.app-shell,.play-screen,.desk,.route-map-screen,.footer{background:var(--page-background)}
+/* On phones the photograph follows the screen width; the paper pile scrolls below it. */
+@media(max-width:560px){
+ .play-screen{padding:10px 6px 6px}
+ .play-screen .scene-panel{width:100%}
+ .play-screen .paper-stack{width:95%}
+}
