@@ -22,14 +22,17 @@ function icon(c,type){
   poly(c,'cream',[[5,9],[26,9],[26,21],[14,21],[8,27],[8,21],[5,21]]);r(c,'ochre',8,22,1,5);r(c,'pale',6,9,18,2);hatch(c,'light',6,18,18,3);
   for(let i=0;i<3;i++){r(c,'moss',9+i*5,14,2,2);r(c,'light',10+i*5,14,1,1);}
  }else if(type==='maps'){
- // A rolled paper atlas: cylindrical ends and a broad face, like the other desk objects.
- r(c,'dark',6,7,24,23);r(c,'ochre',5,5,23,24);r(c,'cream',7,5,18,23);r(c,'pale',8,6,15,2);
- poly(c,'sage',[[9,11],[14,9],[19,12],[23,11],[23,23],[17,25],[11,23],[9,18]]);
- poly(c,'light',[[10,10],[14,10],[17,13],[16,17],[12,19],[10,16]]);
- line(c,'cream',10,23,19,14);line(c,'cream',19,14,22,15);r(c,'rose',18,13,3,3);r(c,'pale',18,13,1,1);
- r(c,'dark',4,6,4,23);r(c,'ochre',3,4,4,24);r(c,'pale',4,5,2,20);r(c,'light',6,6,1,18);
- r(c,'dark',25,8,5,23);r(c,'ochre',24,5,5,24);r(c,'cream',25,6,3,21);r(c,'light',28,7,1,20);
- r(c,'ink',4,4,2,2);r(c,'cream',4,4,1,1);r(c,'ink',25,5,2,2);r(c,'pale',25,5,1,1);r(c,'light',8,27,15,1);
+ // Three folded panels, with the same raised paper edges as the notebook.
+ poly(c,'dark',[[4,8],[12,5],[21,8],[29,5],[30,28],[22,31],[13,28],[5,31]]);
+ poly(c,'ochre',[[3,6],[11,3],[20,6],[28,3],[28,26],[20,29],[11,26],[3,29]]);
+ poly(c,'cream',[[4,7],[11,5],[19,8],[27,5],[27,25],[20,27],[11,24],[4,27]]);
+ poly(c,'pale',[[4,7],[11,5],[11,24],[4,27]]);
+ poly(c,'light',[[11,5],[19,8],[20,27],[11,24]]);
+ poly(c,'sage',[[6,12],[9,10],[14,13],[15,17],[10,20],[6,18]]);
+ poly(c,'moss',[[18,11],[24,9],[25,16],[22,19],[18,17]]);
+ line(c,'ochre',11,6,11,23);line(c,'cream',12,7,12,23);line(c,'ochre',20,8,20,26);
+ line(c,'cream',7,23,16,19);line(c,'cream',16,19,23,13);
+ r(c,'rose',21,12,3,3);r(c,'pale',21,12,1,1);r(c,'cream',5,8,1,15);r(c,'pale',22,7,4,1);
  }else if(type==='notes'){
   edge(c,'ochre',6,3,23,27);edge(c,'clay',5,2,22,27);r(c,'cream',8,3,17,23);r(c,'pale',9,4,13,2);r(c,'ochre',5,3,3,25);r(c,'ink',5,3,1,24);
   for(let y=6;y<26;y+=5){r(c,'light',4,y,4,1);r(c,'dark',5,y+1,2,1);}labelLines(c,11,10,11);poly(c,'light',[[20,25],[25,20],[25,25]]);r(c,'rose',19,26,3,6);r(c,'pale',9,27,10,1);
@@ -38,14 +41,24 @@ function icon(c,type){
   edge(c,'dark',4,11,26,19,2);edge(c,'ochre',4,10,24,17,2);r(c,'cream',6,11,19,2);r(c,'clay',7,14,16,10);hatch(c,'ochre',7,21,16,3);
   for(const x of [9,22]){r(c,'dark',x,13,2,14);r(c,'light',x,13,1,8);r(c,'cream',x-1,19,4,3);r(c,'ochre',x,20,2,1);}r(c,'pale',14,15,5,5);r(c,'rose',15,16,3,2);r(c,'ink',7,28,3,3);r(c,'ink',23,28,3,3);
  }else if(type==='photos'){
-  edge(c,'dark',5,5,25,23,2);edge(c,'sage',4,4,24,22,2);r(c,'pale',6,5,19,2);r(c,'cream',6,8,20,15);poly(c,'moss',[[7,21],[13,13],[18,19],[22,15],[26,21]]);r(c,'clay',21,10,3,3);r(c,'light',8,24,17,1);
+  // One instant photograph, with a shaded paper edge.
+ edge(c,'dark',5,5,25,25,2);edge(c,'ochre',4,4,24,24,2);
+ r(c,'pale',5,5,21,22);r(c,'cream',6,7,19,19);r(c,'sage',7,8,17,14);
+ r(c,'light',8,9,15,6);r(c,'pale',19,10,3,3);
+ poly(c,'moss',[[7,21],[12,13],[18,21]]);poly(c,'dark',[[15,21],[20,16],[24,21]]);
+ r(c,'sea',7,21,17,1);r(c,'pale',7,24,16,1);r(c,'light',27,8,1,18);
  }else if(type==='bills'){
-  edge(c,'clay',7,3,20,27,2);r(c,'cream',8,4,17,24);r(c,'pale',9,5,13,2);for(let y=11;y<25;y+=4)r(c,'ochre',11,y,10,1);r(c,'rose',20,22,3,3);r(c,'light',9,28,14,1);
+  // One receipt, with a perforated foot and a single total line.
+ edge(c,'dark',8,4,20,26,1);r(c,'clay',6,3,20,25);r(c,'cream',7,4,17,23);
+ r(c,'pale',8,4,14,2);r(c,'ochre',23,7,1,19);r(c,'pale',8,7,1,17);
+ for(const y of [10,14,18]){r(c,'ochre',10,y,8,1);r(c,'moss',20,y,2,1);}
+ r(c,'moss',10,23,12,1);for(const x of [7,11,15,19])r(c,'cream',x,27,2,2);
  }else{
   // A small mechanical dial, with eight readable teeth and an inset brass hub.
   const teeth=[[14,3,6,5],[14,25,6,5],[3,14,5,6],[25,14,5,6],[6,6,6,5],[22,6,5,6],[6,22,6,5],[22,22,5,5]];
   for(const p of teeth)r(c,'dark',...p);edge(c,'dark',7,7,21,21,4);edge(c,'sage',7,6,19,19,4);
   for(const [x,y,w,h] of teeth)r(c,'light',x,y,w,1);edge(c,'ochre',11,10,11,12,2);edge(c,'cream',12,10,9,9,2);r(c,'moss',15,13,4,5);r(c,'pale',13,11,5,1);hatch(c,'dark',9,23,13,3);r(c,'rose',24,7,2,2);
+
  }
 }
 function homeKey(c,w,h){
