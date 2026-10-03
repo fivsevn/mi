@@ -58,7 +58,7 @@ export function installSuitcaseInput(onPan){
  let slide=null,suppress=null;
  document.addEventListener('pointerdown',e=>{
   const view=e.target.closest('.packing-panorama');
-  if(!view||e.button!==0||view.closest('.case-closed')||e.target.closest('button'))return;
+  if(!view||e.button!==0||e.pointerType==='touch'||view.closest('.case-closed')||e.target.closest('button')||view.querySelector('.packing-stage').clientWidth<=view.clientWidth)return;
   slide={view,pointer:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,moved:false};
  });
  document.addEventListener('pointermove',e=>{
@@ -67,7 +67,7 @@ export function installSuitcaseInput(onPan){
   if(!slide.moved&&Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){clear();return;}
   if(!slide.moved&&Math.abs(dx)<7)return;
   e.preventDefault();if(!slide.moved)slide.view.setPointerCapture(e.pointerId);slide.moved=true;slide.view.classList.add('case-sliding');
-  onPan((slide.lastX-e.clientX)/slide.view.clientWidth);slide.lastX=e.clientX;
+  onPan(slide.lastX-e.clientX);slide.lastX=e.clientX;
  },{passive:false});
  function clear(){
   if(!slide)return;slide.view.classList.remove('case-sliding');if(slide.view.hasPointerCapture(slide.pointer))slide.view.releasePointerCapture(slide.pointer);slide=null;

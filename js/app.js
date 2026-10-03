@@ -1,5 +1,5 @@
-import {HANDLE_TRAVEL,drawSuitcase,drawSuitcaseLid,drawScale,drawPackingItem} from './packing-art.js?v=packing-card-25';
-import {installPackingInput,installSuitcaseInput,installSuitcasePullInput} from './packing-input.js?v=packing-card-25';
+import {HANDLE_TRAVEL,drawSuitcase,drawSuitcaseLid,drawScale,drawPackingItem} from './packing-art.js?v=packing-native-28';
+import {installPackingInput,installSuitcaseInput,installSuitcasePullInput} from './packing-input.js?v=packing-native-28';
 import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
 import {paintStoryPapers} from './paper-art.js?v=paper-layer-5';
 import {drawUI} from './ui-art.js?v=paper-study-31';
@@ -120,9 +120,10 @@ function freePackingItems(r){
 function renderPackingScene(){
  const r=run(),closed=r.packingClosed===true,ready=closed&&r.packingReady===true,weight=E.checkedWeight(r),tone=weight>=25?'danger':weight>=20?'warning':'normal',packed=freePackingItems(r),floor=ITEMS.filter(i=>!i.souvenir&&i.id!=='phone'&&!r.bag.includes(i.id));
  const objects=packed.map(id=>{const p=r.packingPositions[id];return `<div class="packing-free-object" data-pack-drop="case" style="left:${p.x*100}%;top:${p.y*100}%;z-index:${p.z}">${packingObject(id,'case')}</div>`;}).join('');
- app.innerHTML=`<section class="packing-screen ${closed?'case-closed':''} ${ready?'packing-ready':closed?'packing-review':''}" style="${packingPullStyle(closed?packingPull:0)}" aria-label="整理行李"><div class="packing-viewbox"><div class="packing-panorama" tabindex="0" aria-label="左右滑动查看行李箱"><div class="packing-stage" style="--case-pan:${packingPan}"><canvas class="suitcase-art" data-suitcase aria-hidden="true"></canvas>${ready?`<button class="suitcase-handle" data-pull-handle aria-label="向上拉满拉杆，出发"></button>`:closed?'':`<div class="packing-lid"><canvas class="suitcase-lid-art" data-suitcase-lid aria-hidden="true"></canvas><div class="packing-lid-objects"><button class="packing-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="scrap-phone" aria-hidden="true"></canvas></button><button class="packing-map" data-action="phone-maps" aria-label="打开旅行地图"><canvas data-minimap aria-hidden="true"></canvas></button></div></div><div class="packing-bay packing-bay-left" data-pack-drop="case" aria-label="左侧箱内"></div><div class="packing-bay packing-bay-right" data-pack-drop="case" aria-label="右侧箱内"></div><div class="packing-free-objects">${objects}</div>`}<button class="suitcase-zipper" data-action="packing-close" aria-label="${closed?'打开行李箱':'合上行李箱'}"></button></div></div>${!closed&&r.carry.filter(id=>id!=='phone').length?`<div class="packing-carry" aria-label="随身物品">${r.carry.filter(id=>id!=='phone').map(id=>packingObject(id,'carry')).join('')}</div>`:''}</div>${!ready?`<div class="packing-floor" data-pack-drop="floor" aria-label="箱外物品栏" ${closed?'inert aria-hidden="true"':''}><aside class="packing-info" aria-label="物品说明" role="status" ${packingSelected&&!closed?'':'hidden'}>${packingInfoContent()}</aside><div class="packing-shelf" tabindex="0" aria-label="待装入的物品">${floor.map(i=>`<div class="packing-slot" data-pack-drop="floor">${packingObject(i.id,'floor')}</div>`).join('')}${Array.from({length:(FLOOR_COLUMNS-floor.length%FLOOR_COLUMNS)%FLOOR_COLUMNS},()=>'<div class="packing-slot" data-pack-drop="floor"></div>').join('')}</div></div>`:''}${closed&&!ready?`<div class="packing-weighing"><div class="packing-scale ${tone}" role="status" aria-label="${kg(weight)} 公斤"><canvas data-scale data-tone="${tone}" aria-hidden="true"></canvas><output>${kg(weight)}<small>kg</small></output><div class="packing-decisions"><button data-action="packing-confirm" ${weight>BAG_LIMIT?'disabled':''}>就带这些</button><button data-action="packing-edit">继续整理</button></div></div></div>`:''}</section>`;
+ app.innerHTML=`<section class="packing-screen ${closed?'case-closed':''} ${ready?'packing-ready':closed?'packing-review':''}" style="${packingPullStyle(closed?packingPull:0)}" aria-label="整理行李"><div class="packing-viewbox"><div class="packing-panorama" tabindex="0" aria-label="左右滑动查看行李箱"><div class="packing-stage"><canvas class="suitcase-art" data-suitcase aria-hidden="true"></canvas>${ready?`<button class="suitcase-handle" data-pull-handle aria-label="向上拉满拉杆，出发"></button>`:closed?'':`<div class="packing-lid"><canvas class="suitcase-lid-art" data-suitcase-lid aria-hidden="true"></canvas><div class="packing-lid-objects"><button class="packing-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="scrap-phone" aria-hidden="true"></canvas></button><button class="packing-map" data-action="phone-maps" aria-label="打开旅行地图"><canvas data-minimap aria-hidden="true"></canvas></button></div></div><div class="packing-bay packing-bay-left" data-pack-drop="case" aria-label="左侧箱内"></div><div class="packing-bay packing-bay-right" data-pack-drop="case" aria-label="右侧箱内"></div><div class="packing-free-objects">${objects}</div>`}<button class="suitcase-zipper" data-action="packing-close" aria-label="${closed?'打开行李箱':'合上行李箱'}"></button></div></div>${!closed&&r.carry.filter(id=>id!=='phone').length?`<div class="packing-carry" aria-label="随身物品">${r.carry.filter(id=>id!=='phone').map(id=>packingObject(id,'carry')).join('')}</div>`:''}</div>${!ready?`<div class="packing-floor" data-pack-drop="floor" aria-label="箱外物品栏" ${closed?'inert aria-hidden="true"':''}><aside class="packing-info" aria-label="物品说明" role="status" ${packingSelected&&!closed?'':'hidden'}>${packingInfoContent()}</aside><div class="packing-shelf" tabindex="0" aria-label="待装入的物品">${floor.map(i=>`<div class="packing-slot" data-pack-drop="floor">${packingObject(i.id,'floor')}</div>`).join('')}${Array.from({length:(FLOOR_COLUMNS-floor.length%FLOOR_COLUMNS)%FLOOR_COLUMNS},()=>'<div class="packing-slot" data-pack-drop="floor"></div>').join('')}</div></div>`:''}${closed&&!ready?`<div class="packing-weighing"><div class="packing-scale ${tone}" role="status" aria-label="${kg(weight)} 公斤"><canvas data-scale data-tone="${tone}" aria-hidden="true"></canvas><output>${kg(weight)}<small>kg</small></output><div class="packing-decisions"><button data-action="packing-confirm" ${weight>BAG_LIMIT?'disabled':''}>就带这些</button><button data-action="packing-edit">继续整理</button></div></div></div>`:''}</section>`;
 }
 function paintPacking(){
+ const viewport=document.querySelector('.packing-screen:not(.case-closed) .packing-panorama');if(viewport)panPacking(packingPan);
  document.querySelectorAll('[data-suitcase]').forEach(c=>drawSuitcase(c,run()?.packingClosed===true,packingPull));document.querySelectorAll('[data-suitcase-lid]').forEach(drawSuitcaseLid);document.querySelectorAll('[data-scale]').forEach(c=>drawScale(c,c.dataset.tone));document.querySelectorAll('[data-pack-art]').forEach(c=>drawPackingItem(c,itemById[c.dataset.packArt]));
 }
 function packingPullStyle(progress){
@@ -139,8 +140,18 @@ function pullPackingHandle(progress,commit=false){
 }
 function panPacking(value){
  if(run()?.packingClosed)return;
- packingPan=Math.max(0,Math.min(1,value));document.querySelector('.packing-stage')?.style.setProperty('--case-pan',packingPan);
+ const viewport=document.querySelector('.packing-panorama');if(!viewport)return;
+ const range=viewport.scrollWidth-viewport.clientWidth;if(range<=0)return;
+ packingPan=Math.max(0,Math.min(1,value));viewport.scrollLeft=packingPan*range;
 }
+function scrollPackingBy(delta){
+ const viewport=document.querySelector('.packing-panorama');if(!viewport)return;
+ const range=viewport.scrollWidth-viewport.clientWidth;if(range>0)panPacking((viewport.scrollLeft+delta)/range);
+}
+document.addEventListener('scroll',e=>{
+ const viewport=e.target;if(!viewport.matches?.('.packing-panorama')||viewport.closest('.case-closed'))return;
+ const range=viewport.scrollWidth-viewport.clientWidth;if(range>0)packingPan=viewport.scrollLeft/range;
+},true);
 function movePackingItem(id,destination,point){
  const r=run(),i=itemById[id];if(!r||r.stage!=='packing'||r.packingClosed||!i)return;
  const adding=destination==='case',present=r.bag.includes(id);freePackingItems(r);
@@ -151,7 +162,7 @@ function movePackingItem(id,destination,point){
  freePackingItems(r);save();render({keepScroll:true});
 }
 installPackingInput((id,destination,source,point)=>movePackingItem(id,destination,point),direction=>panPacking(packingPan+direction*.02),selectPackingItem);
-installSuitcaseInput(delta=>panPacking(packingPan+delta));
+installSuitcaseInput(scrollPackingBy);
 installSuitcasePullInput(()=>{const r=run(),stage=document.querySelector('.packing-ready .packing-stage');return r?.stage==='packing'&&r.packingReady&&stage?{distance:stage.clientWidth*HANDLE_TRAVEL/400}:null;},pullPackingHandle);
 // Keyboard camera control and focus reveal the same large panorama.
 document.addEventListener('keydown',e=>{if(!e.target.closest('.packing-panorama')||e.target.closest('[data-pack-id]'))return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();panPacking(packingPan+(e.key==='ArrowLeft'?-.2:.2));}});

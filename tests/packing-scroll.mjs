@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+const {chromium,webkit}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+for(const [name,engine]of Object.entries({chromium,webkit})){
+ const b=await engine.launch(),p=await b.newPage({viewport:{width:390,height:844}}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(process.env.MI_TEST_URL||'http://127.0.0.1:4173');await p.waitForSelector('.font-ready');for(const a of ['journey','phone','unlock'])await p.locator(`[data-action=${a}]`).click();await p.locator('.route-pin.ready').click();await p.locator('[data-action=reason]').first().click();
+ const view=p.locator('.packing-panorama'),stage=p.locator('.packing-stage'),floor=await p.locator('.packing-floor').boundingBox();
+ const range=await view.evaluate(e=>e.scrollWidth-e.clientWidth);assert.ok(range>100);assert.equal(await stage.evaluate(e=>getComputedStyle(e).transform),'none');assert.equal(await view.evaluate(e=>getComputedStyle(e).overflowX),'auto');
+ await view.press('ArrowLeft');await p.waitForTimeout(100);const before=await view.evaluate(e=>e.scrollLeft),a=await stage.boundingBox();await p.mouse.move(195,150);await p.mouse.wheel(-90,0);await p.waitForTimeout(200);const after=await view.evaluate(e=>e.scrollLeft),c=await stage.boundingBox();assert.ok(before-after>40,'native horizontal wheel changes scrollLeft');assert.ok(Math.abs(c.x-a.x-(before-after))<1,'scroll offset matches content movement');assert.deepEqual(await p.locator('.packing-floor').boundingBox(),floor);
+ await view.press('ArrowRight');await p.locator('.suitcase-zipper').click();await p.locator('[data-action=packing-edit]').click();assert.equal(await stage.evaluate(e=>getComputedStyle(e).transform),'none');
+ await p.setViewportSize({width:1440,height:1000});await p.locator('[data-pack-id=tee]').click();const wide=await stage.boundingBox(),card=await p.locator('.packing-info').boundingBox();assert.equal(await view.evaluate(e=>e.scrollWidth-e.clientWidth),0);assert.ok(Math.abs(wide.x+wide.width/2-720)<1);assert.ok(Math.abs(card.x+card.width/2-720)<1);await p.mouse.move(720,150);await p.mouse.wheel(400,0);await p.waitForTimeout(100);assert.deepEqual(await stage.boundingBox(),wide);
+ if(name==='chromium')await p.screenshot({path:'/tmp/mi-native-28-wide.png'});
+ assert.deepEqual(errors,[]);await b.close();console.log(`PASS ${name}: real scroll range, wheel scrollLeft, untransformed content, fixed inventory, no wide-screen scrolling, centered case/card`);
+}
