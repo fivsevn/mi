@@ -1,4 +1,4 @@
-import {HANDLE_TRAVEL,drawSuitcase,drawSuitcaseLid,drawScale,drawPackingItem} from './packing-art.js?v=packing-scale-32';
+import {HANDLE_TRAVEL,drawSuitcase,drawSuitcaseLid,drawScale,drawPackingItem} from './packing-art.js?v=packing-scale-33';
 import {installPackingInput,installSuitcaseInput,installSuitcasePullInput} from './packing-input.js?v=packing-scale-32';
 import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
 import {paintStoryPapers} from './paper-art.js?v=paper-layer-5';

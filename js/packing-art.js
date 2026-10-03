@@ -108,15 +108,16 @@ function lining(c,x,y,divider){
 }
 // The same inverse pixel sampling as the tilted phone, with a gentler angle.
 // Keep fine material pixels, but quantize the silhouette to paired-pixel steps.
-function steppedCase(canvas,cx,degrees,extra=0,centerY=136+extra){
+function steppedCase(canvas,cx,degrees,extra=0,centerY=136+extra,topEdgeStep=4){
  const c=canvas.getContext('2d'),src=c.getImageData(0,0,canvas.width,canvas.height),out=c.createImageData(canvas.width,canvas.height),mid=cx*2,cy=centerY*2;
  const a=degrees*Math.PI/180,cos=Math.cos(a),sin=Math.sin(a);
  for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){
   const dx=x+.5-mid,dy=y+.5-cy,sx=Math.floor(cos*dx+sin*dy+mid),sy=Math.floor(-sin*dx+cos*dy+cy);
   if(sx<0||sy<0||sx>=canvas.width||sy>=canvas.height)continue;
   const i=(sy*canvas.width+sx)*4,j=(y*canvas.width+x)*4;
-  // Silhouette coverage uses a 4 x 4 authored edge grid; interior stays detailed.
-  const ex=Math.floor(x/4)*4+2-mid,ey=Math.floor(y/4)*4+2-cy,ux=Math.floor(cos*ex+sin*ey+mid),uy=Math.floor(-sin*ex+cos*ey+cy);
+  // Keep authored stepped edges; the scale upper rim uses a finer grid.
+  const edgeStep=y<canvas.height*.25?topEdgeStep:4;
+  const ex=Math.floor(x/edgeStep)*edgeStep+edgeStep/2-mid,ey=Math.floor(y/edgeStep)*edgeStep+edgeStep/2-cy,ux=Math.floor(cos*ex+sin*ey+mid),uy=Math.floor(-sin*ex+cos*ey+cy);
   if(ux<0||uy<0||ux>=canvas.width||uy>=canvas.height||!src.data[(uy*canvas.width+ux)*4+3])continue;
   const edge=src.data[i+3]?i:(uy*canvas.width+ux)*4;out.data.set(src.data.subarray(edge,edge+4),j);
  }
@@ -263,7 +264,7 @@ export function drawScale(canvas,tone='normal'){
  }
  rect(c,'#71825c',16,80,87,.5);rect(c,'#a1ae7d',17,79,33,.5);
  for(const x of [16,99]){rect(c,'#40553f',x,83,13,3);rect(c,'#6c7d59',x+1,83,10,.5);rect(c,'#4b6047',x+2,86,9,1);}
- steppedCase(canvas,64,-4,0,47);
+ steppedCase(canvas,64,-4,0,47,2);
 }
 export function drawPackingItem(canvas,item){
  canvas.width=32;canvas.height=32;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
