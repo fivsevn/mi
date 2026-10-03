@@ -39,7 +39,20 @@ function paperContour(w,h,v){
 }
 // The final pixel-sampled rotation gives long cut edges their natural staircase.
 function paperShape(w,h,v){return paperContour(w,h,v);}
-function loosePaper(c,w,h,v){
+function paperSeed(canvas){
+ const el=canvas.parentElement,story=el?.closest('.play-screen')?.querySelector('[data-story]')?.dataset.story||'';
+ const key=`${story}|${canvas.dataset.paper}|${el?.dataset.action||''}|${el?.dataset.id||''}|${el?.textContent||''}`;
+ let hash=2166136261;for(const ch of key)hash=Math.imul(hash^ch.charCodeAt(0),16777619);return hash>>>0;
+}
+function paperRandom(seed,n){let x=(seed^Math.imul(n+1,2654435761))>>>0;x=Math.imul(x^(x>>>16),2246822507);return ((x^(x>>>13))>>>0)/4294967296;}
+function pressureMark(c,x,y,dx,dy,shade,lit,branch=false){
+ const length=Math.hypot(dx,dy),nx=-dy/length,ny=dx/length;
+ const at=(t,n)=>[x+dx*t+nx*n,y+dy*t+ny*n];
+ polygon(c,shade,[at(0,0),at(.2,1),at(.55,3),at(1,0),at(.68,1),at(.32,-.5)]);
+ polygon(c,lit,[at(0,-1),at(.2,-1),at(.55,0),at(.85,0),at(.46,-1)]);
+ if(branch){const a=at(.46,0),b=at(.75,-3);line(c,shade,...a,...b);line(c,lit,a[0],a[1]-1,b[0],b[1]-1);}
+}
+function loosePaper(c,w,h,v,seed){
  const p=paperShape(w,h,v),b=h-7;
  // Real journal collage reference: small areas of a differently cut backing leaf
  // remain exposed; these are separate paper pieces, not a uniform frame.
@@ -58,10 +71,15 @@ function loosePaper(c,w,h,v){
  for(let x=5;x<w-7;x++){
   let bottom=h-1;while(bottom>=0&&!silhouette[(bottom*w+x)*4+3])bottom--;
   if(bottom>=0){
-   const u=x/w,lift=(u>.09&&u<.34)||(u>.62&&u<.9);
-   rect(c,lift?'#65714f60':'#65714f24',x,bottom+1,1,1);
-   if(lift&&x%9<6)rect(c,'#65714f25',x,bottom+2,1,1);
+   const u=x/w,a=.16+paperRandom(seed,1)*.2,b=.65+paperRandom(seed,2)*.16,lift=Math.abs(u-a)<.14||Math.abs(u-b)<.1;
+   rect(c,lift?'#56665099':'#65714f55',x,bottom+1,1,1);
+   if(lift){rect(c,'#56665050',x,bottom+2,1,1);if((x+seed)%11<7)rect(c,'#56665022',x,bottom+3,1,1);}
   }
+ }
+ // A narrow side shadow joins the deeper contact shadow under lifted sections.
+ for(let y=8;y<h-8;y++){
+  let right=w-1;while(right>=0&&!silhouette[(y*w+right)*4+3])right--;
+  if(right>=0){rect(c,'#56665055',right+1,y,1,1);if((y+seed)%7<4)rect(c,'#56665022',right+2,y,1,1);}
  }
  const color=v===1?'light':v===2?'cream':'pale';polygon(c,color,p);
  const a=p[0],z=p[1];
@@ -100,7 +118,7 @@ function loosePaper(c,w,h,v){
 }
 // Feathering belongs to local torn fibres, not to an all-around light/shadow
 // rim. A flat sheet keeps the same body tone right up to its clean cut edges.
-function paperMaterial(c,w,h,v){
+function paperMaterial(c,w,h,v,seed){
  const mask=document.createElement('canvas');mask.width=w;mask.height=h;
  polygon(mask.getContext('2d'),'#fff',paperShape(w,h,v));
  const alpha=mask.getContext('2d').getImageData(0,0,w,h).data;
@@ -109,12 +127,16 @@ function paperMaterial(c,w,h,v){
  // Local creases have a broad compressed side and a narrow lit fibre side.
  // Their centres stay near blank margins, leaving the writing surface calm.
  const shade=v===1?'#b9bf92':v===2?'#d8cba0':'#e2d4a5',lit=v===1?'#d4d5ab':'#f2e5b9';
- if(v!==2){
-  polygon(c,shade,[[w-39,10],[w-32,13],[w-20,25],[w-14,39],[w-21,32],[w-27,22],[w-35,17]]);
-  polygon(c,lit,[[w-39,10],[w-35,11],[w-26,20],[w-21,31],[w-27,24],[w-31,19]]);
+ const r=n=>paperRandom(seed,n),length=14+Math.floor(r(3)*16),depth=Math.min(h-18,9+Math.floor(r(4)*12)),mode=v==='narrative'?4:Number(v);
+ if(mode===0)pressureMark(c,8,h-depth-9,length,depth,shade,lit,r(6)>.5);
+ else if(mode===1)pressureMark(c,7,7,length,depth*.65,shade,lit,r(6)>.5);
+ else if(mode===2)pressureMark(c,w-11,h-8,-length,-depth,shade,lit,r(6)>.5);
+ else if(mode===3)pressureMark(c,w*(.23+r(7)*.15),h-8,length,-depth*.4,shade,lit,r(6)>.5);
+ else pressureMark(c,w*(.65+r(7)*.12),h-8,length*.65,-depth*.35,shade,lit,r(6)>.5);
+ if(v!==2&&(v==='narrative'||r(8)>.25)){
+  const y=7+Math.floor(r(9)*Math.max(1,h*.14)),dx=8+Math.floor(r(10)*13),dy=Math.min(h-y-12,12+Math.floor(r(11)*13));
+  pressureMark(c,w-dx-15,y,dx,dy,shade,lit,r(12)>.6);
  }
- polygon(c,shade,[[10,h-24],[13,h-20],[22,h-14],[31,h-11],[25,h-12],[16,h-14],[11,h-18]]);
- polygon(c,lit,[[9,h-25],[12,h-23],[16,h-18],[23,h-15],[17,h-16],[12,h-20]]);
  const pixels=c.getImageData(0,0,w,h),data=pixels.data;
  // Quiet connected fibre islands; the central reading area is deliberately calm.
  const tint=(x,y,delta)=>{
@@ -123,21 +145,14 @@ function paperMaterial(c,w,h,v){
   for(let j=0;j<3;j++)data[i+j]=Math.max(0,Math.min(255,base[j]+delta));
  };
  for(let y=4;y<h-4;y++)for(let x=5;x<w-6;x++){
-  const hash=((Math.imul(x+v.toString().length*31,374761393)^Math.imul(y+17,668265263))>>>0),edge=x<20||x>w-29||y<9||y>h-12;
+  const hash=((Math.imul(x+(seed%97),374761393)^Math.imul(y+17,668265263))>>>0),edge=x<20||x>w-29||y<9||y>h-12;
   if(hash%(edge?181:587)===0){const delta=(hash&8)?3:-3;tint(x,y,delta);tint(x+1,y,delta);if(edge&&(hash&16))tint(x+1,y+1,delta-1);}
   // A low-contrast compressed band follows the lower curl, with irregular breaks.
-  const curl=h-10-Math.round(1.5*Math.sin(x/w*5+Number(v===1)));
-  if(x>w*.2&&x<w*.82&&y===curl&&hash%5!==0)tint(x,y,-4);
+  const curl=h-10-Math.round(1.5*Math.sin(x/w*5+paperRandom(seed,13)*6));
+  if(x>w*.2&&x<w*.82&&y===curl&&hash%5!==0)tint(x,y,-6);
   if(x>w*.22&&x<w*.78&&y===curl-1&&hash%7<3)tint(x,y,2);
  }
  c.putImageData(pixels,0,0);
- // Small pressure creases gather at the free corners instead of framing the sheet.
- if(v!==1){
-  line(c,'#d5c89b',8,h-15,17,h-8);line(c,'#f1e3b7',8,h-16,18,h-9);
-  line(c,'#d9cca0',w-29,8,w-38,11);line(c,'#f2e5ba',w-29,7,w-38,10);
- }else{
-  line(c,'#b6bc90',7,h-15,15,h-9);line(c,'#d2d3a7',7,h-16,15,h-10);
- }
  const spans=v==='narrative'?[[.03,.19,0],[.38,.57,0],[.71,.86,0],[.09,.28,1],[.49,.68,1]]:
   v===0?[[.04,.24,0],[.54,.71,0],[.18,.38,1],[.76,.9,1]]:
   v===1?[[.1,.25,1],[.57,.75,1]]:
@@ -162,6 +177,16 @@ function paperMaterial(c,w,h,v){
   }
  }
 }
+// Pair silhouette pixels into clear small steps while retaining fine paper grain.
+function stepPaperEdges(canvas){
+ const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height,src=c.getImageData(0,0,w,h),out=c.createImageData(w,h);out.data.set(src.data);
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const sx=Math.min(w-1,Math.floor(x/2)*2+1),sy=Math.min(h-1,Math.floor(y/2)*2+1),i=(y*w+x)*4,j=(sy*w+sx)*4;
+  const current=src.data[i+3]>=200,sampled=src.data[j+3]>=200;
+  if(current!==sampled)out.data.set(src.data.subarray(j,j+4),i);
+ }
+ c.putImageData(out,0,0);
+}
 export function drawPaper(canvas){
  const unit=canvas.dataset.paper==='instant'?2:1;
  const w=canvas.dataset.paper==='instant'?224:Math.max(24,Math.round(canvas.clientWidth/unit)),h=canvas.dataset.paper==='instant'?272:Math.max(18,Math.round(canvas.clientHeight/unit));
@@ -171,18 +196,18 @@ export function drawPaper(canvas){
   const {l,t,r,b}=instant(c,w,h),scene=canvas.parentElement.querySelector(':scope > .scene-view');
   if(scene){scene.style.left=`${l/w*100}%`;scene.style.top=`${t/h*100}%`;scene.style.right='auto';scene.style.bottom='auto';scene.style.width=`${(r-l)/w*100}%`;scene.style.height=`${(b-t)/h*100}%`;}
  }else{
-  const v=type==='narrative'?'narrative':Number(type.split('-').at(-1))||0;
+  const v=type==='narrative'?'narrative':Number(type.split('-').at(-1))||0,seed=paperSeed(canvas);
   const paperH=Math.round(canvas.parentElement.clientHeight);
   const angle=v==='narrative'?-.65:[1.1,-1.3,.85,-1.05][v],rise=Math.tan(angle*Math.PI/180)*w;
   const pad=Math.ceil(Math.abs(rise)/2)+3,targetH=paperH+pad*2;
   canvas.style.top=`${-pad}px`;canvas.style.height=`${targetH}px`;
   const source=document.createElement('canvas');source.width=w;source.height=paperH;
-  const material=source.getContext('2d');loosePaper(material,w,paperH,v);paperMaterial(material,w,paperH,v);
+  const material=source.getContext('2d');loosePaper(material,w,paperH,v,seed);paperMaterial(material,w,paperH,v,seed);
   // Slightly translucent stock; preserve the separately painted cast-shadow alpha.
   const pixels=material.getImageData(0,0,w,paperH);
   for(let i=3;i<pixels.data.length;i+=4)if(pixels.data[i]===255)pixels.data[i]=230;
   material.putImageData(pixels,0,0);
-  tiltSprite(canvas,source,w,targetH,angle,1,0);
+  tiltSprite(canvas,source,w,targetH,angle,1,0);stepPaperEdges(canvas);
  }
 }
 let observer,layoutObserver;

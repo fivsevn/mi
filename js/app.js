@@ -1,7 +1,7 @@
 import {HANDLE_TRAVEL,drawSuitcase,drawSuitcaseLid,drawScale,drawPackingItem,drawSuitcaseControlLight,drawScaleKeyLight} from './packing-art.js?v=packing-glow-34';
 import {installPackingInput,installSuitcaseInput,installSuitcasePullInput} from './packing-input.js?v=packing-scale-32';
 import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
-import {paintStoryPapers} from './paper-art.js?v=paper-detail-35';
+import {paintStoryPapers} from './paper-art.js?v=paper-edge-36';
 import {drawUI} from './ui-art.js?v=paper-study-31';
 import {paintSurface} from './scene.js?v=paper-study-32';
 import { geographyFor,routePins } from '../data/geography.js?v=atlas-64';
