@@ -1,3 +1,5 @@
+import {HANDLE_TRAVEL,drawSuitcase,drawSuitcaseLid,drawScale,drawPackingItem} from './packing-art.js?v=packing-card-25';
+import {installPackingInput,installSuitcaseInput,installSuitcasePullInput} from './packing-input.js?v=packing-card-25';
 import {drawFoldedTitle} from './folded-paper.js?v=paper-study-30';
 import {paintStoryPapers} from './paper-art.js?v=paper-layer-5';
 import {drawUI} from './ui-art.js?v=paper-study-31';
@@ -17,7 +19,7 @@ const money=n=>'¥ '+Math.round(n).toLocaleString('zh-CN'),kg=n=>Number(n||0).to
 let africaSelected=false,phoneAwake=false,phoneSignal=0,mapZoom=1,mapQuery='',mapFocus='';
 const atlasFocus=routePins.find(p=>p.id==='safari').coord,atlasAnchorX=(atlasFocus[0]+180)/360,atlasAnchorY=(30+(90-atlasFocus[1])*3)/600;
 let atlasPan=0,atlasDrag=null,suppressAtlasClick=false;
-let storageOK=true,view='map',phoneApp='home',phoneUnlocked=false,phoneReturn='map',selectedContact=null,caseOpen=false,tab='衣服',notesRegion=null,toastTimer,locationTimer;
+let storageOK=true,view='map',phoneApp='home',phoneUnlocked=false,phoneReturn='map',selectedContact=null,caseOpen=false,notesRegion=null,toastTimer,locationTimer;
 function readProfile(){try{const raw=localStorage.getItem(E.SAVE_KEY);return raw?E.parseSave(raw)||E.freshProfile():E.freshProfile();}catch{storageOK=false;return E.freshProfile();}}
 let profile=readProfile();
 const run=()=>profile.run,active=()=>run()&&run().stage!=='ending';
@@ -36,9 +38,9 @@ function capturePhoneBackdrop(){
  const source=app.querySelector(':scope > section');if(!source)return;
  const copy=source.cloneNode(true),originals=source.querySelectorAll('canvas');
  copy.querySelectorAll('canvas').forEach((canvas,i)=>{const original=originals[i],style=getComputedStyle(original);canvas.width=original.width;canvas.height=original.height;canvas.style.width=style.width;canvas.style.height=style.height;canvas.getContext('2d').drawImage(original,0,0);for(const attr of [...canvas.attributes])if(attr.name.startsWith('data-'))canvas.removeAttribute(attr.name);});
- copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));layer.dataset.scroll=source.querySelector('.paper-stack')?.scrollTop||source.scrollTop;layer.append(copy);phoneBackdrop=layer;
+ copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));layer.dataset.scroll=source.querySelector('.paper-stack,.packing-shelf')?.scrollTop||source.scrollTop;layer.append(copy);phoneBackdrop=layer;
 }
-function activeScroller(){return app.querySelector(':scope > .play-screen > .paper-stack, :scope > .phone-scene .phone-scroll');}
+function activeScroller(){return app.querySelector(':scope > .play-screen > .paper-stack, :scope > .packing-screen .packing-shelf, :scope > .phone-scene .phone-scroll');}
 function render({sync=true,keepScroll=false}={}){
  const oldScroll=keepScroll?activeScroller()?.scrollTop||0:0;
  if(view==='phone'&&!app.querySelector('.phone-scene')){if(!app.querySelector(':scope > section'))renderMap();capturePhoneBackdrop();}
@@ -46,11 +48,11 @@ function render({sync=true,keepScroll=false}={}){
  if(view==='play'&&!run())view='map';
  if(sync&&location.hash!==viewHash())history.pushState(null,'',viewHash());
  if(view==='map')renderMap();else if(view==='route-map'){phoneReturn='map';phoneApp='maps';phoneUnlocked=false;view='phone';renderPhone();}else if(view==='phone')renderPhone();else renderPlay();
- if(view==='phone'&&phoneBackdrop){app.prepend(phoneBackdrop);const paperScroll=phoneBackdrop.querySelector('.paper-stack')||phoneBackdrop.firstElementChild;paperScroll.scrollTop=Number(phoneBackdrop.dataset.scroll||0);}
+ if(view==='phone'&&phoneBackdrop){app.prepend(phoneBackdrop);const paperScroll=phoneBackdrop.querySelector('.paper-stack,.packing-shelf')||phoneBackdrop.firstElementChild;paperScroll.scrollTop=Number(phoneBackdrop.dataset.scroll||0);}
  if(keepScroll){const scroller=activeScroller();if(scroller)scroller.scrollTop=oldScroll;}
  drawCanvases();startMini();updateSaveStatus();
 }
-function drawCanvases(){document.querySelectorAll('.choice,.mini-controls .btn,.paper-title:not(.folded-title)').forEach(el=>{if(!el.querySelector('canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=control-paper data-ui="${el.classList.contains('paper-title')?'title-strip':'plaque'}" aria-hidden=true></canvas>`);});document.querySelectorAll('.phone-screen .btn,.phone-screen .contact,.phone-screen .bubble,.phone-screen .outfit-btn,.phone-screen .phone-note,.phone-screen .contact-avatar,.phone-screen .chat-bar,.phone-screen .phone-status,.phone-screen .avatar-row,.phone-modal,.phone-modal .btn,.phone-modal .close-btn').forEach(el=>{if(!el.querySelector(':scope > canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=crystal-surface data-ui="${el.classList.contains('contact')?'phone-row':el.classList.contains('contact-avatar')?'phone-seal':el.classList.contains('bubble')?(el.classList.contains('mi')?'phone-message-mi':'phone-message'):el.classList.contains('phone-note')?'phone-note':el.classList.contains('chat-bar')||el.classList.contains('phone-status')?'phone-bar':'phone-control'}" aria-hidden=true></canvas>`);});document.querySelectorAll('canvas[data-ui]').forEach(c=>drawUI(c,c.dataset.ui));paintSurface($("#surface")); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles},0,c.dataset.story));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());if($('#phone-africa-map'))drawPhoneMap($('#phone-africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));document.querySelectorAll('canvas[data-folded-title]').forEach(drawFoldedTitle);resizePhoneMap();paintStoryPapers();}
+function drawCanvases(){document.querySelectorAll('.choice,.mini-controls .btn,.paper-title:not(.folded-title)').forEach(el=>{if(!el.querySelector('canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=control-paper data-ui="${el.classList.contains('paper-title')?'title-strip':'plaque'}" aria-hidden=true></canvas>`);});document.querySelectorAll('.phone-screen .btn,.phone-screen .contact,.phone-screen .bubble,.phone-screen .outfit-btn,.phone-screen .phone-note,.phone-screen .contact-avatar,.phone-screen .chat-bar,.phone-screen .phone-status,.phone-screen .avatar-row,.phone-modal,.phone-modal .btn,.phone-modal .close-btn').forEach(el=>{if(!el.querySelector(':scope > canvas[data-ui]'))el.insertAdjacentHTML('afterbegin',`<canvas class=crystal-surface data-ui="${el.classList.contains('contact')?'phone-row':el.classList.contains('contact-avatar')?'phone-seal':el.classList.contains('bubble')?(el.classList.contains('mi')?'phone-message-mi':'phone-message'):el.classList.contains('phone-note')?'phone-note':el.classList.contains('chat-bar')||el.classList.contains('phone-status')?'phone-bar':'phone-control'}" aria-hidden=true></canvas>`);});document.querySelectorAll('canvas[data-ui]').forEach(c=>drawUI(c,c.dataset.ui));paintSurface($("#surface")); document.querySelectorAll('canvas[data-scene]').forEach(c=>scene(c,c.dataset.scene,{...run()?.outfit,goggles:run()?.flags.goggles},0,c.dataset.story));document.querySelectorAll('canvas[data-avatar]').forEach(c=>avatar(c,{...run()?.outfit,goggles:run()?.flags.goggles}));if($('#world-map'))drawMap($('#world-map'),E.visibleNotes(run()).map(n=>placeFor(n.day).id));if($('#africa-map'))drawJourneyMap($('#africa-map'),visitedPlaces());if($('#phone-africa-map'))drawPhoneMap($('#phone-africa-map'),visitedPlaces());document.querySelectorAll('canvas[data-minimap]').forEach(c=>drawLocalMap(c,mapNode()));document.querySelectorAll('canvas[data-folded-title]').forEach(drawFoldedTitle);resizePhoneMap();paintStoryPapers();paintPacking();}
 function renderMap(){app.innerHTML=`<section class="desk" aria-label="米的桌面"><canvas id="atlas-rose" class="atlas-rose" aria-hidden="true"></canvas><button class="desk-phone ${phoneAwake?'phone-alert':''}" data-action="phone" aria-label="${phoneAwake?'手机亮了，打开非洲地图':'拿起手机'}"><canvas data-ui="${phoneAwake?'small-phone-lit':'small-phone'}" aria-hidden="true"></canvas><span class="mini-clock-face" data-clock>${clockTime()}</span></button><div class="map-paper"><a class="paper-title folded-title" href="#map" data-action="map" aria-label="米的地图 MI’S MAP"><canvas data-folded-title aria-hidden="true"></canvas></a><div class="map-view" style="--pan-x:${atlasPan}px;--focus-x:${atlasAnchorX*100}%;--focus-y:${atlasAnchorY*100}%"><canvas id="world-map" role="img" aria-label="米的世界地图"></canvas><svg class="map-hit" viewBox="0 0 1080 600" preserveAspectRatio="xMidYMid meet"><a href="#map" data-action="journey" aria-label="在手机上查看非洲地图"><path d="${africaHitPath()}"/><text x="592" y="258">AFRICA</text></a></svg></div></div></section>`;}
 function mapNode(){const r=run();return current()||(r?.stage==='rest'?ROUTES[0].nodes[r.node-1]:r&&['return-pack','reflect'].includes(r.stage)?ROUTES[0].nodes.at(-1):null);}
 function visitedPlaces(){
@@ -84,9 +86,76 @@ function renderPlay(){const r=run();
 }
 function packingThought(r){const volume=r.bag.reduce((v,id)=>v+itemById[id].volume,0);return E.checkedWeight(r)>20?'箱子拎起来，手腕沉了一下。再拿出一点。':volume>40?'拉链有点难拉。换个方向压一压。':volume>20?'还能塞一点。也可以不塞。':'箱子里还有很大一块空地。';}
 function outfitControls(r){return `<div class="outfit-list">${r.bag.filter(id=>itemById[id].slot).map(id=>{const i=itemById[id],on=r.outfit[i.slot]===id;return `<button class="outfit-btn ${on?'active':''}" data-action="equip" data-id="${id}" aria-pressed="${on}">${esc(i.name)}</button>`;}).join('')}</div>`;}
-function packingItems(){const r=run();return `<div class="tabs">${['衣服','日用','随身物'].map(t=>`<button data-action="tab" data-tab="${t}" aria-pressed="${tab===t}">${t}</button>`).join('')}</div>${btn('先装一套日常行李','preset')}<div class="item-grid">${ITEMS.filter(i=>i.group===tab&&!i.souvenir).map(i=>`<button class="item ${r.bag.includes(i.id)?'selected':''}" data-action="item" data-id="${i.id}" aria-pressed="${r.bag.includes(i.id)}"><b>${esc(i.name)}</b><small>${esc(i.note)}</small></button>`).join('')}</div>`;}
 function returnItems(){const r=run();return `<p class="micro">随身包 ${kg(E.carryWeight(r))} / ${HAND_LIMIT} kg</p>${r.bag.map(id=>{const i=itemById[id];return `<div class="inventory-row"><strong>${esc(i.name)}</strong><small>${kg(i.weight)} kg${r.carry.includes(id)?' · 随身':r.worn.includes(id)?' · 穿着':''}</small><div class="item-actions"><button data-action="carry" data-id="${id}" ${i.carryOnly?'disabled':''}>${r.carry.includes(id)?'放回':'随身带'}</button>${i.slot?`<button data-action="wear" data-id="${id}">${r.worn.includes(id)?'脱下':'穿上'}</button>`:''}<button data-action="discard" data-id="${id}">留下</button></div></div>`;}).join('')}${r.removed.length?btn('放回刚才取出的东西','restore'):''}`;}
-function renderPacking(){const r=run(),ret=r.stage==='return-pack',over=E.checkedWeight(r)>20,fee=E.overweightFee(r);app.innerHTML=gameScreen(ret?'airport':'home',ret?'什么跟米一起回家？':'箱子摊开了。',ret?`秤上 ${kg(E.checkedWeight(r))} kg。\n箱子还是那个箱子。`:packingThought(r),`${btn(caseOpen?'合上箱子看看':'打开行李箱','open-case')}${caseOpen?(ret?returnItems():packingItems()):''}${btn(ret?(over?`付 ${money(fee)}，带回家`:'拉上箱子，回家'):'关上箱子，出发',ret?'return-finish':'depart',over&&(!ret||!E.canAfford(r,fee))?'disabled':'')}`,{overlay:`<button class="case-hotspot" data-action="open-case" aria-label="打开地上的行李箱"></button>`});}
+function renderPacking(){if(run().stage==='packing'){renderPackingScene();return;}const r=run(),ret=r.stage==='return-pack',over=E.checkedWeight(r)>20,fee=E.overweightFee(r);app.innerHTML=gameScreen(ret?'airport':'home',ret?'什么跟米一起回家？':'箱子摊开了。',ret?`秤上 ${kg(E.checkedWeight(r))} kg。\n箱子还是那个箱子。`:packingThought(r),`${btn(caseOpen?'合上箱子看看':'打开行李箱','open-case')}${caseOpen?returnItems():''}${btn(ret?(over?`付 ${money(fee)}，带回家`:'拉上箱子，回家'):'关上箱子，出发',ret?'return-finish':'depart',over&&(!ret||!E.canAfford(r,fee))?'disabled':'')}`,{overlay:`<button class="case-hotspot" data-action="open-case" aria-label="打开地上的行李箱"></button>`});}
+const FLOOR_COLUMNS=6;
+let packingPan=1,packingSelected=null,packingPull=0;
+function packingObject(id,zone){const i=itemById[id];return `<button class="packing-object" data-action="pack-item" data-pack-id="${id}" data-pack-zone="${zone}" data-id="${id}" aria-label="${esc(i.name)}，查看物品" aria-pressed="${packingSelected===id}"><canvas data-pack-art="${id}" aria-hidden="true"></canvas></button>`;}
+function packingInfoContent(){const i=itemById[packingSelected];return i?`<div class="packing-info-name"><strong>${esc(i.name)}</strong></div><p>${esc(i.note)}</p>`:'';}
+function selectPackingItem(id){
+ if(!itemById[id]||run()?.packingClosed)return;packingSelected=id;const info=document.querySelector('.packing-info');if(!info)return;
+ info.innerHTML=packingInfoContent();info.hidden=false;document.querySelectorAll('[data-pack-id]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.packId===id)));
+}
+
+function clearPackingInfo(){
+ packingSelected=null;const info=document.querySelector('.packing-info');if(info)info.hidden=true;
+ document.querySelectorAll('[data-pack-id]').forEach(b=>b.setAttribute('aria-pressed','false'));
+}
+
+function constrainPackingPosition(x,y){
+ const left=x<.5;return {x:Math.round(Math.max(left ? .1125 : .6025,Math.min(left ? .3975 : .8875,x))*10000)/10000,y:Math.round(Math.max(.178,Math.min(.727,y))*10000)/10000};
+}
+function freePackingItems(r){
+ if(!r.packingPositions||typeof r.packingPositions!=='object'||Array.isArray(r.packingPositions))r.packingPositions={};
+ const packed=r.bag.filter(id=>!r.carry.includes(id)&&!r.worn.includes(id)&&id!=='phone');
+ for(const id of Object.keys(r.packingPositions))if(!packed.includes(id))delete r.packingPositions[id];
+ packed.forEach((id,index)=>{
+  const p=r.packingPositions[id];
+  if(p&&Number.isFinite(p.x)&&Number.isFinite(p.y)){r.packingPositions[id]={...constrainPackingPosition(p.x,p.y),z:Number.isFinite(p.z)?p.z:index+1};return;}
+  const legacy=Number.isInteger(r.packingSlots?.[id])?r.packingSlots[id]:index;
+  r.packingPositions[id]={...constrainPackingPosition(.625+(legacy%3)*.12,.21+(Math.floor(legacy/3)%4)*.16),z:index+1};
+ });
+ return packed;
+}
+function renderPackingScene(){
+ const r=run(),closed=r.packingClosed===true,ready=closed&&r.packingReady===true,weight=E.checkedWeight(r),tone=weight>=25?'danger':weight>=20?'warning':'normal',packed=freePackingItems(r),floor=ITEMS.filter(i=>!i.souvenir&&i.id!=='phone'&&!r.bag.includes(i.id));
+ const objects=packed.map(id=>{const p=r.packingPositions[id];return `<div class="packing-free-object" data-pack-drop="case" style="left:${p.x*100}%;top:${p.y*100}%;z-index:${p.z}">${packingObject(id,'case')}</div>`;}).join('');
+ app.innerHTML=`<section class="packing-screen ${closed?'case-closed':''} ${ready?'packing-ready':closed?'packing-review':''}" style="${packingPullStyle(closed?packingPull:0)}" aria-label="整理行李"><div class="packing-viewbox"><div class="packing-panorama" tabindex="0" aria-label="左右滑动查看行李箱"><div class="packing-stage" style="--case-pan:${packingPan}"><canvas class="suitcase-art" data-suitcase aria-hidden="true"></canvas>${ready?`<button class="suitcase-handle" data-pull-handle aria-label="向上拉满拉杆，出发"></button>`:closed?'':`<div class="packing-lid"><canvas class="suitcase-lid-art" data-suitcase-lid aria-hidden="true"></canvas><div class="packing-lid-objects"><button class="packing-phone" data-action="phone" aria-label="拿起手机"><canvas data-ui="scrap-phone" aria-hidden="true"></canvas></button><button class="packing-map" data-action="phone-maps" aria-label="打开旅行地图"><canvas data-minimap aria-hidden="true"></canvas></button></div></div><div class="packing-bay packing-bay-left" data-pack-drop="case" aria-label="左侧箱内"></div><div class="packing-bay packing-bay-right" data-pack-drop="case" aria-label="右侧箱内"></div><div class="packing-free-objects">${objects}</div>`}<button class="suitcase-zipper" data-action="packing-close" aria-label="${closed?'打开行李箱':'合上行李箱'}"></button></div></div>${!closed&&r.carry.filter(id=>id!=='phone').length?`<div class="packing-carry" aria-label="随身物品">${r.carry.filter(id=>id!=='phone').map(id=>packingObject(id,'carry')).join('')}</div>`:''}</div>${!ready?`<div class="packing-floor" data-pack-drop="floor" aria-label="箱外物品栏" ${closed?'inert aria-hidden="true"':''}><aside class="packing-info" aria-label="物品说明" role="status" ${packingSelected&&!closed?'':'hidden'}>${packingInfoContent()}</aside><div class="packing-shelf" tabindex="0" aria-label="待装入的物品">${floor.map(i=>`<div class="packing-slot" data-pack-drop="floor">${packingObject(i.id,'floor')}</div>`).join('')}${Array.from({length:(FLOOR_COLUMNS-floor.length%FLOOR_COLUMNS)%FLOOR_COLUMNS},()=>'<div class="packing-slot" data-pack-drop="floor"></div>').join('')}</div></div>`:''}${closed&&!ready?`<div class="packing-weighing"><div class="packing-scale ${tone}" role="status" aria-label="${kg(weight)} 公斤"><canvas data-scale data-tone="${tone}" aria-hidden="true"></canvas><output>${kg(weight)}<small>kg</small></output><div class="packing-decisions"><button data-action="packing-confirm" ${weight>BAG_LIMIT?'disabled':''}>就带这些</button><button data-action="packing-edit">继续整理</button></div></div></div>`:''}</section>`;
+}
+function paintPacking(){
+ document.querySelectorAll('[data-suitcase]').forEach(c=>drawSuitcase(c,run()?.packingClosed===true,packingPull));document.querySelectorAll('[data-suitcase-lid]').forEach(drawSuitcaseLid);document.querySelectorAll('[data-scale]').forEach(c=>drawScale(c,c.dataset.tone));document.querySelectorAll('[data-pack-art]').forEach(c=>drawPackingItem(c,itemById[c.dataset.packArt]));
+}
+function packingPullStyle(progress){
+ const extra=Math.round(progress*HANDLE_TRAVEL),height=286+extra;
+ return `--handle-extension:${extra/HANDLE_TRAVEL};--lock-top:${(100+extra)/height*100}%;--lock-height:${60/height*100}%`;
+}
+function pullPackingHandle(progress,commit=false){
+ const r=run(),screen=document.querySelector('.packing-screen.case-closed');if(!r||r.stage!=='packing'||!r.packingReady||!screen)return;
+ packingPull=progress;screen.style.cssText=packingPullStyle(progress);drawSuitcase(screen.querySelector('[data-suitcase]'),true,progress);
+ if(commit&&progress===1){
+  if(E.checkedWeight(r)>BAG_LIMIT){pullPackingHandle(0);return;}
+  dispatch('depart',null);
+ }
+}
+function panPacking(value){
+ if(run()?.packingClosed)return;
+ packingPan=Math.max(0,Math.min(1,value));document.querySelector('.packing-stage')?.style.setProperty('--case-pan',packingPan);
+}
+function movePackingItem(id,destination,point){
+ const r=run(),i=itemById[id];if(!r||r.stage!=='packing'||r.packingClosed||!i)return;
+ const adding=destination==='case',present=r.bag.includes(id);freePackingItems(r);
+ if(adding){
+  if(!present)E.addItem(r,id);freePackingItems(r);
+  if(!i.carryOnly&&point){const box=document.querySelector('.packing-stage').getBoundingClientRect();r.packingPositions[id]={...constrainPackingPosition((point.x-box.left)/box.width,(point.y-box.top)/box.height),z:Math.max(0,...Object.values(r.packingPositions).map(p=>p.z))+1};}
+ }else if(present){E.removeItem(r,id);delete r.packingPositions[id];}else return;
+ freePackingItems(r);save();render({keepScroll:true});
+}
+installPackingInput((id,destination,source,point)=>movePackingItem(id,destination,point),direction=>panPacking(packingPan+direction*.02),selectPackingItem);
+installSuitcaseInput(delta=>panPacking(packingPan+delta));
+installSuitcasePullInput(()=>{const r=run(),stage=document.querySelector('.packing-ready .packing-stage');return r?.stage==='packing'&&r.packingReady&&stage?{distance:stage.clientWidth*HANDLE_TRAVEL/400}:null;},pullPackingHandle);
+// Keyboard camera control and focus reveal the same large panorama.
+document.addEventListener('keydown',e=>{if(!e.target.closest('.packing-panorama')||e.target.closest('[data-pack-id]'))return;if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();panPacking(packingPan+(e.key==='ArrowLeft'?-.2:.2));}});
+document.addEventListener('focusin',e=>{if(e.target.closest('.packing-phone,.packing-map'))panPacking(0);else if(e.target.closest('.suitcase-zipper'))panPacking(1);});
 const greetings={he:['出门记得吃饭。','刚才吃过了。','那就好。下次拍给我看。'],lan:['看到好看的天，发给我。','刚才想起你了。','我在。慢慢说。'],you:['替我看看路边的小动物。','路上遇到什么再告诉你。','好，我等着。'],qi:['护照带了吧？','带了，放在最里面。','那就放心了。'],wu:['路上有怪东西记得叫我。','什么才算怪东西？','你犹豫的时候就算。'],blank:['到了说一声。','只是想跟你说一下。','嗯，我在。']};
 function allMessages(){return run()?.messages||[];}
 function chatHTML(lines,c){return lines.map(l=>`<div class="bubble ${l.from==='mi'?'mi':''}"><span class="chat-speaker">${l.from==='mi'?'米':esc(c.name)}</span>${esc(l.text)}</div>`).join('');}
@@ -100,7 +169,7 @@ function phoneAppIcon(id,name){return `<button ${['photos','bills'].includes(id)
 function renderPhone(){const labels={home:'',chat:'消息',notes:'笔记',bag:'行李',settings:'设置',maps:'旅行地图'};const body=phoneApp==='maps'?phoneMapApp():phoneApp==='chat'?chatApp():phoneApp==='notes'?notesApp():phoneApp==='bag'?bagApp():phoneApp==='settings'?`<div class="phone-scroll settings-app">${run()?btn('重新收拾行李','restart'):''}<button class="btn" data-action="sound">${soundOn?'声音开':'声音关'}</button></div>`:`<div class="phone-apps"><div class="phone-launch-grid">${[['settings','设置'],['bag','行李'],['maps','旅行地图'],['photos','相册'],['bills','57pay']].map(([id,name])=>phoneAppIcon(id,name)).join('')}</div><div class="phone-dock"><canvas class="dock-paper" data-ui="phone-dock" aria-hidden="true"></canvas>${[['mi','米的地图'],['chat','消息'],['notes','笔记']].map(([id,name])=>phoneAppIcon(id,name)).join('')}</div></div>`;
  app.innerHTML=`<section class="phone-scene ${phoneUnlocked&&phoneApp==='maps'?'phone-map-open':''}"><div class="pixel-phone"><canvas class="phone-casing" data-ui="shell" aria-hidden="true"></canvas><div class="phone-hardware"><i></i></div><div class="phone-screen"><canvas class="phone-glass" data-ui="glass-wallpaper" aria-hidden="true"></canvas><div class="phone-status"><span class="phone-network"><span class="phone-signal" aria-label="信号充足"><i></i><i></i><i></i><i></i></span><span>57Signal</span></span>${phoneUnlocked?`<span data-clock>${clockTime()}</span>`:''}<span class="phone-power"><span>35%</span><canvas class="battery-pixel" data-ui="battery" aria-label="电量35%"></canvas></span></div>${phoneUnlocked?`${phoneApp==='maps'?'':`<div class="chat-bar"><button data-action="${phoneApp==='chat'&&selectedContact?'contacts':'phone-home'}" aria-label="返回手机桌面">返回</button>${phoneApp!=='home'?`<canvas class="phone-app-mark" data-ui="icon-${phoneApp}" aria-hidden="true"></canvas>`:''}<h1>${labels[phoneApp]}</h1></div>`}${body}`:`<div class="lock-screen"><div class="lock-clock"><div class="lock-time" data-clock>${clockTime()}</div><div class="lock-date" data-clock-date>${new Intl.DateTimeFormat('zh-CN',{month:'long',day:'numeric',weekday:'long'}).format(new Date())}</div></div><button class="tap-unlock" data-action="unlock">轻按解锁</button></div>`}</div><button class="phone-home" data-action="close-phone" aria-label="退出手机" title="退出手机"><canvas data-ui="home-key" aria-hidden="true"></canvas></button></div></section>`;
 }
-function startRun(){profile.run=E.createRun();profile.contacts={};profile.messages=[];phoneApp='home';selectedContact=null;caseOpen=false;view='play';closeModal();save();render();}
+function startRun(){packingSelected=null;profile.run=E.createRun();profile.contacts={};profile.messages=[];phoneApp='home';selectedContact=null;caseOpen=false;view='play';closeModal();save();render();}
 function openPhone(){phoneAwake=false;notesRegion=null;phoneReturn=view==='play'?'play':view==='route-map'?'route-map':'map';phoneApp=phoneReturn==='map'&&africaSelected?'maps':'home';phoneUnlocked=false;selectedContact=null;view='phone';render();}
 function closePhone(){const advance=phoneReturn==='play'&&['social','chat'].includes(run()?.stage),paperScroll=Number(phoneBackdrop?.dataset.scroll||0);if(advance){E.advance(run());save();}view=phoneReturn;render();if(view==='play'&&!advance&&activeScroller())activeScroller().scrollTop=paperScroll;}
 function dispatch(action,b){const r=run();
@@ -115,6 +184,7 @@ function dispatch(action,b){const r=run();
   notesRegion=id;phoneApp='notes';phoneUnlocked=true;view='phone';render();return;
  }
  if(action==='resume-segment'){if(r&&E.resumeSegment(r)){view='play';closeModal();save();render();}return;}
+ if(action==='phone-maps'){openPhone();phoneApp='maps';phoneUnlocked=true;render();return;}
  if(action==='phone'){openPhone();return;}
  if(action==='close-phone'){closePhone();return;}
  if(action==='unlock'){phoneUnlocked=true;render();return;}
@@ -131,13 +201,14 @@ function dispatch(action,b){const r=run();
  if(action==='inspect'){const i=itemById[b.dataset.id];if(!r||!r.bag.includes(i?.id))return;openModal(esc(i.name),`<p class="prose">${esc(i.note)}</p>${r.used?.[i.id]?`<p class="micro">这一路，拿出来用过 ${r.used[i.id]} 次。</p>`:''}`);return;}
  if(!r)return;
  if(action==='hello'){const c=CONTACTS.find(x=>x.id===b.dataset.contact);if(c&&!allMessages().some(m=>m.contact===c.id&&m.event==='hello')){r.messages.push({id:crypto.randomUUID(),contact:c.id,event:'hello',day:current()?.day||0,lines:[{from:'mi',text:greetings[c.id][1]},{from:'friend',text:greetings[c.id][2]}]});save();render();}return;}
- if(action==='reason'&&r.stage==='reason'){r.reason=['想看没见过的东西。','一直想去。','不知道。','票都买了。'][Number(b.dataset.id)];r.stage='packing';save();render();return;}
+ if(action==='reason'&&r.stage==='reason'){r.reason=['想看没见过的东西。','一直想去。','不知道。','票都买了。'][Number(b.dataset.id)];r.stage='packing';r.packingClosed=false;save();render();return;}
+ if(action==='packing-close'&&r.stage==='packing'){r.packingClosed=!r.packingClosed;r.packingReady=false;packingPull=0;delete r.packingHandleExtended;save();render({keepScroll:true});return;}
+ if(action==='packing-edit'&&r.stage==='packing'&&!r.packingReady){r.packingClosed=false;r.packingReady=false;packingPull=0;save();render({keepScroll:true});return;}
+ if(action==='packing-confirm'&&r.stage==='packing'&&r.packingClosed&&E.checkedWeight(r)<=BAG_LIMIT){r.packingReady=true;packingSelected=null;packingPull=0;save();render();return;}
+ if(action==='pack-item'){selectPackingItem(b.dataset.id);return;}
  if(action==='open-case'){caseOpen=!caseOpen;render();return;}
- if(action==='tab'){tab=b.dataset.tab;render();return;}
- if(action==='item'&&r.stage==='packing'){E.toggleItem(r,b.dataset.id);save();render({keepScroll:true});return;}
- if(action==='preset'&&r.stage==='packing'){E.preset(r);save();render({keepScroll:true});return;}
  if(action==='equip'){const i=itemById[b.dataset.id];if(i&&E.equip(r,i.slot,i.id)){save();render({keepScroll:true});}return;}
- if(action==='depart'&&r.stage==='packing'){if(!r.bag.includes('passport')){E.addItem(r,'passport');toast('摸了摸口袋。护照忘了，回头拿上。');}if(E.depart(r)){save();render();}return;}
+ if(action==='depart'&&r.stage==='packing'){if(!r.packingClosed||!r.packingReady)return;if(!r.bag.includes('passport'))E.addItem(r,'passport');if(E.depart(r)){save();render();}else{r.packingClosed=false;save();render();}return;}
  if(action==='choose'){if(E.choose(r,Number(b.dataset.index))){save();render();}return;}
  if(action==='next'){E.afterResult(r);phoneUnlocked=false;save();render();return;}
  if(action==='send'){if(E.sendMessage(profile,b.dataset.contact)){selectedContact=b.dataset.contact;save();render();}return;}
@@ -161,7 +232,7 @@ document.addEventListener('keydown',e=>{if(e.target.matches('.map-search-input')
 document.addEventListener('pointerdown',e=>{const input=document.activeElement;if(input?.matches('.map-search-input')&&!e.target.closest('.map-search-area'))input.blur();});
 window.visualViewport?.addEventListener('resize',()=>{if(!document.activeElement?.matches('.map-search-input'))restoreSearchPosition();});
 document.addEventListener('input',e=>{if(e.target.matches('.map-search-input')){mapQuery=e.target.value;searchMap();}});
-document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;e.preventDefault();dispatch(b.dataset.action,b);});
+document.addEventListener('click',e=>{if(view==='play'&&run()?.stage==='packing'&&!e.target.closest('[data-pack-id]'))clearPackingInfo();const b=e.target.closest('[data-action]');if(!b||b.disabled)return;e.preventDefault();dispatch(b.dataset.action,b);});
 // The title is a title, not a second navigation menu.
 document.querySelector('.brand').addEventListener('click',e=>e.preventDefault());
 window.addEventListener('popstate',readLocation);

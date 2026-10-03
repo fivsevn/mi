@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 const {chromium,webkit}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+async function pullToDepart(p){await p.locator('[data-action=packing-confirm]').click();const stage=await p.locator('.packing-stage').boundingBox(),a=await p.locator('[data-pull-handle]').boundingBox();await p.mouse.move(a.x+a.width/2,a.y+26);await p.mouse.down();await p.mouse.move(a.x+a.width/2,a.y+26-stage.width*.16-2,{steps:10});await p.mouse.up();}
 const origin=process.env.MI_TEST_URL||'http://127.0.0.1:4173';
 const widths=[[320,568],[375,600],[390,660],[390,844],[560,1000],[900,600]];
 await mkdir('/tmp/mi-paper-scroll',{recursive:true});
@@ -78,12 +79,8 @@ for(const name of ['chromium','webkit']){
  await page.locator('[data-app=chat]').click();await page.locator('[data-action=close-phone]').click();
  assert.equal(await scrollTop(page),20,'Phone return must restore paper position');
  await reset(page);await page.locator('[data-action=reason]').first().click();
- await page.locator('.paper-option[data-action=open-case]').click();await reset(page);
- const scene=await page.locator('.scene-panel').boundingBox();
- await wheel(page,'.paper-option',500);assert.ok(await scrollTop(page)>100);await fixed(page,scene);
- await page.locator('[data-action=item]').first().click();
- assert.ok(await scrollTop(page)>0,'Inventory edit must retain scrolling');
- await page.locator('[data-action=depart]').click();
+ await page.locator('[data-action=packing-close]').first().click();
+ await pullToDepart(page);
  assert.equal(await page.locator('.choice[data-action=choose]').count()>0,true);
  await page.locator('.choice[data-action=choose]').first().click();
  await page.locator('[data-action=next]').click();assert.equal(await page.locator('.play-screen').count(),1);
@@ -96,11 +93,8 @@ for(const [width,height]of widths.slice(0,5)){
  const context=await browser.newContext({viewport:{width,height},isMobile:true,hasTouch:true});
  const page=await context.newPage();await enter(page);
  const cdp=await context.newCDPSession(page),scene=await page.locator('.scene-panel').boundingBox();
- for(const phase of ['opening','packing','airport']){
-  if(phase==='packing'){
-   await reset(page);await page.locator('[data-action=reason]').first().click();
-   await page.locator('.paper-option[data-action=open-case]').click();
-  }else if(phase==='airport')await page.locator('[data-action=depart]').click();
+ for(const phase of ['opening','airport']){
+  if(phase==='airport'){await reset(page);await page.locator('[data-action=reason]').first().click();await page.locator('[data-action=packing-close]').first().click();await pullToDepart(page);}
   const range=await page.locator('.paper-stack').evaluate(e=>e.scrollHeight-e.clientHeight);
   for(const selector of ['.story-copy','.paper-option']){
    await reset(page);await swipe(page,cdp,selector,100);
