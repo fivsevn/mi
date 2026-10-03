@@ -98,3 +98,5 @@ PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/story-art.mjs
 - Packing-Native-28: 横向查看由画布 transform 位移改为真实 overflow-x:auto 容器与 scrollLeft。触屏使用浏览器原生 pan-x，横向滚轮直接滚动；鼠标抓取、键盘与拖动物品停靠边缘均修改真实滚动位置。完整箱体适合宽屏时 scrollWidth=clientWidth、滚动范围为零，箱体、说明卡和物品栏居中；窄屏滚动不会移动物品栏。`packing-scroll.mjs` Chromium/WebKit 验证真实滚动范围、原生横向滚轮、scrollLeft 与内容位移一一对应、打开箱体没有 transform、宽屏无多余滚动与居中。`packing.mjs` 两浏览器六视口和 Chromium 原生触屏验证自由摆放/跨侧拖动/取消、原生水平滚动、独立物品栏、手机/地图返回、称重与剧情。
 
 - Packing-Scale-29: 电子秤缩至最多 220px，固定在关闭箱体的右下角并随箱体尺寸定位；按钮文字按像素秤按键的同一旋转中心居中。`packing-review.mjs` Chromium/WebKit 六视口验证称重、返回保持摆放、确认和锁重新打开，电子秤不越界。
+
+- Packing-Scale-32: 电子秤逆时针 4°，重绘分层外壳/接缝/屏幕凹槽/按键帽/细小紧固件，文字与按键同向旋转。物品栏原生滚动条隐藏，窄屏初始 scrollLeft 为真实范围的 70%。Chromium/WebKit 六视口称重返回/确认/开锁检查、20/25kg 颜色、自由拖放、手机地图和拉杆流程通过，Chromium 原生触屏滚动与出发通过。

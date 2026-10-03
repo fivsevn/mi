@@ -218,32 +218,52 @@ export function drawSuitcase(canvas,closed,progress=0){
 }
 export function drawScale(canvas,tone='normal'){
  canvas.width=256;canvas.height=188;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.scale(2,2);
- // Molded plastic and two inset physical keys belong to one weighing device.
- caseBody(c,'#56665066',7,15,118,75);caseBody(c,'#566650',5,11,118,75);
- caseBody(c,'#a1a87a',3,5,118,76);
- patch(c,'#bcc29a',3,5,[[10,0],[106,0],[113,4],[106,9],[15,8],[4,13],[1,9]],1);
- patch(c,'#939b70',4,15,[[0,0],[7,-4],[7,54],[11,61],[5,61],[0,55]],1);
- patch(c,'#748360',112,15,[[0,-4],[7,2],[8,54],[3,62],[-2,59]],1);
- patch(c,'#849066',10,73,[[0,0],[102,-1],[106,3],[100,8],[8,8],[-3,4]],1);
- // Broken highlights and small joined material clusters avoid a flat vector rim.
- for(const [x,w]of [[15,18],[38,23],[67,15],[88,14]]){rect(c,'#d0d2aa',x,7,w,1);rect(c,'#b3ba8c',x+3,8,w-7,1);}
- for(let x=13;x<111;x+=7){rect(c,'#adb58a',x,51,2,1);if(x%3===0)rect(c,'#87966d',x+2,52,1,1);}
- for(const [x,y]of [[9,21],[11,48],[114,27],[111,69],[22,78],[101,76]]){rect(c,'#bbc19a',x,y,3,1);rect(c,'#8c966e',x+1,y+1,2,1);}
- // A recessed LCD with opaque, stepped corners and a quiet glass reflection.
- patch(c,'#74805a',11,15,[[3,0],[100,0],[103,3],[103,32],[100,35],[3,35],[0,32],[0,3]],1);
- patch(c,'#52634a',14,18,[[1,0],[96,0],[98,2],[98,28],[96,30],[1,30],[0,28],[0,2]],1);
- const lcd=tone==='danger'?'#bd765e':tone==='warning'?'#dfbd65':'#93996c';
- rect(c,lcd,18,21,91,24);rect(c,tone==='normal'?'#a6ad7d':tone==='warning'?'#ebce83':'#cf9174',18,21,91,1);
- patch(c,tone==='normal'?'#a1a87a':lcd,18,22,[[0,0],[23,0],[8,9],[0,9]],1);
- rect(c,'#6f7b57',18,45,91,1);rect(c,'#b5bc92',14,49,92,1);
- for(const x of [11,67]){
-  patch(c,'#667553',x,56,[[2,0],[48,0],[50,2],[50,17],[48,20],[2,20],[0,17],[0,2]],1);
-  patch(c,'#bac092',x+2,57,[[1,0],[44,0],[46,2],[46,14],[44,16],[1,16],[0,14],[0,2]],1);
-  rect(c,'#d1d4aa',x+4,57,41,1);rect(c,'#adb588',x+3,59,1,11);rect(c,'#8e9a6e',x+4,72,42,1);
-  rect(c,'#c7cea0',x+6,59,7,1);rect(c,'#a5af81',x+38,69,6,1);
+ // Joined pixel clusters describe a molded upper shell and its deeper lower half.
+ const body=[[8,0],[106,0],[111,2],[115,6],[118,13],[118,65],[116,71],[111,76],[105,78],[11,78],[5,76],[1,71],[0,63],[0,12],[2,6],[5,2]];
+ patch(c,'#56665055',7,12,body,1);patch(c,'#4f624c',5,10,body,1);
+ patch(c,'#697858',4,8,body,.5);patch(c,'#939d73',3,4,body,.5);
+ patch(c,'#b4bc8f',3,4,[[8,0],[106,0],[111,2],[114,5],[108,7],[14,6],[7,10],[2,15],[1,9],[3,4]],.5);
+ patch(c,'#a3ae80',3,4,[[7,10],[14,6],[108,7],[114,5],[116,12],[114,63],[110,69],[101,72],[15,72],[8,69],[4,62],[4,19]],.5);
+ patch(c,'#88986a',3,4,[[1,15],[7,10],[9,16],[8,61],[11,69],[6,73],[2,69],[0,61]],.5);
+ patch(c,'#72835c',3,4,[[114,10],[117,15],[118,63],[115,71],[109,76],[101,77],[103,72],[110,67],[113,60]],.5);
+ patch(c,'#809067',9,75,[[0,0],[104,-1],[108,1],[101,6],[11,6],[2,4]],.5);
+ // Irregular short highlights belong to bevels, not evenly sprinkled noise.
+ for(const [x,y,w]of [[13,5,14],[31,6,23],[60,5,19],[85,6,22]]){
+  rect(c,'#d0d3a9',x,y,w,.5);rect(c,'#bec69a',x+2,y+.5,w-4,1);
  }
- rect(c,'#4f624c',14,83,12,3);rect(c,'#4f624c',102,83,12,3);
- steppedCase(canvas,64,2,0,47);
+ patch(c,'#c6cea0',6,13,[[0,0],[2,-3],[4,-4],[3,0],[1,5],[1,19],[0,21]],.5);
+ for(const [x,y,w]of [[7,44,1],[10,70,4],[113,26,1],[109,73,5],[20,78,9],[87,77,14]]){
+  rect(c,'#a6b285',x,y,w,.5);rect(c,'#71805c',x+.5,y+1,w,.5);
+ }
+ // A deep screen socket: upper-left shadow, thin lower lip, and glass reflection.
+ patch(c,'#83916a',11,15,[[2,-2],[99,-2],[103,1],[105,4],[105,31],[102,35],[3,36],[-1,33],[-1,3]],.5);
+ patch(c,'#4b5f47',12,16,[[2,0],[99,0],[101,2],[101,31],[99,33],[2,33],[0,31],[0,2]],.5);
+ rect(c,'#677a54',15,19,96,2);rect(c,'#3e543f',16,21,2,23);
+ const lcd=tone==='danger'?'#bd765e':tone==='warning'?'#dfbd65':'#93996c';
+ rect(c,lcd,18,21,91,24);
+ rect(c,tone==='normal'?'#adb788':tone==='warning'?'#ebce83':'#cf9174',18,21,91,.5);
+ if(tone==='normal'){
+  patch(c,'#a7b080',18,22,[[0,0],[29,0],[19,6],[8,11],[0,11]],.5);
+  patch(c,'#9ca777',18,22,[[29,0],[37,0],[19,10],[12,11],[19,6]],.5);
+ }
+ rect(c,'#70815b',18,45,91,1);rect(c,'#bac499',15,49,93,.5);
+ rect(c,'#8e9f73',15,50,87,.5);rect(c,'#bec69a',111,22,.5,20);
+ // Two inset key wells have a dark socket and individually lit cap faces.
+ for(const x of [11,67]){
+  patch(c,'#71825b',x,55,[[2,0],[48,0],[51,3],[51,17],[48,21],[2,21],[-1,18],[-1,3]],.5);
+  patch(c,'#506548',x,57,[[1,0],[48,0],[49,2],[49,17],[47,19],[1,19],[0,16],[0,2]],.5);
+  patch(c,'#b3be8d',x+2,57,[[1,0],[43,0],[46,2],[46,14],[44,16],[1,16],[0,14],[0,2]],.5);
+  patch(c,'#bec69a',x+3,58,[[1,0],[41,0],[43,1],[40,3],[3,3],[0,5],[0,1]],.5);
+  rect(c,'#d1d5ad',x+5,58,29,.5);rect(c,'#c8cea1',x+35,58,6,.5);
+  rect(c,'#8e9d70',x+4,72,41,1);rect(c,'#a4b17f',x+3,62,1,8);
+ }
+ // Fine fasteners, shell seam, and rubber feet complete the construction.
+ for(const [x,y]of [[8,53],[117,53]]){
+  rect(c,'#76865f',x-1,y,2,2);rect(c,'#c2c89d',x,y,.5,1.5);rect(c,'#4d6149',x-.5,y+.5,1,.5);
+ }
+ rect(c,'#71825c',16,80,87,.5);rect(c,'#a1ae7d',17,79,33,.5);
+ for(const x of [16,99]){rect(c,'#40553f',x,83,13,3);rect(c,'#6c7d59',x+1,83,10,.5);rect(c,'#4b6047',x+2,86,9,1);}
+ steppedCase(canvas,64,-4,0,47);
 }
 export function drawPackingItem(canvas,item){
  canvas.width=32;canvas.height=32;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
