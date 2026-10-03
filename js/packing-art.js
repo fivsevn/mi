@@ -250,14 +250,7 @@ export function drawScale(canvas,tone='normal'){
  rect(c,'#70815b',18,45,91,1);rect(c,'#bac499',15,49,93,.5);
  rect(c,'#8e9f73',15,50,87,.5);rect(c,'#bec69a',111,22,.5,20);
  // Two inset key wells have a dark socket and individually lit cap faces.
- for(const x of [11,67]){
-  patch(c,'#71825b',x,55,[[2,0],[48,0],[51,3],[51,17],[48,21],[2,21],[-1,18],[-1,3]],.5);
-  patch(c,'#506548',x,57,[[1,0],[48,0],[49,2],[49,17],[47,19],[1,19],[0,16],[0,2]],.5);
-  patch(c,'#b3be8d',x+2,57,[[1,0],[43,0],[46,2],[46,14],[44,16],[1,16],[0,14],[0,2]],.5);
-  patch(c,'#bec69a',x+3,58,[[1,0],[41,0],[43,1],[40,3],[3,3],[0,5],[0,1]],.5);
-  rect(c,'#d1d5ad',x+5,58,29,.5);rect(c,'#c8cea1',x+35,58,6,.5);
-  rect(c,'#8e9d70',x+4,72,41,1);rect(c,'#a4b17f',x+3,62,1,8);
- }
+ for(const x of [11,67])scaleKey(c,x);
  // Fine fasteners, shell seam, and rubber feet complete the construction.
  for(const [x,y]of [[8,53],[117,53]]){
   rect(c,'#76865f',x-1,y,2,2);rect(c,'#c2c89d',x,y,.5,1.5);rect(c,'#4d6149',x-.5,y+.5,1,.5);
@@ -336,4 +329,31 @@ function softenItemContour(c){
   if(pigment){const shade=(!visible(x,y+1)||!visible(x+1,y)) ? .9 : 1;for(let j=0;j<3;j++)out[k+j]=Math.round(pigment[j]*shade);}
  }
  c.putImageData(pixels,0,0);
+}
+
+// Hover light is sampled from the actual prop silhouette, never its hit rectangle.
+function contourLight(canvas){
+ const c=canvas.getContext('2d'),src=c.getImageData(0,0,canvas.width,canvas.height),out=c.createImageData(canvas.width,canvas.height),w=canvas.width,h=canvas.height;
+ for(let y=2;y<h-2;y++)for(let x=2;x<w-2;x++){
+  const i=(y*w+x)*4;if(!src.data[i+3])continue;
+  if([[2,0],[-2,0],[0,2],[0,-2]].some(([dx,dy])=>!src.data[((y+dy)*w+x+dx)*4+3]))out.data.set([237,223,177,155],i);
+ }
+ c.save();c.setTransform(1,0,0,1,0,0);c.putImageData(out,0,0);c.restore();
+}
+export function drawSuitcaseControlLight(canvas,kind,closed,progress=0){
+ const extra=closed?Math.round(Math.max(0,Math.min(1,progress))*HANDLE_TRAVEL):0,c=caseContext(canvas,400,extra),x=closed?108:206;
+ if(kind==='lock')caseLock(c,x,closed);else topHandle(c,x,closed?extra/HANDLE_TRAVEL:0);
+ steppedCase(canvas,closed?x+92:200,3.5,extra);contourLight(canvas);
+}
+function scaleKey(c,x){
+  patch(c,'#71825b',x,55,[[2,0],[48,0],[51,3],[51,17],[48,21],[2,21],[-1,18],[-1,3]],.5);
+  patch(c,'#506548',x,57,[[1,0],[48,0],[49,2],[49,17],[47,19],[1,19],[0,16],[0,2]],.5);
+  patch(c,'#b3be8d',x+2,57,[[1,0],[43,0],[46,2],[46,14],[44,16],[1,16],[0,14],[0,2]],.5);
+  patch(c,'#bec69a',x+3,58,[[1,0],[41,0],[43,1],[40,3],[3,3],[0,5],[0,1]],.5);
+  rect(c,'#d1d5ad',x+5,58,29,.5);rect(c,'#c8cea1',x+35,58,6,.5);
+  rect(c,'#8e9d70',x+4,72,41,1);rect(c,'#a4b17f',x+3,62,1,8);
+}
+export function drawScaleKeyLight(canvas,index){
+ canvas.width=256;canvas.height=188;const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.scale(2,2);
+ scaleKey(c,index===0?11:67);steppedCase(canvas,64,-4,0,47,2);contourLight(canvas);
 }

@@ -100,3 +100,5 @@ PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/story-art.mjs
 - Packing-Scale-29: 电子秤缩至最多 220px，固定在关闭箱体的右下角并随箱体尺寸定位；按钮文字按像素秤按键的同一旋转中心居中。`packing-review.mjs` Chromium/WebKit 六视口验证称重、返回保持摆放、确认和锁重新打开，电子秤不越界。
 
 - Packing-Scale-32: 电子秤逆时针 4°，重绘分层外壳/接缝/屏幕凹槽/按键帽/细小紧固件，文字与按键同向旋转。物品栏原生滚动条隐藏，窄屏初始 scrollLeft 为真实范围的 70%。Chromium/WebKit 六视口称重返回/确认/开锁检查、20/25kg 颜色、自由拖放、手机地图和拉杆流程通过，Chromium 原生触屏滚动与出发通过。
+
+- Packing-Glow-34: 去除整理画面的悬停/拖放矩形预选底色，锁/拉杆/秤按键使用实际像素轮廓光层，物品/手机/地图沿透明像素边缘轻微发光；触屏不保留悬停光。`packing-hover.mjs` 两浏览器验证光层仅有小物体轮廓、离开消失、热区透明、物品格底色不变与鼠标/键盘开合。`packing.mjs`、`packing-handle.mjs` 两浏览器及原生触屏通过。
