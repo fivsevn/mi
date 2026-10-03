@@ -9,6 +9,7 @@ node --test tests/engine.test.js
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/browser.mjs
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/phone-design.mjs
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/touch-phone.mjs
+PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/paper-scroll.mjs
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/atlas-interaction.mjs
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/code-visual.mjs
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/story-art.mjs
@@ -21,6 +22,7 @@ PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/story-art.mjs
 | `browser.mjs` | Chromium/WebKit 完整 74 事件流程、小游戏、七次停顿、手机、旧入口与拒绝存储；支持 `MI_TEST_URL`、`MI_BROWSER` 和可选 `CHROME_PATH` |
 | `phone-design.mjs` | Chromium/WebKit 锁屏与实时钟表、轻按解锁、Home 退出、内部滚动与宽窄视口；目标地址固定为本地 4173 |
 | `touch-phone.mjs` | Chromium 原生触摸轻按解锁和联系人内部滚动，不产生页面滚动或文字选择；固定本地 4173 |
+| `paper-scroll.mjs` | Chromium/WebKit 上下纸条滚动、内容末尾、照片固定、手机/地图点击、行李与手机返回；Chromium 原生触摸检查开场、长行李列表和机场选项；支持 `MI_TEST_URL` |
 | `atlas-interaction.mjs` | 拖地图、悬停、地区地理比例、节点可达性与迷你地图；支持 `MI_TEST_URL` |
 | `code-visual.mjs` | 无图片文件/请求、唯一样式表、14 种代码场景与服装变化；支持 `MI_TEST_URL` |
 
@@ -66,3 +68,5 @@ PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/story-art.mjs
 - Paper-layer-2: Chromium and WebKit at 320×568, 390×660, 390×844, 560×1000 and 900×600 passed native wheel scrolling of slips across a stationary photograph, hit testing above the photograph, hidden scrollbar, short-pile scrolling to the top, inventory scroll retention, phone entry/return and next-story navigation. Canvas pixels confirmed 240/255 paper-face opacity and unchanged 120/255 and 40/255 cast shadows. Chromium native touch swipes also moved the papers without moving the page/photograph; phone backdrop/return preserved a 350px paper scroll, and resizing recalculated both spacers. Inspected overlapping-paper screenshots; no horizontal overflow or page errors occurred.
 
 - Paper-layer-4: Chromium/WebKit at the same five viewport sizes passed the new scroll limit for opening, packing and airport papers. Fully visible piles had zero scroll range; overflowing piles stopped 8px above the viewport bottom, and further wheel movement did not advance them. At 320×568, phone backdrop/return retained a 30px scroll. Checked alpha 230/255 for stock, unchanged 120/255 and 40/255 shadows, and opaque text. A native Chromium touch swipe at the end did not move the papers or page. Choices and next-story navigation remained functional without page errors.
+
+- Paper-layer-5: `tests/paper-scroll.mjs` passed Chromium/WebKit wheel input at 320×568, 375×600 (matching the reported iPhone Safari content area), 390×660, 390×844, 560×1000 and 900×600. Upper narrative and lower choices reveal overflowing content and stop with its end visible; fully visible piles retain zero scroll range. Exposed phone/map clicks, phone-return position, long packing lists, inventory edits, airport choices and next-story navigation passed. Chromium native touch swipes passed both directions on opening, packing and airport papers at all five mobile sizes, without moving the photo/page, selecting text or triggering choices. The 19 engine tests passed. WebKit wheel testing is not physical iPhone touch verification.

@@ -150,12 +150,19 @@ export function drawPaper(canvas){
  }
 }
 let observer,layoutObserver;
+function updatePaperHitArea(stack){
+ // Clip only the empty leading spacer, so the native scroller receives swipes
+ // on either paper while the uncovered photograph's objects stay clickable.
+ const pile=stack.querySelector(':scope > .paper-pile');
+ if(pile)stack.style.setProperty('--paper-hit-top',`${Math.max(0,pile.offsetTop-stack.scrollTop-8)}px`);
+}
 function layoutPaperLayer(screen){
  const scene=screen.querySelector(':scope > .scene-panel'),stack=screen.querySelector(':scope > .paper-stack'),pile=stack?.querySelector(':scope > .paper-pile');
  if(!scene||!stack||!pile)return;
  // Reserve the photograph only at the beginning of the scrollable paper layer.
  const values={'--photo-space':scene.offsetTop+scene.offsetHeight};
  for(const [name,value]of Object.entries(values)){const px=`${value}px`;if(screen.style.getPropertyValue(name)!==px)screen.style.setProperty(name,px);}
+ updatePaperHitArea(stack);
 }
 export function paintStoryPapers(){
  observer?.disconnect();observer??=new ResizeObserver(entries=>entries.forEach(({target})=>drawPaper(target)));
@@ -174,6 +181,8 @@ export function paintStoryPapers(){
  layoutObserver?.disconnect();layoutObserver??=new ResizeObserver(entries=>{const screens=new Set(entries.map(({target})=>target.closest('.play-screen')));for(const screen of screens)if(screen)layoutPaperLayer(screen);});
  document.querySelectorAll('.play-screen').forEach(screen=>{
   layoutPaperLayer(screen);
+  const stack=screen.querySelector(':scope > .paper-stack');
+  if(stack)stack.onscroll=()=>updatePaperHitArea(stack);
   screen.querySelectorAll(':scope > .scene-panel,:scope > .paper-stack,:scope > .paper-stack > .paper-pile').forEach(el=>layoutObserver.observe(el));
  });
 }

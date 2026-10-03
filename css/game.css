@@ -231,9 +231,9 @@ html,body,body:has(.phone-scene),.app-shell,.play-screen,.desk,.route-map-screen
 /* Loose papers scroll across the entire photograph, above the phone and map. */
 .play-screen{position:relative}
 .play-screen .scene-panel{z-index:0}
-.play-screen .paper-stack{position:absolute;inset:0 auto 0 50%;transform:translateX(-50%);z-index:10;flex:none;margin:0;pointer-events:none;padding:0;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-y:none}
+.play-screen .paper-stack{position:absolute;inset:0 auto 0 50%;transform:translateX(-50%);z-index:10;flex:none;margin:0;pointer-events:auto;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;clip-path:inset(var(--paper-hit-top,var(--photo-space,460px)) 0 0);padding:0;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior-y:none}
 .play-screen .paper-stack::before{content:'';display:block;height:var(--photo-space,460px)}
 .play-screen .paper-stack::after{content:'';display:block;height:8px}
 .play-screen .paper-stack::-webkit-scrollbar{display:none;width:0;height:0}
-.play-screen .paper-pile{display:flow-root;pointer-events:none}
-.play-screen .story-copy,.play-screen .choice-scroll{pointer-events:auto}
+.play-screen .paper-pile{display:flow-root;pointer-events:auto}
+.play-screen .story-copy,.play-screen .choice-scroll{pointer-events:auto;touch-action:pan-y;overscroll-behavior:auto}
