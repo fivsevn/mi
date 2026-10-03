@@ -31,11 +31,11 @@ function instant(c,w,h){
 }
 function paperContour(w,h,v){
  const b=h-4;
- if(v==='narrative')return [[5,3],[24,2],[29,4],[43,3],[68,4],[75,2],[w-40,2],[w-34,4],[w-22,1],[w-6,2],[w-5,b-9],[w-15,b],[w-34,b-1],[w-41,b-3],[w-59,b-2],[w-70,b-4],[38,b-1],[28,b-3],[7,b-2],[3,b-4],[4,21],[2,18],[4,15],[3,11],[5,9]];
- if(v===0)return [[7,2],[w-12,4],[w-7,7],[w-10,10],[w-6,12],[w-9,16],[w-7,19],[w-10,b-1],[28,b-3],[4,b-4],[6,b-10],[3,b-12],[5,13],[3,10],[6,8]];
- if(v===1)return [[4,5],[w-10,1],[w-6,4],[w-8,b-5],[w-18,b-2],[6,b],[3,b-3]];
- if(v===2)return [[5,2],[w-17,4],[w-6,13],[w-8,b-1],[w-27,b],[3,b-4]];
- return [[7,3],[w-9,1],[w-6,7],[w-8,b-3],[w-16,b],[5,b-1],[3,12],[6,10],[4,7]];
+ if(v==='narrative')return [[5,3],[27,2],[34,3],[w*.38,3],[w*.42,2],[w-31,2],[w-26,3],[w-7,3],[w-5,7],[w-5,b-14],[w-17,b-1],[w-35,b-1],[w-42,b-2],[w*.55,b-2],[w*.5,b-1],[28,b-1],[23,b-2],[6,b-2],[3,b-5],[4,24],[3,21],[4,15],[3,11],[4,7]];
+ if(v===0)return [[6,3],[w*.28,2],[w*.32,3],[w*.7,3],[w*.74,2],[w-10,3],[w-7,5],[w-6,b-11],[w-8,b-6],[w-11,b-3],[w*.76,b-3],[w*.54,b-2],[w*.49,b-3],[18,b-2],[7,b-3],[4,b-6],[4,20],[3,17],[4,11],[3,8],[5,6]];
+ if(v===1)return [[5,4],[23,4],[27,3],[w*.56,3],[w*.6,2],[w-12,2],[w-7,5],[w-7,b-7],[w-11,b-3],[w*.77,b-2],[w*.73,b-1],[19,b-1],[6,b-2],[3,b-5],[4,12],[3,9]];
+ if(v===2)return [[5,3],[w*.45,3],[w*.5,2],[w-25,3],[w-7,18],[w-7,b-5],[w-10,b-2],[w*.7,b-1],[w*.66,b-2],[16,b-2],[5,b-3],[3,b-7],[4,12]];
+ return [[6,3],[w*.3,3],[w*.34,2],[w-10,2],[w-6,6],[w-7,b-6],[w-11,b-2],[w*.71,b-2],[w*.66,b-1],[18,b-1],[6,b-2],[3,b-6],[4,13],[3,10],[5,7]];
 }
 // The final pixel-sampled rotation gives long cut edges their natural staircase.
 function paperShape(w,h,v){return paperContour(w,h,v);}
@@ -58,8 +58,9 @@ function loosePaper(c,w,h,v){
  for(let x=5;x<w-7;x++){
   let bottom=h-1;while(bottom>=0&&!silhouette[(bottom*w+x)*4+3])bottom--;
   if(bottom>=0){
-   rect(c,'#65714f78',x,bottom+1,1,2);
-   rect(c,'#65714f28',x,bottom+3,1,1);
+   const u=x/w,lift=(u>.09&&u<.34)||(u>.62&&u<.9);
+   rect(c,lift?'#65714f60':'#65714f24',x,bottom+1,1,1);
+   if(lift&&x%9<6)rect(c,'#65714f25',x,bottom+2,1,1);
   }
  }
  const color=v===1?'light':v===2?'cream':'pale';polygon(c,color,p);
@@ -81,13 +82,15 @@ function loosePaper(c,w,h,v){
   for(const [x,y]of [[3,12],[4,20],[5,b-9]])rect(c,'cream',x,y,2,1);
  }else if(v===1){
   // Notebook fragment: fine muted ruling and an unbroken free lower edge.
-  for(let y=12;y<b-3;y+=8)line(c,'sage',8,y,w-14,y-2);
-  line(c,'moss',13,8,12,b-5);
+  for(let y=13;y<b-3;y+=9){line(c,'#9fa77e88',9,y,w-15,y-1);rect(c,'#cfd0a477',10,y+1,Math.max(1,w-28),1);}
+  line(c,'#929c7388',14,9,13,b-5);
  }else if(v===2){
   // A visibly lifted corner, rather than an ornamental corner notch.
-  polygon(c,'ochre',[[w-18,4],[w-6,13],[w-19,14]]);
-  polygon(c,'pale',[[w-18,3],[w-7,12],[w-19,12]]);
-  line(c,'light',w-19,14,w-20,b-5);line(c,'pale',w-18,15,w-19,b-6);
+  polygon(c,'#a99c73',[[w-25,4],[w-7,18],[w-27,20]]);
+  polygon(c,'light',[[w-25,4],[w-8,17],[w-26,17]]);
+  polygon(c,'pale',[[w-25,4],[w-11,15],[w-26,15]]);
+  line(c,'cream',w-24,5,w-11,15);
+  line(c,'#c9bd93',w-27,21,w-25,b-7);line(c,'pale',w-26,21,w-24,b-8);
  }else if(v===3){
   // One irregular torn lower edge, without a regular receipt/button sawtooth.
   const cuts=[[18,3,2],[w-44,4,1],[w-20,3,2]];
@@ -102,6 +105,39 @@ function paperMaterial(c,w,h,v){
  polygon(mask.getContext('2d'),'#fff',paperShape(w,h,v));
  const alpha=mask.getContext('2d').getImageData(0,0,w,h).data;
  const inside=(x,y)=>x>=0&&y>=0&&x<w&&y<h&&alpha[(y*w+x)*4+3]>0;
+ const base=P[v===1?'light':v===2?'cream':'pale'].slice(1).match(/../g).map(n=>parseInt(n,16));
+ // Local creases have a broad compressed side and a narrow lit fibre side.
+ // Their centres stay near blank margins, leaving the writing surface calm.
+ const shade=v===1?'#b9bf92':v===2?'#d8cba0':'#e2d4a5',lit=v===1?'#d4d5ab':'#f2e5b9';
+ if(v!==2){
+  polygon(c,shade,[[w-39,10],[w-32,13],[w-20,25],[w-14,39],[w-21,32],[w-27,22],[w-35,17]]);
+  polygon(c,lit,[[w-39,10],[w-35,11],[w-26,20],[w-21,31],[w-27,24],[w-31,19]]);
+ }
+ polygon(c,shade,[[10,h-24],[13,h-20],[22,h-14],[31,h-11],[25,h-12],[16,h-14],[11,h-18]]);
+ polygon(c,lit,[[9,h-25],[12,h-23],[16,h-18],[23,h-15],[17,h-16],[12,h-20]]);
+ const pixels=c.getImageData(0,0,w,h),data=pixels.data;
+ // Quiet connected fibre islands; the central reading area is deliberately calm.
+ const tint=(x,y,delta)=>{
+  if(!inside(x,y))return;const i=(y*w+x)*4;
+  if(base.some((n,j)=>Math.abs(data[i+j]-n)>5)||data[i+3]!==255)return;
+  for(let j=0;j<3;j++)data[i+j]=Math.max(0,Math.min(255,base[j]+delta));
+ };
+ for(let y=4;y<h-4;y++)for(let x=5;x<w-6;x++){
+  const hash=((Math.imul(x+v.toString().length*31,374761393)^Math.imul(y+17,668265263))>>>0),edge=x<20||x>w-29||y<9||y>h-12;
+  if(hash%(edge?181:587)===0){const delta=(hash&8)?3:-3;tint(x,y,delta);tint(x+1,y,delta);if(edge&&(hash&16))tint(x+1,y+1,delta-1);}
+  // A low-contrast compressed band follows the lower curl, with irregular breaks.
+  const curl=h-10-Math.round(1.5*Math.sin(x/w*5+Number(v===1)));
+  if(x>w*.2&&x<w*.82&&y===curl&&hash%5!==0)tint(x,y,-4);
+  if(x>w*.22&&x<w*.78&&y===curl-1&&hash%7<3)tint(x,y,2);
+ }
+ c.putImageData(pixels,0,0);
+ // Small pressure creases gather at the free corners instead of framing the sheet.
+ if(v!==1){
+  line(c,'#d5c89b',8,h-15,17,h-8);line(c,'#f1e3b7',8,h-16,18,h-9);
+  line(c,'#d9cca0',w-29,8,w-38,11);line(c,'#f2e5ba',w-29,7,w-38,10);
+ }else{
+  line(c,'#b6bc90',7,h-15,15,h-9);line(c,'#d2d3a7',7,h-16,15,h-10);
+ }
  const spans=v==='narrative'?[[.03,.19,0],[.38,.57,0],[.71,.86,0],[.09,.28,1],[.49,.68,1]]:
   v===0?[[.04,.24,0],[.54,.71,0],[.18,.38,1],[.76,.9,1]]:
   v===1?[[.1,.25,1],[.57,.75,1]]:
@@ -137,8 +173,8 @@ export function drawPaper(canvas){
  }else{
   const v=type==='narrative'?'narrative':Number(type.split('-').at(-1))||0;
   const paperH=Math.round(canvas.parentElement.clientHeight);
-  const rise=v==='narrative'?-3:[4,-6,3,-5][v];
-  const angle=Math.atan(rise/w)*180/Math.PI,pad=Math.ceil(Math.abs(rise)/2)+3,targetH=paperH+pad*2;
+  const angle=v==='narrative'?-.65:[1.1,-1.3,.85,-1.05][v],rise=Math.tan(angle*Math.PI/180)*w;
+  const pad=Math.ceil(Math.abs(rise)/2)+3,targetH=paperH+pad*2;
   canvas.style.top=`${-pad}px`;canvas.style.height=`${targetH}px`;
   const source=document.createElement('canvas');source.width=w;source.height=paperH;
   const material=source.getContext('2d');loosePaper(material,w,paperH,v);paperMaterial(material,w,paperH,v);

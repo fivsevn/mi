@@ -191,7 +191,7 @@ body:has(.phone-scene) #surface{visibility:visible}
 .play-screen .paper-option:nth-child(4n){margin-left:19px;width:calc(100% - 24px);padding-right:34px}
 .play-screen .paper-option:hover{background:none;color:#895f58;translate:0 -1px}
 .play-screen .paper-option:active{background:none;translate:1px 1px}
-.play-screen .paper-option:focus-visible{outline:1px dashed #f6efd8;outline-offset:0}
+.play-screen .paper-option:focus-visible{outline:none}.play-screen .paper-option:focus-visible .paper-surface{filter:drop-shadow(0 0 1.5px #f6efd866)}
 .play-screen .mini-controls{gap:0}
 @media(max-height:680px){
  .play-screen{--paper-reserve:224px;padding:10px 9px 6px}

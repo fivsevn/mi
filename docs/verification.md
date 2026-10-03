@@ -102,3 +102,5 @@ PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/story-art.mjs
 - Packing-Scale-32: 电子秤逆时针 4°，重绘分层外壳/接缝/屏幕凹槽/按键帽/细小紧固件，文字与按键同向旋转。物品栏原生滚动条隐藏，窄屏初始 scrollLeft 为真实范围的 70%。Chromium/WebKit 六视口称重返回/确认/开锁检查、20/25kg 颜色、自由拖放、手机地图和拉杆流程通过，Chromium 原生触屏滚动与出发通过。
 
 - Packing-Glow-34: 去除整理画面的悬停/拖放矩形预选底色，锁/拉杆/秤按键使用实际像素轮廓光层，物品/手机/地图沿透明像素边缘轻微发光；触屏不保留悬停光。`packing-hover.mjs` 两浏览器验证光层仅有小物体轮廓、离开消失、热区透明、物品格底色不变与鼠标/键盘开合。`packing.mjs`、`packing-handle.mjs` 两浏览器及原生触屏通过。
+
+- Paper-Detail-35: 叙事和四类选项纸片重画细阶梯边缘、局部纤维/压痕/折角与轻薄接触阴影，保持文字区干净；倾斜采用逐像素采样。照片框、文字尺寸和选项布局保留，键盘焦点改为纸片轮廓微光。`paper-scroll.mjs` Chromium/WebKit 六视口检查纸片原生滚动/有限范围/固定照片/手机地图返回，以及选择和剧情推进；五个原生触屏尺寸检查上下滑动与不误选，全部通过。
