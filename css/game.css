@@ -268,18 +268,19 @@ html,body,body:has(.phone-scene),.app-shell,.play-screen,.desk,.route-map-screen
 /* Weigh after closing; the inventory recedes behind the result. */
 .packing-review .packing-viewbox{margin-top:36px}
 .packing-review .packing-floor{pointer-events:none}
-.packing-weighing{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:8}
-.packing-weighing .packing-scale{position:relative;right:auto;bottom:auto;width:min(260px,calc(100vw - 40px));aspect-ratio:128/94;pointer-events:auto}
+.packing-weighing{position:absolute;right:max(12px,calc(50% - var(--case-width) * .65));bottom:-48px;z-index:8}
+.packing-weighing .packing-scale{position:relative;right:auto;bottom:auto;width:min(220px,60cqw);aspect-ratio:128/94;pointer-events:auto}
 .packing-weighing .packing-scale output{left:14%;top:23%;width:72%;height:24%;font-size:26px;transform:rotate(2deg);pointer-events:none}
 .packing-weighing .packing-scale output small{font-size:12px}
-.packing-decisions{position:absolute;left:8.5%;top:60.5%;width:82.5%;height:21%;display:flex;gap:5.8%;transform:rotate(2deg);white-space:nowrap}
-.packing-decisions button{flex:1;min-width:0;padding:0;background:none;border:0;box-shadow:none;color:#435644;font-size:12px;line-height:20px;pointer-events:auto}
+.packing-decisions{position:absolute;inset:0;transform:rotate(2deg);white-space:nowrap;pointer-events:none}
+.packing-decisions button{position:absolute;left:10.15625%;top:60.6383%;width:35.9375%;height:17.0213%;display:flex;align-items:center;justify-content:center;min-width:0;padding:0;background:none;border:0;box-shadow:none;color:#435644;font-size:clamp(10px,3cqw,12px);line-height:1;text-align:center;pointer-events:auto}
+.packing-decisions button+button{left:53.90625%}
 .packing-decisions button:hover{background:#eddfb119}
 .packing-decisions button:active{translate:0 1px}
 .packing-decisions button:disabled{opacity:.45;cursor:default}
 .packing-ready{--case-width:min(92cqw,calc(78cqh * 200 / 350));justify-content:center}
 .packing-ready .packing-viewbox{margin:0}
-@media(max-height:650px){.packing-weighing{bottom:12px}.packing-weighing .packing-scale{width:230px}.packing-review .packing-viewbox{margin-top:28px}}
+@media(max-height:650px){.packing-review .packing-viewbox{margin-top:28px}}
 
 /* The description floats above the tray without changing its layout. */
 .packing-floor{flex-direction:column}

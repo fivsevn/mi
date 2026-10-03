@@ -96,3 +96,5 @@ PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node tests/story-art.mjs
 - Packing-Center-27: 箱外物品栏外框改为最大 571px，只包住 560px 格子区，去掉宽屏左右空底板；保留窄屏左右与底部留白。能完整容纳两侧箱体的宽屏，将整个打开的箱子和物品说明卡居中；两侧都可见时暂停横向镜头，窄屏仍可左右滑动。Chromium/WebKit 在 1440×1000、900×600、390×844、320×568 验证外框贴合格子、箱子与卡片居中、无溢出、卡片不挤动物品栏。
 
 - Packing-Native-28: 横向查看由画布 transform 位移改为真实 overflow-x:auto 容器与 scrollLeft。触屏使用浏览器原生 pan-x，横向滚轮直接滚动；鼠标抓取、键盘与拖动物品停靠边缘均修改真实滚动位置。完整箱体适合宽屏时 scrollWidth=clientWidth、滚动范围为零，箱体、说明卡和物品栏居中；窄屏滚动不会移动物品栏。`packing-scroll.mjs` Chromium/WebKit 验证真实滚动范围、原生横向滚轮、scrollLeft 与内容位移一一对应、打开箱体没有 transform、宽屏无多余滚动与居中。`packing.mjs` 两浏览器六视口和 Chromium 原生触屏验证自由摆放/跨侧拖动/取消、原生水平滚动、独立物品栏、手机/地图返回、称重与剧情。
+
+- Packing-Scale-29: 电子秤缩至最多 220px，固定在关闭箱体的右下角并随箱体尺寸定位；按钮文字按像素秤按键的同一旋转中心居中。`packing-review.mjs` Chromium/WebKit 六视口验证称重、返回保持摆放、确认和锁重新打开，电子秤不越界。
